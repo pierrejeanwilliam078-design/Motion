@@ -1,0 +1,23 @@
+{
+  "source": "audio/vo/voiceover_full.mp3",
+  "note": "srcIn/srcOut = position dans le fichier ElevenLabs d'origine (s). at = position dans la pub (s). Les phrases sont déplacées, jamais accélérées.",
+  "cues": [
+    { "id": "v01", "text": "Des abonnements premium.", "srcIn": 0.10, "srcOut": 1.50, "at": 0.21 },
+    { "id": "v02", "text": "En un clic.", "srcIn": 1.66, "srcOut": 2.44, "at": 1.82 },
+    { "id": "v03", "text": "Bienvenue chez DigitalSubMG !", "srcIn": 2.94, "srcOut": 4.84, "at": 3.10 },
+    { "id": "v04", "text": "Netflix.", "srcIn": 5.12, "srcOut": 5.95, "at": 5.10 },
+    { "id": "v05", "text": "Prime Video.", "srcIn": 6.06, "srcOut": 6.90, "at": 6.03 },
+    { "id": "v06", "text": "ChatGPT.", "srcIn": 6.99, "srcOut": 7.86, "at": 6.97 },
+    { "id": "v07", "text": "Spotify.", "srcIn": 7.93, "srcOut": 8.88, "at": 7.91 },
+    { "id": "v08", "text": "Canva Pro !", "srcIn": 8.98, "srcOut": 9.95, "at": 8.85 },
+    { "id": "v09", "text": "Choisissez votre offre, simplement.", "srcIn": 10.10, "srcOut": 12.04, "at": 10.55 },
+    { "id": "v10", "text": "Payez en ariary avec MVola, Orange Money ou Airtel Money.", "srcIn": 12.20, "srcOut": 16.55, "at": 14.376 },
+    { "id": "v11", "text": "Activation rapide.", "srcIn": 16.80, "srcOut": 17.90, "at": 19.316 },
+    { "id": "v12", "text": "Paiement sécurisé.", "srcIn": 18.06, "srcOut": 18.98, "at": 20.81 },
+    { "id": "v13", "text": "Assistance WhatsApp.", "srcIn": 19.12, "srcOut": 20.16, "at": 21.75 },
+    { "id": "v14", "text": "Plus de cinq cents clients !", "srcIn": 20.28, "srcOut": 21.66, "at": 23.05 },
+    { "id": "v15", "text": "DigitalSubMG.", "srcIn": 21.86, "srcOut": 23.04, "at": 25.25 },
+    { "id": "v16", "text": "Vos abonnements premium en un clic.", "srcIn": 23.15, "srcOut": 25.08, "at": 26.55 },
+    { "id": "v17", "text": "Digitalsub point org !", "srcIn": 25.30, "srcOut": 27.01, "at": 28.10 }
+  ]
+}
