@@ -1,0 +1,119 @@
+<template>
+    <style>
+      @font-face { font-family: "Inter"; font-weight: 400; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 500; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 600; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 700; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 800; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-800-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 900; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-900-normal.woff2") format("woff2"); }
+
+      #root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden;
+        font-family: "Inter", sans-serif; color: #F5F7FA; -webkit-font-smoothing: antialiased; }
+      #root .layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .grain { background-image: url("assets/fx/grain.png"); background-size: 512px 512px;
+        opacity: 0.055; mix-blend-mode: overlay; pointer-events: none; }
+      #root .grad { background: linear-gradient(90deg, #00F0FF 0%, #3D7BFF 45%, #8A3DFF 75%, #E600FF 100%);
+        background-size: 200% 100%; background-position: 0% 50%; -webkit-background-clip: text;
+        background-clip: text; color: transparent; }
+      #root .glass { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+        backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+      #root .center-x { position: absolute; left: 0; right: 0; text-align: center; }
+      #root .label { font-size: 24px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #9AA3B2; }
+      #root .watermark { position: absolute; left: 0; right: 0; top: 118px; margin: 0 auto; height: 72px;
+        width: 52px; opacity: 0.38; }
+      #root .shine { position: absolute; top: -20%; left: 0; width: 22%; height: 140%;
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%);
+        pointer-events: none; opacity: 0; }
+
+      #root .f05ground { background: radial-gradient(60% 35% at 50% 20%, rgba(90,0,254,0.22), rgba(5,6,10,0) 70%),
+        radial-gradient(70% 40% at 50% 90%, rgba(0,94,254,0.18), rgba(5,6,10,0) 70%), #05060A; }
+      #root .f05h { position: absolute; left: 0; right: 0; text-align: center; font-size: 84px; font-weight: 800;
+        letter-spacing: -0.035em; line-height: 1; white-space: nowrap; }
+      #root .f05h1 { top: 250px; }
+      #root .f05h2 { top: 344px; }
+      #root .f05group { position: absolute; inset: 0; }
+      #root .f05card { position: absolute; overflow: hidden; }
+      #root .f05tile { position: absolute; left: 32px; top: 32px; width: 88px; height: 88px; border-radius: 20px;
+        background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; }
+      #root .f05t { position: absolute; left: 32px; right: 28px; font-size: 36px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.12; }
+      #root .f05s { position: absolute; left: 32px; right: 28px; font-size: 25px; font-weight: 500; color: #9AA3B2; line-height: 1.3; }
+      #root .f05big .f05tile { left: 40px; top: 40px; }
+      #root .f05big .f05t { left: 40px; top: 168px; font-size: 56px; }
+      #root .f05big .f05s { left: 40px; top: 244px; font-size: 30px; }
+      #root .f05bigbolt { position: absolute; right: -10px; top: 10px; }
+      #root .f05num { position: absolute; left: 32px; top: 128px; font-size: 92px; font-weight: 900; letter-spacing: -0.04em;
+        font-variant-numeric: tabular-nums; }
+      #root .f05dark { position: absolute; inset: 0; background: #071233; opacity: 0; }
+
+    </style>
+    <div data-hf-id="hf-6x4j" id="root" data-composition-id="05-avantages" data-width="1080" data-height="1920" data-duration="7.5">
+      <div data-hf-id="hf-kybw" id="f05-ground" class="clip layer f05ground" data-start="0" data-duration="7.5" data-track-index="0"></div>
+      <div data-hf-id="hf-8s8f" id="f05-stage" class="clip layer f05stage" data-start="0" data-duration="7.5" data-track-index="1">
+        <div data-hf-id="hf-4jn3" class="f05h f05h1">Pourquoi</div>
+        <div data-hf-id="hf-lrzr" class="f05h f05h2 grad">DigitalSubMG ?</div>
+        <div data-hf-id="hf-zzh4" class="f05group">
+          <div data-hf-id="hf-3fy0" class="f05card glass f05big" style="left:80px;top:520px;width:920px;height:330px"><div data-hf-id="hf-912v" class="f05tile"><svg data-hf-id="hf-17e0" class="f05icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-iopq" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" pathLength="1" /></svg></div><svg data-hf-id="hf-7mom" class="f05bigbolt" width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="rgba(245,247,250,0.10)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-cjuq" d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" pathLength="1" /></svg><div data-hf-id="hf-bsk9" class="f05t">Activation instantanée</div><div data-hf-id="hf-0cmv" class="f05s">Vos accès en quelques minutes</div><div data-hf-id="hf-j9ul" class="shine"></div></div>
+          <div data-hf-id="hf-ngkm" class="f05card glass f05pay" style="left:80px;top:878px;width:446px;height:290px"><div data-hf-id="hf-xq5z" class="f05tile"><svg data-hf-id="hf-478g" class="f05icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-6xck" d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5l-8-3z" pathLength="1" /><path data-hf-id="hf-b30v" d="m9 12 2 2 4-4" pathLength="1" /></svg></div><div data-hf-id="hf-ndbl" class="f05t" style="top:146px">Paiement sécurisé</div><div data-hf-id="hf-ubn2" class="f05s" style="top:232px">Mobile money</div><div data-hf-id="hf-aegh" class="shine"></div></div>
+          <div data-hf-id="hf-pi44" class="f05card glass f05sup" style="left:554px;top:878px;width:446px;height:290px"><div data-hf-id="hf-xbuy" class="f05tile"><svg data-hf-id="hf-30bd" class="f05icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-h256" d="M3 14v-2a9 9 0 0 1 18 0v2" pathLength="1" /><path data-hf-id="hf-futp" d="M21 14v4a2 2 0 0 1-2 2h-1v-6h3z" pathLength="1" /><path data-hf-id="hf-xn1k" d="M3 14v4a2 2 0 0 0 2 2h1v-6H3z" pathLength="1" /></svg></div><div data-hf-id="hf-ma5q" class="f05t" style="top:146px">Support WhatsApp 24/7</div><div data-hf-id="hf-bldk" class="shine"></div></div>
+          <div data-hf-id="hf-c2vm" class="f05card glass f05cli" style="left:80px;top:1196px;width:446px;height:290px"><div data-hf-id="hf-wxjx" class="f05tile"><svg data-hf-id="hf-3eme" class="f05icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-gbz6" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" pathLength="1" /><circle data-hf-id="hf-7o2f" cx="9" cy="7" r="4" pathLength="1" /><path data-hf-id="hf-rs8o" d="M22 21v-2a4 4 0 0 0-3-3.87" pathLength="1" /><path data-hf-id="hf-hw1v" d="M16 3.13a4 4 0 0 1 0 7.75" pathLength="1" /></svg></div><div data-hf-id="hf-m77j" class="f05num">0</div><div data-hf-id="hf-e5rp" class="f05s" style="top:232px">clients satisfaits</div><div data-hf-id="hf-b72j" class="shine"></div></div>
+          <div data-hf-id="hf-bazq" class="f05card glass f05prx" style="left:554px;top:1196px;width:446px;height:290px"><div data-hf-id="hf-zpp4" class="f05tile"><svg data-hf-id="hf-27pb" class="f05icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-81gr" d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z" pathLength="1" /><circle data-hf-id="hf-hibn" cx="7" cy="7" r="1.5" pathLength="1" /></svg></div><div data-hf-id="hf-kstd" class="f05t" style="top:146px">Prix accessibles</div><div data-hf-id="hf-lgec" class="f05s" style="top:232px">Tarifs en Ariary</div><div data-hf-id="hf-97je" class="shine"></div></div>
+        </div>
+        <div data-hf-id="hf-n6c3" class="f05dark"></div>
+      </div>
+      <div data-hf-id="hf-niw1" id="f05-grain" class="clip layer grain" data-start="0" data-duration="7.5" data-track-index="2"></div>
+    </div>
+    <script>
+      (function () {
+
+        const root = document.querySelector('[data-composition-id="05-avantages"]');
+        const q = (s) => root.querySelector(s);
+        const qa = (s) => Array.from(root.querySelectorAll(s));
+        const tl = gsap.timeline({ paused: true });
+        // film grain: deterministic jitter of the texture, 12 steps per second
+        const grain = q(".grain");
+        for (let i = 0; i * (1 / 12) < 7.5; i++) {
+          const gx = (i * 137) % 512, gy = (i * 241) % 512;
+          tl.set(grain, { backgroundPosition: gx + "px " + gy + "px" }, i / 12);
+        }
+        const count = (el, from, to, fmt, at, dur, ease) => {
+          const o = { v: from };
+          el.textContent = fmt(from);
+          tl.to(o, { v: to, duration: dur, ease: ease || "expo.out",
+            onUpdate: () => { el.textContent = fmt(o.v); } }, at);
+        };
+        const shine = (el, at) => {
+          tl.fromTo(el, { xPercent: -160, skewX: -20, opacity: 1 },
+            { xPercent: 560, skewX: -20, opacity: 1, duration: 0.75, ease: "power2.inOut" }, at);
+        };
+        const draw = (els, at, dur) => {
+          tl.fromTo(els, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: dur || 0.45,
+            ease: "power2.out", stagger: 0.06 }, at);
+        };
+
+        tl.fromTo(q(".f05h1"), { y: 40, opacity: 0, filter: "blur(8px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.6, ease: "expo.out" }, 0.0);
+        tl.fromTo(q(".f05h2"), { y: 40, opacity: 0, filter: "blur(8px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.6, ease: "expo.out" }, 0.15);
+        tl.fromTo(q(".f05h2"), { backgroundPosition: "100% 50%" }, { backgroundPosition: "0% 50%", duration: 1.4, ease: "power2.out" }, 0.15);
+        const cards = qa(".f05card");
+        const at = [0.47, 1.41, 2.34, 3.28, 4.22];
+        cards.forEach((el, i) => {
+          tl.fromTo(el, { y: 70, opacity: 0, scale: 0.97 }, { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: "expo.out" }, at[i]);
+          draw(el.querySelectorAll(".f05icon path, .f05icon circle"), at[i] + 0.2, 0.5);
+          shine(el.querySelector(".shine"), at[i] + 0.2);
+          tl.fromTo(el, { borderColor: "rgba(0,240,255,0.75)", boxShadow: "0 0 40px rgba(0,240,255,0.30), 0 30px 80px rgba(0,0,0,0.45)" },
+            { borderColor: "rgba(255,255,255,0.12)", boxShadow: "0 0 0px rgba(0,240,255,0), 0 30px 80px rgba(0,0,0,0.45)", duration: 0.9, ease: "power2.out", immediateRender: false }, at[i] + 0.3);
+        });
+        draw(q(".f05bigbolt").querySelectorAll("path"), 0.6, 0.9);
+        count(q(".f05num"), 0, 500, (v) => Math.round(v) + (v >= 499.5 ? "+" : ""), 3.48, 0.9);
+        tl.to(cards, { borderColor: "rgba(0,240,255,0.65)", boxShadow: "0 0 36px rgba(0,240,255,0.28), 0 30px 80px rgba(0,0,0,0.45)", duration: 0.2, ease: "power2.out" }, 5.63);
+        tl.to(cards, { borderColor: "rgba(255,255,255,0.14)", boxShadow: "0 0 0px rgba(0,240,255,0), 0 30px 80px rgba(0,0,0,0.45)", duration: 0.9, ease: "power2.out" }, 5.85);
+        tl.fromTo(q(".f05group"), { scale: 1 }, { scale: 0.93, duration: 1.37, ease: "power2.out", transformOrigin: "540px 1000px" }, 5.63);
+        tl.to([q(".f05h1"), q(".f05h2")], { opacity: 0, y: -30, duration: 0.3, ease: "power2.in" }, 7.0);
+        tl.to(cards.filter((c, i) => i !== 1), { opacity: 0, duration: 0.3, ease: "none" }, 7.0);
+        tl.to(q(".f05group"), { scale: 7, duration: 0.5, ease: "power3.in", transformOrigin: "156px 954px" }, 7.0);
+        tl.to(q(".f05dark"), { opacity: 1, duration: 0.2, ease: "power2.in" }, 7.3);
+
+        window.__timelines["05-avantages"] = tl;
+      })();
+    </script>
+</template>

@@ -1,0 +1,116 @@
+<template>
+    <style>
+      @font-face { font-family: "Inter"; font-weight: 400; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 500; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 600; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 700; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 800; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-800-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 900; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-900-normal.woff2") format("woff2"); }
+
+      #root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden;
+        font-family: "Inter", sans-serif; color: #F5F7FA; -webkit-font-smoothing: antialiased; }
+      #root .layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .grain { background-image: url("assets/fx/grain.png"); background-size: 512px 512px;
+        opacity: 0.055; mix-blend-mode: overlay; pointer-events: none; }
+      #root .grad { background: linear-gradient(90deg, #00F0FF 0%, #3D7BFF 45%, #8A3DFF 75%, #E600FF 100%);
+        background-size: 200% 100%; background-position: 0% 50%; -webkit-background-clip: text;
+        background-clip: text; color: transparent; }
+      #root .glass { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+        backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+      #root .center-x { position: absolute; left: 0; right: 0; text-align: center; }
+      #root .label { font-size: 24px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #9AA3B2; }
+      #root .watermark { position: absolute; left: 0; right: 0; top: 118px; margin: 0 auto; height: 72px;
+        width: 52px; opacity: 0.38; }
+      #root .shine { position: absolute; top: -20%; left: 0; width: 22%; height: 140%;
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%);
+        pointer-events: none; opacity: 0; }
+
+      #root .f02ground { background: radial-gradient(120% 55% at 50% 102%, rgba(1,50,142,0.75) 0%, rgba(7,18,51,0.55) 40%, rgba(5,6,10,1) 75%), #05060A; }
+      #root .f02glow2 { position: absolute; right: -260px; top: 120px; width: 760px; height: 760px;
+        background: radial-gradient(closest-side, rgba(90,0,254,0.30), rgba(90,0,254,0)); }
+      #root .f02cam { position: absolute; inset: 0; }
+      #root .f02badge { position: absolute; top: 500px; left: 0; right: 0; margin: 0 auto; width: 430px; height: 64px;
+        border-radius: 999px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.04);
+        display: flex; align-items: center; justify-content: center; gap: 14px;
+        font-size: 22px; font-weight: 800; letter-spacing: 0.14em; color: #F5F7FA; }
+      #root .f02dot { width: 12px; height: 12px; border-radius: 50%; background: #25D366; box-shadow: 0 0 12px #25D366; }
+      #root .f02line { position: absolute; left: 0; right: 0; text-align: center; white-space: nowrap; }
+      #root .f02l1 { top: 610px; font-size: 92px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+      #root .f02l2 { top: 712px; font-size: 176px; font-weight: 900; letter-spacing: -0.045em; line-height: 1.05; }
+      #root .f02l3 { top: 918px; font-size: 92px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+      #root .f02w { display: inline-block; position: relative; margin: 0 0.12em; }
+      #root .f02l2 .f02w { padding: 0 0.04em; }
+      #root .f02cursor { position: absolute; left: 62%; top: 52%; filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6)); }
+      #root .f02ripple { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px;
+        border-radius: 50%; border: 3px solid #00F0FF; box-shadow: 0 0 20px rgba(0,240,255,0.7); opacity: 0; }
+      #root .f02sub { position: absolute; top: 1090px; left: 120px; width: 840px; text-align: center;
+        font-size: 36px; font-weight: 500; line-height: 1.35; color: #9AA3B2; }
+      #root .f02bloom { position: absolute; left: -460px; top: 380px; width: 2000px; height: 1600px;
+        background: radial-gradient(closest-side, rgba(0,94,254,0.95), rgba(0,94,254,0.5) 40%, rgba(5,6,10,0) 100%); opacity: 0; }
+
+    </style>
+    <div data-hf-id="hf-d4o6" id="root" data-composition-id="02-message" data-width="1080" data-height="1920" data-duration="3.75">
+      <div data-hf-id="hf-9bkx" id="f02-ground" class="clip layer f02ground" data-start="0" data-duration="3.75" data-track-index="0"><div data-hf-id="hf-smxz" class="f02glow2"></div></div>
+      <div data-hf-id="hf-726g" id="f02-stage" class="clip layer f02stage" data-start="0" data-duration="3.75" data-track-index="1">
+        <div data-hf-id="hf-mmwx" class="f02cam">
+          <div data-hf-id="hf-icyy" class="f02badge"><span data-hf-id="hf-8u3o" class="f02dot"></span>N°1 À MADAGASCAR</div>
+          <div data-hf-id="hf-0qyr" class="f02line f02l1"><span data-hf-id="hf-0a1u" class="f02w">Vos</span><span data-hf-id="hf-nkt6" class="f02w">abonnements</span></div>
+          <div data-hf-id="hf-pvh4" class="f02line f02l2"><span data-hf-id="hf-ukl3" class="f02w grad f02prem">premium</span></div>
+          <div data-hf-id="hf-suqp" class="f02line f02l3"><span data-hf-id="hf-m5e5" class="f02w">en</span><span data-hf-id="hf-nzz1" class="f02w">un</span><span data-hf-id="hf-xprg" class="f02w f02clic">clic<span data-hf-id="hf-ttup" class="f02ripple"></span><svg data-hf-id="hf-5b7n" class="f02cursor" width="72" height="72" viewBox="0 0 24 24"><path data-hf-id="hf-q2ye" d="M4 2.5 19.5 12l-7 1.6L9 20.5z" fill="#F5F7FA" stroke="#05060A" stroke-width="1.2" stroke-linejoin="round" /></svg></span></div>
+          <div data-hf-id="hf-v9he" class="f02sub">Netflix, Prime Video, ChatGPT, Spotify et plus</div>
+        </div>
+        <div data-hf-id="hf-5brh" class="f02bloom"></div>
+      </div>
+      <div data-hf-id="hf-wzzr" id="f02-grain" class="clip layer grain" data-start="0" data-duration="3.75" data-track-index="2"></div>
+    </div>
+    <script>
+      (function () {
+
+        const root = document.querySelector('[data-composition-id="02-message"]');
+        const q = (s) => root.querySelector(s);
+        const qa = (s) => Array.from(root.querySelectorAll(s));
+        const tl = gsap.timeline({ paused: true });
+        // film grain: deterministic jitter of the texture, 12 steps per second
+        const grain = q(".grain");
+        for (let i = 0; i * (1 / 12) < 3.75; i++) {
+          const gx = (i * 137) % 512, gy = (i * 241) % 512;
+          tl.set(grain, { backgroundPosition: gx + "px " + gy + "px" }, i / 12);
+        }
+        const count = (el, from, to, fmt, at, dur, ease) => {
+          const o = { v: from };
+          el.textContent = fmt(from);
+          tl.to(o, { v: to, duration: dur, ease: ease || "expo.out",
+            onUpdate: () => { el.textContent = fmt(o.v); } }, at);
+        };
+        const shine = (el, at) => {
+          tl.fromTo(el, { xPercent: -160, skewX: -20, opacity: 1 },
+            { xPercent: 560, skewX: -20, opacity: 1, duration: 0.75, ease: "power2.inOut" }, at);
+        };
+        const draw = (els, at, dur) => {
+          tl.fromTo(els, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: dur || 0.45,
+            ease: "power2.out", stagger: 0.06 }, at);
+        };
+
+        tl.fromTo(q(".f02cam"), { scale: 1 }, { scale: 1.07, duration: 3.75, ease: "none" }, 0);
+        tl.fromTo(q(".f02badge"), { y: -24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "expo.out" }, 0.05);
+        const w = qa(".f02w");
+        const times = [0.28, 0.40, 0.94, 1.22, 1.30, 1.41];
+        w.forEach((el, i) => {
+          tl.fromTo(el, { y: 70, opacity: 0, filter: "blur(10px)" },
+            { y: 0, opacity: 1, filter: "blur(0px)", duration: i === 2 ? 0.7 : 0.55, ease: "expo.out" }, times[i]);
+        });
+        tl.fromTo(q(".f02prem"), { backgroundPosition: "100% 50%" }, { backgroundPosition: "0% 50%", duration: 1.6, ease: "power2.out" }, 0.94);
+        tl.fromTo(q(".f02cursor"), { x: 320, y: 360, opacity: 0 }, { x: 0, y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 1.42);
+        tl.to(q(".f02cursor"), { scale: 0.82, duration: 0.07, ease: "power2.in" }, 1.84);
+        tl.to(q(".f02cursor"), { scale: 1, duration: 0.18, ease: "back.out(2)" }, 1.91);
+        tl.fromTo(q(".f02ripple"), { scale: 0.3, opacity: 1 }, { scale: 5, opacity: 0, duration: 0.6, ease: "expo.out" }, 1.85);
+        tl.to(q(".f02clic"), { color: "#00F0FF", textShadow: "0 0 30px rgba(0,240,255,0.65)", duration: 0.25, ease: "power2.out" }, 1.86);
+        tl.fromTo(q(".f02sub"), { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "expo.out" }, 2.25);
+        tl.to(q(".f02cursor"), { opacity: 0, duration: 0.3, ease: "none" }, 2.6);
+        tl.fromTo(q(".f02bloom"), { scale: 0.25, opacity: 0 }, { scale: 1.3, opacity: 1, duration: 0.4, ease: "power2.in" }, 3.35);
+
+        window.__timelines["02-message"] = tl;
+      })();
+    </script>
+</template>

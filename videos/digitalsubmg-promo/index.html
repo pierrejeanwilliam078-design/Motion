@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #000;
+      }
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #05060A;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-zshp" id="root" data-composition-id="main" data-start="0" data-duration="45" data-width="1080" data-height="1920">
+      <div data-hf-id="hf-7ppm" id="el-01-hook" class="scene" data-composition-id="01-hook" data-composition-src="compositions/frames/01-hook.html" data-start="0" data-duration="3.75" data-track-index="1"></div>
+
+      <div data-hf-id="hf-edhe" id="el-02-message" class="scene" data-composition-id="02-message" data-composition-src="compositions/frames/02-message.html" data-start="3.75" data-duration="3.75" data-track-index="1"></div>
+
+      <div data-hf-id="hf-w57q" id="el-03-produits" class="scene" data-composition-id="03-produits" data-composition-src="compositions/frames/03-produits.html" data-start="7.5" data-duration="5.625" data-track-index="1"></div>
+
+      <div data-hf-id="hf-9muq" id="el-04-achat" class="scene" data-composition-id="04-achat" data-composition-src="compositions/frames/04-achat.html" data-start="13.125" data-duration="5.625" data-track-index="1"></div>
+
+      <div data-hf-id="hf-pdar" id="el-05-avantages" class="scene" data-composition-id="05-avantages" data-composition-src="compositions/frames/05-avantages.html" data-start="18.75" data-duration="7.5" data-track-index="1"></div>
+
+      <div data-hf-id="hf-hjq0" id="el-06-paiement" class="scene" data-composition-id="06-paiement" data-composition-src="compositions/frames/06-paiement.html" data-start="26.25" data-duration="3.75" data-track-index="1"></div>
+
+      <div data-hf-id="hf-fset" id="el-07-activation" class="scene" data-composition-id="07-activation" data-composition-src="compositions/frames/07-activation.html" data-start="30" data-duration="5.625" data-track-index="1"></div>
+
+      <div data-hf-id="hf-k62j" id="el-08-confiance" class="scene" data-composition-id="08-confiance" data-composition-src="compositions/frames/08-confiance.html" data-start="35.625" data-duration="3.75" data-track-index="1"></div>
+
+      <div data-hf-id="hf-et0f" id="el-09-cta" class="scene" data-composition-id="09-cta" data-composition-src="compositions/frames/09-cta.html" data-start="39.375" data-duration="5.625" data-track-index="1"></div>
+
+      <!-- BGM -->
+      <audio data-hf-id="hf-6ca5" id="el-bgm" src="assets/audio/digitalsubmg-mix.wav" data-start="0" data-duration="45" data-track-index="11" data-volume="1"></audio>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

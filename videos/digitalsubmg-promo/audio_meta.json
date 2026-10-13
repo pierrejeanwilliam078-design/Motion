@@ -1,0 +1,5 @@
+{
+  "bgm": { "path": "assets/audio/digitalsubmg-mix.wav", "volume": 1.0, "source": "host" },
+  "voices": [],
+  "sfx": []
+}

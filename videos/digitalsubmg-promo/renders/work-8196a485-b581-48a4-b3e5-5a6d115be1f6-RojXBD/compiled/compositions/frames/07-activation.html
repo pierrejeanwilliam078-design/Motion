@@ -1,0 +1,134 @@
+<template>
+    <style>
+      @font-face { font-family: "Inter"; font-weight: 400; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 500; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-500-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 600; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-600-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 700; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-700-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 800; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-800-normal.woff2") format("woff2"); }
+      @font-face { font-family: "Inter"; font-weight: 900; font-style: normal; font-display: block; src: url("assets/fonts/inter-latin-900-normal.woff2") format("woff2"); }
+
+      #root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden;
+        font-family: "Inter", sans-serif; color: #F5F7FA; -webkit-font-smoothing: antialiased; }
+      #root .layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .grain { background-image: url("assets/fx/grain.png"); background-size: 512px 512px;
+        opacity: 0.055; mix-blend-mode: overlay; pointer-events: none; }
+      #root .grad { background: linear-gradient(90deg, #00F0FF 0%, #3D7BFF 45%, #8A3DFF 75%, #E600FF 100%);
+        background-size: 200% 100%; background-position: 0% 50%; -webkit-background-clip: text;
+        background-clip: text; color: transparent; }
+      #root .glass { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 28px; box-shadow: 0 30px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+        backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+      #root .center-x { position: absolute; left: 0; right: 0; text-align: center; }
+      #root .label { font-size: 24px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #9AA3B2; }
+      #root .watermark { position: absolute; left: 0; right: 0; top: 118px; margin: 0 auto; height: 72px;
+        width: 52px; opacity: 0.38; }
+      #root .shine { position: absolute; top: -20%; left: 0; width: 22%; height: 140%;
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%);
+        pointer-events: none; opacity: 0; }
+
+      #root .f07ground { background: radial-gradient(70% 40% at 50% 45%, rgba(0,94,254,0.18), rgba(5,6,10,0) 70%),
+        radial-gradient(60% 30% at 50% 100%, rgba(90,0,254,0.22), rgba(5,6,10,0) 70%), #05060A; }
+      #root .f07h { position: absolute; left: 0; right: 0; top: 270px; text-align: center; font-size: 92px; font-weight: 800;
+        letter-spacing: -0.035em; white-space: nowrap; }
+      #root .f07card { position: absolute; left: 80px; top: 430px; width: 920px; height: 560px; }
+      #root .f07client { position: absolute; left: 44px; top: 44px; font-size: 34px; font-weight: 800; }
+      #root .f07tag { position: absolute; left: 44px; top: 100px; font-size: 18px; font-weight: 800; letter-spacing: 0.14em;
+        color: #00F0FF; border: 1px solid rgba(0,240,255,0.4); border-radius: 999px; padding: 8px 16px; }
+      #root .f07timer { position: absolute; right: 44px; top: 38px; font-size: 52px; font-weight: 800; letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums; }
+      #root .f07tlab { position: absolute; right: 44px; top: 104px; font-size: 18px; }
+      #root .f07track { position: absolute; left: 120px; top: 298px; width: 680px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.12); }
+      #root .f07fill { position: absolute; left: 120px; top: 298px; width: 680px; height: 4px; border-radius: 4px;
+        background: linear-gradient(90deg, #00F0FF, #5A9BFF); box-shadow: 0 0 16px rgba(0,240,255,0.7); transform-origin: 0% 50%; }
+      #root .f07node { position: absolute; top: 262px; width: 76px; height: 76px; border-radius: 50%; background: #10131C;
+        border: 2px solid rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; }
+      #root .f07nlab { position: absolute; top: 356px; width: 220px; text-align: center; font-size: 23px; font-weight: 700; color: #9AA3B2; }
+      #root .f07ok { position: absolute; right: 44px; top: 452px; height: 64px; padding: 0 28px; border-radius: 16px; background: #1E3A8A;
+        display: flex; align-items: center; font-size: 30px; font-weight: 800; box-shadow: 0 0 24px rgba(30,58,138,0.8); }
+      #root .f07under { position: absolute; left: 44px; top: 470px; font-size: 27px; font-weight: 600; color: #9AA3B2; }
+      #root .f07notif { position: absolute; left: 80px; top: 1060px; width: 920px; height: 160px; border-radius: 34px;
+        background: rgba(255,255,255,0.10); }
+      #root .f07nlogo { position: absolute; left: 30px; top: 30px; width: 100px; height: 100px; border-radius: 24px; background: #01328E;
+        display: flex; align-items: center; justify-content: center; }
+      #root .f07nlogo img { width: 50px; height: 70px; }
+      #root .f07nt1 { position: absolute; left: 158px; top: 36px; font-size: 28px; font-weight: 800; }
+      #root .f07nt2 { position: absolute; left: 158px; top: 80px; font-size: 38px; font-weight: 700; }
+      #root .f07ncheck { position: absolute; right: 36px; top: 50px; }
+
+    </style>
+    <div data-hf-id="hf-h5nt" id="root" data-composition-id="07-activation" data-width="1080" data-height="1920" data-duration="5.625">
+      <div data-hf-id="hf-ggxu" id="f07-ground" class="clip layer f07ground" data-start="0" data-duration="5.625" data-track-index="0"></div>
+      <div data-hf-id="hf-739t" id="f07-stage" class="clip layer f07stage" data-start="0" data-duration="5.625" data-track-index="1">
+        <div data-hf-id="hf-9kd7" class="f07h">Activation <span data-hf-id="hf-cpbu" class="grad f07hg">rapide</span></div>
+        <div data-hf-id="hf-lqyn" class="f07card glass">
+          <div data-hf-id="hf-kaj4" class="f07client">Client · Netflix Premium 4K</div>
+          <div data-hf-id="hf-mgdr" class="f07tag">NOUVELLE ACTIVATION</div>
+          <div data-hf-id="hf-mqdq" class="f07timer">00:00</div><div data-hf-id="hf-5kch" class="label f07tlab">Chrono</div>
+          <div data-hf-id="hf-hyn2" class="f07track"></div><div data-hf-id="hf-12km" class="f07fill"></div>
+          <div data-hf-id="hf-mxek" class="f07node" style="left:82px"><svg data-hf-id="hf-hc3m" class="f07nicon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-2nau" d="m6 12.5 4 4 8-9" pathLength="1" /></svg></div><div data-hf-id="hf-qflo" class="f07nlab" style="left:10px">Confirmée</div>
+          <div data-hf-id="hf-o3g0" class="f07node" style="left:309px"><svg data-hf-id="hf-o4bq" class="f07nicon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><rect data-hf-id="hf-mbz4" x="3" y="5" width="18" height="14" rx="2" pathLength="1" /><path data-hf-id="hf-inhl" d="M3 10h18" pathLength="1" /></svg></div><div data-hf-id="hf-g1kx" class="f07nlab" style="left:237px">Payée</div>
+          <div data-hf-id="hf-a5m7" class="f07node" style="left:535px"><svg data-hf-id="hf-oimr" class="f07nicon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-da2d" d="M21 8 12 3 3 8v8l9 5 9-5V8z" pathLength="1" /><path data-hf-id="hf-dqda" d="M3 8l9 5 9-5" pathLength="1" /><path data-hf-id="hf-rpsx" d="M12 13v8" pathLength="1" /></svg></div><div data-hf-id="hf-oxu4" class="f07nlab" style="left:463px">En préparation</div>
+          <div data-hf-id="hf-p68p" class="f07node" style="left:762px"><svg data-hf-id="hf-owxs" class="f07nicon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#F5F7FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><path data-hf-id="hf-tymi" d="M2 6h12v10H2z" pathLength="1" /><path data-hf-id="hf-k1m5" d="M14 10h4l3 3v3h-7z" pathLength="1" /><circle data-hf-id="hf-i59c" cx="6" cy="17.5" r="2" pathLength="1" /><circle data-hf-id="hf-2ova" cx="17" cy="17.5" r="2" pathLength="1" /></svg></div><div data-hf-id="hf-umbj" class="f07nlab" style="left:690px">Livrée</div>
+          <div data-hf-id="hf-mmz5" class="f07under">Activation en moins de 2 min</div>
+          <div data-hf-id="hf-6p91" class="f07ok">✓ Validé</div>
+        </div>
+        <div data-hf-id="hf-lbzh" class="f07notif glass"><div data-hf-id="hf-dudc" class="f07nlogo"><img data-hf-id="hf-e02z" src="assets/brand/logo-symbol.png" alt=""></div>
+          <div data-hf-id="hf-xohy" class="f07nt1">DigitalSubMG</div><div data-hf-id="hf-ffvm" class="f07nt2">Vos accès sont prêts</div>
+          <svg data-hf-id="hf-jrtw" class="f07ncheck" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1;stroke-dashoffset:0"><circle data-hf-id="hf-hk28" cx="12" cy="12" r="10" pathLength="1" /><path data-hf-id="hf-g6jw" d="m7.5 12.5 3 3 6-7" pathLength="1" /></svg></div>
+      </div>
+      <div data-hf-id="hf-aoex" id="f07-grain" class="clip layer grain" data-start="0" data-duration="5.625" data-track-index="2"></div>
+    </div>
+    <script>
+      (function () {
+
+        const root = document.querySelector('[data-composition-id="07-activation"]');
+        const q = (s) => root.querySelector(s);
+        const qa = (s) => Array.from(root.querySelectorAll(s));
+        const tl = gsap.timeline({ paused: true });
+        // film grain: deterministic jitter of the texture, 12 steps per second
+        const grain = q(".grain");
+        for (let i = 0; i * (1 / 12) < 5.625; i++) {
+          const gx = (i * 137) % 512, gy = (i * 241) % 512;
+          tl.set(grain, { backgroundPosition: gx + "px " + gy + "px" }, i / 12);
+        }
+        const count = (el, from, to, fmt, at, dur, ease) => {
+          const o = { v: from };
+          el.textContent = fmt(from);
+          tl.to(o, { v: to, duration: dur, ease: ease || "expo.out",
+            onUpdate: () => { el.textContent = fmt(o.v); } }, at);
+        };
+        const shine = (el, at) => {
+          tl.fromTo(el, { xPercent: -160, skewX: -20, opacity: 1 },
+            { xPercent: 560, skewX: -20, opacity: 1, duration: 0.75, ease: "power2.inOut" }, at);
+        };
+        const draw = (els, at, dur) => {
+          tl.fromTo(els, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: dur || 0.45,
+            ease: "power2.out", stagger: 0.06 }, at);
+        };
+
+        tl.fromTo(q(".f07h"), { y: 40, opacity: 0, filter: "blur(8px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, 0.0);
+        tl.fromTo(q(".f07hg"), { backgroundPosition: "100% 50%" }, { backgroundPosition: "0% 50%", duration: 1.3, ease: "power2.out" }, 0.05);
+        tl.fromTo(q(".f07card"), { y: 60, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: "expo.out" }, 0.1);
+        tl.fromTo(q(".f07fill"), { scaleX: 0 }, { scaleX: 1, duration: 1.41, ease: "none" }, 0.47);
+        const nodes = qa(".f07node"), labs = qa(".f07nlab");
+        nodes.forEach((n, i) => {
+          const t = 0.47 + i * 0.47;
+          tl.to(n, { backgroundColor: "#00C2FF", borderColor: "#00F0FF", boxShadow: "0 0 30px rgba(0,240,255,0.6)", duration: 0.15, ease: "power2.out" }, t);
+          tl.fromTo(n, { scale: 1 }, { scale: 1.18, duration: 0.12, ease: "power2.out" }, t);
+          tl.to(n, { scale: 1, duration: 0.3, ease: "back.out(2)" }, t + 0.12);
+          tl.to(labs[i], { color: "#F5F7FA", duration: 0.2 }, t);
+          draw(n.querySelectorAll("path, rect, circle"), t, 0.3);
+        });
+        const mmss = (v) => { const s = Math.round(v); return "0" + Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+        count(q(".f07timer"), 0, 107, mmss, 0.47, 1.88, "none");
+        tl.fromTo(q(".f07under"), { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 2.6);
+        tl.fromTo(q(".f07ok"), { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2.2)" }, 3.75);
+        tl.fromTo(q(".f07notif"), { y: 160, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "back.out(1.5)" }, 4.2);
+        draw(q(".f07ncheck").querySelectorAll("circle, path"), 4.5, 0.35);
+        tl.to([q(".f07card"), q(".f07h")], { opacity: 0.35, duration: 0.4, ease: "none" }, 5.0);
+        tl.to(q(".f07notif"), { y: -60, scale: 1.04, duration: 0.6, ease: "power2.in" }, 5.0);
+
+        window.__timelines["07-activation"] = tl;
+      })();
+    </script>
+</template>
