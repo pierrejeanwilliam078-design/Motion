@@ -1,0 +1,90 @@
+<template>
+    <style>
+
+      @font-face { font-family: "Anton"; src: url("assets/fonts/anton-latin-400-normal.woff2") format("woff2"); font-display: block; }
+      @font-face { font-family: "Boldonse"; src: url("assets/fonts/Boldonse-Regular.ttf") format("truetype"); font-display: block; }
+      @font-face { font-family: "InstrumentSansBI"; src: url("assets/fonts/InstrumentSans-BoldItalic.ttf") format("truetype"); font-display: block; }
+      @font-face { font-family: "Inter"; font-weight: 800; src: url("assets/fonts/inter-latin-800-normal.woff2") format("woff2"); font-display: block; }
+      @font-face { font-family: "Inter"; font-weight: 900; src: url("assets/fonts/inter-latin-900-normal.woff2") format("woff2"); font-display: block; }
+
+      #root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #FFFFFF; }
+      #root .layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .cam { position: absolute; inset: 0; transform-origin: 540px 960px; }
+      #root .w { position: absolute; left: 50%; white-space: nowrap; line-height: 0.8; }
+      #root .anton { font-family: "Anton", sans-serif; }
+      #root .bold { font-family: "Boldonse", sans-serif; }
+      #root .inter { font-family: "Inter", sans-serif; font-weight: 900; }
+      #root .pt { position: absolute; }
+      #root .pt img { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .relight { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+      #root .grain { background-image: url("assets/fx/grain.png"); background-size: 512px 512px; opacity: 0.06;
+        mix-blend-mode: overlay; pointer-events: none; }
+      #root .vignette { background: radial-gradient(120% 80% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%); pointer-events: none; }
+
+      #root .s7-ground { background: radial-gradient(60% 40% at 50% 46%, #3E6BFF 0%, #0A3BFF 50%, #001A8C 100%); }
+      #root .s7-halo { position: absolute; left: 90px; top: 520px; width: 900px; height: 900px;
+        background: radial-gradient(closest-side, rgba(255,255,255,0.30), rgba(255,255,255,0)); }
+      #root .s7-n { font-size: 300px; background: linear-gradient(100deg, #FFFFFF 42%, #CFE0FF 50%, #FFFFFF 58%);
+        background-size: 300% 100%; background-position: 100% 50%; -webkit-background-clip: text; background-clip: text; color: transparent; }
+      #root .s7-n1 { top: 250px; }
+      #root .s7-n2 { top: 520px; }
+      #root .s7-sig { position: absolute; left: 0; right: 0; top: 1430px; text-align: center; font-family: "InstrumentSansBI", sans-serif;
+        font-size: 66px; letter-spacing: 0.08em; color: #FFFFFF; text-shadow: 0 6px 30px rgba(0,0,40,0.5); }
+      #root .s7-sw { display: inline-block; margin: 0 0.18em; }
+
+    </style>
+    <div id="root" data-composition-id="s7-signature" data-width="1080" data-height="1920" data-duration="5.625">
+      <div id="s7-ground" class="clip layer s7-ground" data-start="0" data-duration="5.625" data-track-index="0">
+        <div class="s7-halo"></div>
+      </div>
+      <div id="s7-back" class="clip layer s7-backl" data-start="0" data-duration="5.625" data-track-index="1">
+        <div class="cam s7-cam"><div data-layout-allow-occlusion class="w anton s7-n s7-n1">TIAVINA</div><div data-layout-allow-occlusion class="w anton s7-n s7-n2">NOMENA</div></div>
+      </div>
+      <div id="s7-person" class="clip layer s7-personl" data-start="0" data-duration="5.625" data-track-index="2">
+        <div class="cam s7-cam"><div class="pt s7-p" data-layout-allow-occlusion style="left:132px;top:741px;width:998px;height:1746px"><img src="assets/portraits/costume.png" alt="" data-layout-allow-occlusion /><div class="relight" data-layout-allow-occlusion style="background:linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 35%, rgba(0,20,90,0.25) 100%);-webkit-mask-image:url(assets/portraits/costume.png);mask-image:url(assets/portraits/costume.png)"></div></div></div>
+      </div>
+      <div id="s7-front" class="clip layer s7-frontl" data-start="0" data-duration="5.625" data-track-index="3">
+        <div class="cam s7-cam"><div class="s7-sig"><span class="s7-sw">CRÉER</span><span class="s7-sw">AVEC</span><span class="s7-sw">IMPACT.</span></div></div>
+      </div>
+      <div id="s7-fx" class="clip layer s7-fxl" data-start="0" data-duration="5.625" data-track-index="4">
+        <div class="layer vignette"></div>
+      </div>
+
+      <div id="s7-signature-grain" class="clip layer grain" data-start="0" data-duration="5.625" data-track-index="8"></div>
+    </div>
+    <script>
+      (function () {
+
+        const root = document.querySelector('[data-composition-id="s7-signature"]');
+        const q = (s) => root.querySelector(s);
+        const qa = (s) => Array.from(root.querySelectorAll(s));
+        const tl = gsap.timeline({ paused: true });
+        const grain = q(".grain");
+        for (let i = 0; i * (1 / 12) < 5.625; i++) {
+          tl.set(grain, { backgroundPosition: ((i * 137) % 512) + "px " + ((i * 241) % 512) + "px" }, i / 12);
+        }
+        // centre every word box horizontally once (left: 50% in CSS)
+        gsap.set(qa(".w"), { xPercent: -50 });
+        // deterministic decaying camera shake
+        const shake = (el, at, amp, dur) => {
+          const n = Math.round(dur / 0.033);
+          for (let i = 0; i < n; i++) {
+            const k = 1 - i / n, s = (i % 2 ? -1 : 1);
+            tl.set(el, { x: s * amp * k * ((i * 7) % 5 + 1) / 5, y: -s * amp * 0.6 * k * ((i * 3) % 4 + 1) / 4 }, at + i * 0.033);
+          }
+          tl.set(el, { x: 0, y: 0 }, at + n * 0.033);
+        };
+
+        tl.fromTo(qa(".s7-cam"), { scale: 1.12 }, { scale: 1, duration: 5.625, ease: "power2.out" }, 0);
+        tl.fromTo(qa(".s7-n"), { scaleX: 1.5, opacity: 0, filter: "blur(10px)" },
+          { scaleX: 1, opacity: 1, filter: "blur(0px)", duration: 0.8, ease: "back.out(1.3)", stagger: 0.12 }, 0.05);
+        tl.fromTo(q(".s7-p"), { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "expo.out" }, 0);
+        tl.fromTo(qa(".s7-sw"), { y: 30, opacity: 0, filter: "blur(6px)" },
+          { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.45, ease: "expo.out", stagger: 0.24 }, 1.925);
+        tl.fromTo(qa(".s7-n"), { backgroundPosition: "100% 50%" }, { backgroundPosition: "0% 50%", duration: 0.9, ease: "power2.inOut", immediateRender: false }, 3.75);
+        tl.fromTo(q(".s7-halo"), { opacity: 0.6 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.75);
+
+        window.__timelines["s7-signature"] = tl;
+      })();
+    </script>
+</template>

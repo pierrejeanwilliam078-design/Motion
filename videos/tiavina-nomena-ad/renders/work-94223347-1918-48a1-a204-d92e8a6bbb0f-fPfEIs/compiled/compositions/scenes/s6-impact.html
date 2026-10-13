@@ -1,0 +1,96 @@
+<template>
+    <style>
+
+      @font-face { font-family: "Anton"; src: url("assets/fonts/anton-latin-400-normal.woff2") format("woff2"); font-display: block; }
+      @font-face { font-family: "Boldonse"; src: url("assets/fonts/Boldonse-Regular.ttf") format("truetype"); font-display: block; }
+      @font-face { font-family: "InstrumentSansBI"; src: url("assets/fonts/InstrumentSans-BoldItalic.ttf") format("truetype"); font-display: block; }
+      @font-face { font-family: "Inter"; font-weight: 800; src: url("assets/fonts/inter-latin-800-normal.woff2") format("woff2"); font-display: block; }
+      @font-face { font-family: "Inter"; font-weight: 900; src: url("assets/fonts/inter-latin-900-normal.woff2") format("woff2"); font-display: block; }
+
+      #root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #FFFFFF; }
+      #root .layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .cam { position: absolute; inset: 0; transform-origin: 540px 960px; }
+      #root .w { position: absolute; left: 50%; white-space: nowrap; line-height: 0.8; }
+      #root .anton { font-family: "Anton", sans-serif; }
+      #root .bold { font-family: "Boldonse", sans-serif; }
+      #root .inter { font-family: "Inter", sans-serif; font-weight: 900; }
+      #root .pt { position: absolute; }
+      #root .pt img { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .relight { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+      #root .grain { background-image: url("assets/fx/grain.png"); background-size: 512px 512px; opacity: 0.06;
+        mix-blend-mode: overlay; pointer-events: none; }
+      #root .vignette { background: radial-gradient(120% 80% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%); pointer-events: none; }
+
+      #root .s6-ground { background: radial-gradient(90% 60% at 50% 40%, #FFFFFF 0%, #F0F1F3 70%, #E3E6EA 100%); }
+      #root .s6-rhythm { top: 330px; font-size: 300px; color: #050506; }
+      #root .s6-creat { top: 300px; font-size: 230px; color: #050506; }
+      #root .s6-impact { top: 70px; font-size: 400px; color: #050506; }
+      #root .s6-blue { position: absolute; inset: 0; background: #0A3BFF; opacity: 0; }
+
+    </style>
+    <div id="root" data-composition-id="s6-impact" data-width="1080" data-height="1920" data-duration="3.75">
+      <div id="s6-ground" class="clip layer s6-ground" data-start="0" data-duration="3.75" data-track-index="0">
+
+      </div>
+      <div id="s6a-back" class="clip layer s6a-backl" data-start="0" data-duration="0.9375" data-track-index="1">
+        <div class="cam s6a-cam"><div data-layout-allow-occlusion class="w inter s6-rhythm">RHYTHM</div></div>
+      </div>
+      <div id="s6a-person" class="clip layer s6a-personl" data-start="0" data-duration="0.9375" data-track-index="2">
+        <div class="cam s6a-cam"><div class="pt s6a-p-shadow" style="left:177px;top:572px;width:1155px;height:2022px;opacity:0.16;filter:blur(0px);background:#000;-webkit-mask-image:url(assets/portraits/costume.png);mask-image:url(assets/portraits/costume.png);-webkit-mask-size:100% 100%;mask-size:100% 100%"></div><div class="pt s6a-p" data-layout-allow-occlusion style="left:67px;top:562px;width:1155px;height:2022px"><img src="assets/portraits/costume.png" alt="" data-layout-allow-occlusion /></div></div>
+      </div>
+      <div id="s6b-back" class="clip layer s6b-backl" data-start="0.9375" data-duration="1.40625" data-track-index="1">
+        <div class="cam s6b-cam"><div data-layout-allow-occlusion class="w anton s6-creat">CREATIVITY</div></div>
+      </div>
+      <div id="s6b-person" class="clip layer s6b-personl" data-start="0.9375" data-duration="1.40625" data-track-index="2">
+        <div class="cam s6b-cam"><div class="pt s6b-p-shadow" style="left:200px;top:590px;width:1067px;height:1356px;opacity:0.16;filter:blur(0px);background:#000;-webkit-mask-image:url(assets/portraits/pull.png);mask-image:url(assets/portraits/pull.png);-webkit-mask-size:100% 100%;mask-size:100% 100%"></div><div class="pt s6b-p" data-layout-allow-occlusion style="left:90px;top:580px;width:1067px;height:1356px"><img src="assets/portraits/pull.png" alt="" data-layout-allow-occlusion /></div></div>
+      </div>
+      <div id="s6c-back" class="clip layer s6c-backl" data-start="2.34375" data-duration="1.40625" data-track-index="1">
+        <div class="cam s6c-cam"><div data-layout-allow-occlusion class="w anton s6-impact">IMPACT</div></div>
+      </div>
+      <div id="s6c-person" class="clip layer s6c-personl" data-start="2.34375" data-duration="1.40625" data-track-index="2">
+        <div class="cam s6c-cam"><div class="pt s6c-p-shadow" style="left:-160px;top:404px;width:1921px;height:2441px;opacity:0.16;filter:blur(0px);background:#000;-webkit-mask-image:url(assets/portraits/pull.png);mask-image:url(assets/portraits/pull.png);-webkit-mask-size:100% 100%;mask-size:100% 100%"></div><div class="pt s6c-p" data-layout-allow-occlusion style="left:-270px;top:394px;width:1921px;height:2441px"><img src="assets/portraits/pull.png" alt="" data-layout-allow-occlusion /></div></div>
+      </div>
+      <div id="s6-fx" class="clip layer s6-fxl" data-start="0" data-duration="3.75" data-track-index="4">
+        <div class="s6-blue"></div>
+      </div>
+
+      <div id="s6-impact-grain" class="clip layer grain" data-start="0" data-duration="3.75" data-track-index="8"></div>
+    </div>
+    <script>
+      (function () {
+
+        const root = document.querySelector('[data-composition-id="s6-impact"]');
+        const q = (s) => root.querySelector(s);
+        const qa = (s) => Array.from(root.querySelectorAll(s));
+        const tl = gsap.timeline({ paused: true });
+        const grain = q(".grain");
+        for (let i = 0; i * (1 / 12) < 3.75; i++) {
+          tl.set(grain, { backgroundPosition: ((i * 137) % 512) + "px " + ((i * 241) % 512) + "px" }, i / 12);
+        }
+        // centre every word box horizontally once (left: 50% in CSS)
+        gsap.set(qa(".w"), { xPercent: -50 });
+        // deterministic decaying camera shake
+        const shake = (el, at, amp, dur) => {
+          const n = Math.round(dur / 0.033);
+          for (let i = 0; i < n; i++) {
+            const k = 1 - i / n, s = (i % 2 ? -1 : 1);
+            tl.set(el, { x: s * amp * k * ((i * 7) % 5 + 1) / 5, y: -s * amp * 0.6 * k * ((i * 3) % 4 + 1) / 4 }, at + i * 0.033);
+          }
+          tl.set(el, { x: 0, y: 0 }, at + n * 0.033);
+        };
+
+        tl.set(q(".s6-rhythm"), { skewX: -12 }, 0);
+        tl.fromTo(q(".s6-rhythm"), { x: 420 }, { x: -420, duration: 0.9375, ease: "none" }, 0);
+        tl.fromTo(q(".s6a-cam"), { scale: 1.08 }, { scale: 1, duration: 0.3, ease: "expo.out" }, 0);
+        tl.set(q(".s6-creat"), { scaleY: 1.3, transformOrigin: "50% 100%" }, 0);
+        tl.fromTo(q(".s6-creat"), { x: -70 }, { x: 70, duration: 1.18625, ease: "power1.out" }, 0.9375);
+        tl.fromTo(q(".s6b-cam"), { scale: 1.08 }, { scale: 1, duration: 0.3, ease: "expo.out" }, 0.9375);
+        tl.fromTo(q(".s6-impact"), { scale: 1.3 }, { scale: 1, duration: 0.18, ease: "expo.out" }, 2.34375);
+        shake(q(".s6c-cam"), 2.36375, 14, 0.3);
+        tl.to(q(".s6-impact"), { scale: 5, duration: 0.32, ease: "power3.in", transformOrigin: "52% 60%" }, 3.43);
+        tl.to(q(".s6-blue"), { opacity: 1, duration: 0.14, ease: "power2.in" }, 3.61);
+
+        window.__timelines["s6-impact"] = tl;
+      })();
+    </script>
+</template>

@@ -1,0 +1,111 @@
+<template>
+    <style>
+
+      @font-face { font-family: "Anton"; src: url("assets/fonts/anton-latin-400-normal.woff2") format("woff2"); font-display: block; }
+      @font-face { font-family: "Boldonse"; src: url("assets/fonts/Boldonse-Regular.ttf") format("truetype"); font-display: block; }
+      @font-face { font-family: "InstrumentSansBI"; src: url("assets/fonts/InstrumentSans-BoldItalic.ttf") format("truetype"); font-display: block; }
+      @font-face { font-family: "Inter"; font-weight: 800; src: url("assets/fonts/inter-latin-800-normal.woff2") format("woff2"); font-display: block; }
+      @font-face { font-family: "Inter"; font-weight: 900; src: url("assets/fonts/inter-latin-900-normal.woff2") format("woff2"); font-display: block; }
+
+      #root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #FFFFFF; }
+      #root .layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .cam { position: absolute; inset: 0; transform-origin: 540px 960px; }
+      #root .w { position: absolute; left: 50%; white-space: nowrap; line-height: 0.8; }
+      #root .anton { font-family: "Anton", sans-serif; }
+      #root .bold { font-family: "Boldonse", sans-serif; }
+      #root .inter { font-family: "Inter", sans-serif; font-weight: 900; }
+      #root .pt { position: absolute; }
+      #root .pt img { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .relight { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+      #root .grain { background-image: url("assets/fx/grain.png"); background-size: 512px 512px; opacity: 0.06;
+        mix-blend-mode: overlay; pointer-events: none; }
+      #root .vignette { background: radial-gradient(120% 80% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%); pointer-events: none; }
+
+      #root .s4a-ground { background: radial-gradient(80% 60% at 50% 45%, #2F5BFF 0%, #0A3BFF 50%, #001A8C 100%); }
+      #root .s4b-g { position: absolute; inset: 0; background: radial-gradient(90% 60% at 50% 40%, #FFFFFF 0%, #ECEEF2 70%, #DDE1E7 100%); }
+      #root .s4c-ground { background: radial-gradient(55% 35% at 50% 52%, rgba(10,59,255,0.55), rgba(5,5,6,0) 100%), #050506; }
+      #root .s4-design { top: 1100px; font-size: 330px; color: #FFFFFF; }
+      #root .s4-video { top: 205px; font-size: 200px; color: #9AA0A8; }
+      #root .s4-svg { position: absolute; left: 0; top: 0; overflow: visible; }
+      #root .s4-rtext { font-family: "Inter", sans-serif; font-weight: 900; font-size: 112px; fill: #FFFFFF; letter-spacing: 4px; }
+
+    </style>
+    <div id="root" data-composition-id="s4-skills" data-width="1080" data-height="1920" data-duration="3.75">
+      <div id="s4a-ground" class="clip layer s4a-ground" data-start="0" data-duration="1.40625" data-track-index="0">
+
+      </div>
+      <div id="s4a-back" class="clip layer s4a-backl" data-start="0" data-duration="1.40625" data-track-index="1">
+        <div class="cam s4a-cam"><div data-layout-allow-occlusion class="w inter s4-design">DESIGN</div></div>
+      </div>
+      <div id="s4a-person" class="clip layer s4a-personl" data-start="0" data-duration="1.40625" data-track-index="2">
+        <div class="cam s4a-cam"><div class="pt s4a-p" data-layout-allow-occlusion style="left:90px;top:570px;width:1067px;height:1356px"><img src="assets/portraits/pull.png" alt="" data-layout-allow-occlusion /><div class="relight" data-layout-allow-occlusion style="background:linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 40%, rgba(0,10,60,0.35) 100%);-webkit-mask-image:url(assets/portraits/pull.png);mask-image:url(assets/portraits/pull.png)"></div></div></div>
+      </div>
+      <div id="s4a-front" class="clip layer s4a-frontl" data-start="0" data-duration="1.40625" data-track-index="3" style="-webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,0) 1200px, #000 1236px);mask-image:linear-gradient(to bottom, rgba(0,0,0,0) 1200px, #000 1236px)">
+        <div class="cam s4a-cam"><div data-layout-allow-overlap aria-hidden="true" data-layout-allow-occlusion class="w inter s4-design">DESIGN</div></div>
+      </div>
+      <div id="s4b-ground" class="clip layer s4b-ground" data-start="1.40625" data-duration="0.9375" data-track-index="0">
+        <div class="s4b-g"></div>
+      </div>
+      <div id="s4b-back" class="clip layer s4b-backl" data-start="1.40625" data-duration="0.9375" data-track-index="1">
+        <div class="cam s4b-cam"><div data-layout-allow-occlusion class="w bold s4-video">VIDEO</div></div>
+      </div>
+      <div id="s4b-person" class="clip layer s4b-personl" data-start="1.40625" data-duration="0.9375" data-track-index="2">
+        <div class="cam s4b-cam"><div class="pt s4b-p-shadow" style="left:21px;top:430px;width:1365px;height:2389px;opacity:0.2;filter:blur(18px);background:#000;-webkit-mask-image:url(assets/portraits/costume.png);mask-image:url(assets/portraits/costume.png);-webkit-mask-size:100% 100%;mask-size:100% 100%"></div><div class="pt s4b-p" data-layout-allow-occlusion style="left:-19px;top:406px;width:1365px;height:2389px"><img src="assets/portraits/costume.png" alt="" data-layout-allow-occlusion /></div></div>
+      </div>
+      <div id="s4c-ground" class="clip layer s4c-ground" data-start="2.34375" data-duration="1.40625" data-track-index="0">
+
+      </div>
+      <div id="s4c-back" class="clip layer s4c-backl" data-start="2.34375" data-duration="1.40625" data-track-index="1">
+        <div class="cam s4c-cam"><svg class="s4-svg" width="1080" height="1920" viewBox="0 0 1080 1920"><g transform="translate(540 1000) rotate(-15)"><path id="s4-ring-b" d="M -600 0 A 600 470 0 1 1 600 0 A 600 470 0 1 1 -600 0" fill="none" /><text data-layout-allow-occlusion data-layout-allow-overlap class="s4-rtext"><textPath data-layout-allow-overlap data-layout-allow-occlusion href="#s4-ring-b" class="s4-tp" startOffset="0">MOTION • MOTION • MOTION • MOTION • MOTION • MOTION • MOTION • MOTION • </textPath></text></g></svg></div>
+      </div>
+      <div id="s4c-person" class="clip layer s4c-personl" data-start="2.34375" data-duration="1.40625" data-track-index="2">
+        <div class="cam s4c-cam"><div class="pt s4c-p" data-layout-allow-occlusion style="left:-225px;top:266px;width:1814px;height:2305px"><img src="assets/portraits/pull.png" alt="" data-layout-allow-occlusion /><div class="relight" data-layout-allow-occlusion style="background:linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.25) 38%, rgba(0,0,0,0) 55%, rgba(10,59,255,0.55) 82%, rgba(90,140,255,0.85) 100%);-webkit-mask-image:url(assets/portraits/pull.png);mask-image:url(assets/portraits/pull.png)"></div></div></div>
+      </div>
+      <div id="s4c-front" class="clip layer s4c-frontl" data-start="2.34375" data-duration="1.40625" data-track-index="3" style="-webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,0) 1320px, #000 1356px);mask-image:linear-gradient(to bottom, rgba(0,0,0,0) 1320px, #000 1356px)">
+        <div class="cam s4c-cam"><svg class="s4-svg" width="1080" height="1920" viewBox="0 0 1080 1920"><g transform="translate(540 1000) rotate(-15)"><path id="s4-ring-f" d="M -600 0 A 600 470 0 1 1 600 0 A 600 470 0 1 1 -600 0" fill="none" /><text data-layout-allow-overlap aria-hidden="true" class="s4-rtext"><textPath data-layout-allow-overlap data-layout-allow-occlusion href="#s4-ring-f" class="s4-tp" startOffset="0">MOTION • MOTION • MOTION • MOTION • MOTION • MOTION • MOTION • MOTION • </textPath></text></g></svg></div>
+      </div>
+
+      <div id="s4-skills-grain" class="clip layer grain" data-start="0" data-duration="3.75" data-track-index="8"></div>
+    </div>
+    <script>
+      (function () {
+
+        const root = document.querySelector('[data-composition-id="s4-skills"]');
+        const q = (s) => root.querySelector(s);
+        const qa = (s) => Array.from(root.querySelectorAll(s));
+        const tl = gsap.timeline({ paused: true });
+        const grain = q(".grain");
+        for (let i = 0; i * (1 / 12) < 3.75; i++) {
+          tl.set(grain, { backgroundPosition: ((i * 137) % 512) + "px " + ((i * 241) % 512) + "px" }, i / 12);
+        }
+        // centre every word box horizontally once (left: 50% in CSS)
+        gsap.set(qa(".w"), { xPercent: -50 });
+        // deterministic decaying camera shake
+        const shake = (el, at, amp, dur) => {
+          const n = Math.round(dur / 0.033);
+          for (let i = 0; i < n; i++) {
+            const k = 1 - i / n, s = (i % 2 ? -1 : 1);
+            tl.set(el, { x: s * amp * k * ((i * 7) % 5 + 1) / 5, y: -s * amp * 0.6 * k * ((i * 3) % 4 + 1) / 4 }, at + i * 0.033);
+          }
+          tl.set(el, { x: 0, y: 0 }, at + n * 0.033);
+        };
+
+        // shot a
+        tl.set(qa(".s4-design"), { skewX: -12, rotation: -10 }, 0);
+        tl.fromTo(qa(".s4a-cam"), { scale: 1.25 }, { scale: 1, duration: 0.3, ease: "expo.out" }, 0);
+        tl.fromTo(qa(".s4-design"), { scale: 1.4, filter: "blur(18px)" }, { scale: 1, filter: "blur(0px)", duration: 0.28, ease: "expo.out" }, 0);
+        tl.fromTo(qa(".s4-design"), { x: 0, y: 0 }, { x: -80, y: 14, duration: 1.1, ease: "none" }, 0.3);
+        // shot b
+        tl.fromTo(qa(".s4b-g, .s4b-cam"), { clipPath: "polygon(120% 0%, 140% 0%, 120% 100%, 100% 100%)" },
+          { clipPath: "polygon(-40% 0%, 140% 0%, 120% 100%, -60% 100%)", duration: 0.2, ease: "power3.out" }, 1.40625);
+        tl.fromTo(q(".s4-video"), { scaleX: 2.6 }, { scaleX: 1.6, duration: 0.4, ease: "expo.out" }, 1.40625);
+        tl.fromTo(q(".s4-video"), { x: 0 }, { x: 40, duration: 0.9375, ease: "none" }, 1.40625);
+        // shot c
+        tl.fromTo(qa(".s4c-cam"), { scale: 1.3 }, { scale: 1, duration: 0.25, ease: "expo.out" }, 2.34375);
+        tl.fromTo(qa(".s4-tp"), { attr: { startOffset: 0 } }, { attr: { startOffset: -700 }, duration: 1.2, ease: "none" }, 2.34375);
+        tl.to(qa(".s4-tp"), { attr: { startOffset: -1500 }, duration: 0.2, ease: "power2.in" }, 3.54375);
+
+        window.__timelines["s4-skills"] = tl;
+      })();
+    </script>
+</template>

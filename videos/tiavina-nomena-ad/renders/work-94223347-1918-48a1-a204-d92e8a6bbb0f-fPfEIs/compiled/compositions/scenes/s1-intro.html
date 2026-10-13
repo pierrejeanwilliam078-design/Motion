@@ -1,0 +1,87 @@
+<template>
+    <style>
+
+      @font-face { font-family: "Anton"; src: url("assets/fonts/anton-latin-400-normal.woff2") format("woff2"); font-display: block; }
+      @font-face { font-family: "Boldonse"; src: url("assets/fonts/Boldonse-Regular.ttf") format("truetype"); font-display: block; }
+      @font-face { font-family: "InstrumentSansBI"; src: url("assets/fonts/InstrumentSans-BoldItalic.ttf") format("truetype"); font-display: block; }
+      @font-face { font-family: "Inter"; font-weight: 800; src: url("assets/fonts/inter-latin-800-normal.woff2") format("woff2"); font-display: block; }
+      @font-face { font-family: "Inter"; font-weight: 900; src: url("assets/fonts/inter-latin-900-normal.woff2") format("woff2"); font-display: block; }
+
+      #root { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; color: #FFFFFF; }
+      #root .layer { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .cam { position: absolute; inset: 0; transform-origin: 540px 960px; }
+      #root .w { position: absolute; left: 50%; white-space: nowrap; line-height: 0.8; }
+      #root .anton { font-family: "Anton", sans-serif; }
+      #root .bold { font-family: "Boldonse", sans-serif; }
+      #root .inter { font-family: "Inter", sans-serif; font-weight: 900; }
+      #root .pt { position: absolute; }
+      #root .pt img { position: absolute; inset: 0; width: 100%; height: 100%; }
+      #root .relight { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; }
+      #root .grain { background-image: url("assets/fx/grain.png"); background-size: 512px 512px; opacity: 0.06;
+        mix-blend-mode: overlay; pointer-events: none; }
+      #root .vignette { background: radial-gradient(120% 80% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%); pointer-events: none; }
+
+      #root .s1-ground { background: #050506; }
+      #root .s1-glow { position: absolute; left: -200px; top: 300px; width: 1480px; height: 1500px;
+        background: radial-gradient(closest-side, rgba(10,59,255,0.55), rgba(10,59,255,0.18) 55%, rgba(5,5,6,0)); }
+      #root .s1-band { position: absolute; left: -260px; top: 900px; width: 1600px; height: 120px; border-radius: 60px;
+        background: linear-gradient(90deg, rgba(10,59,255,0) 0%, #0A3BFF 30%, #BFD2FF 50%, #0A3BFF 70%, rgba(10,59,255,0) 100%);
+        box-shadow: 0 0 120px 40px rgba(10,59,255,0.65); }
+      #root .s1-create { top: 250px; font-size: 470px; color: #FFFFFF; }
+      #root .s1-wipe { position: absolute; left: -300px; top: 0; width: 1680px; height: 2600px; background: #F2F3F5; }
+
+    </style>
+    <div id="root" data-composition-id="s1-intro" data-width="1080" data-height="1920" data-duration="3.75">
+      <div id="s1-ground" class="clip layer s1-ground" data-start="0" data-duration="3.75" data-track-index="0">
+        <div class="s1-glow"></div>
+      </div>
+      <div id="s1-back" class="clip layer s1-backl" data-start="0" data-duration="3.75" data-track-index="1">
+        <div class="cam s1-camt"><div data-layout-allow-occlusion class="w anton s1-create">CREATE</div></div>
+      </div>
+      <div id="s1-person" class="clip layer s1-personl" data-start="0" data-duration="3.75" data-track-index="2">
+        <div class="cam s1-camp"><div class="pt s1-p" data-layout-allow-occlusion style="left:-135px;top:370px;width:1600px;height:2034px"><img src="assets/portraits/pull.png" alt="" data-layout-allow-occlusion /><div class="relight" data-layout-allow-occlusion style="background:linear-gradient(90deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.25) 38%, rgba(0,0,0,0) 55%, rgba(10,59,255,0.55) 82%, rgba(90,140,255,0.85) 100%);-webkit-mask-image:url(assets/portraits/pull.png);mask-image:url(assets/portraits/pull.png)"></div></div></div>
+      </div>
+      <div id="s1-fx" class="clip layer s1-fxl" data-start="0" data-duration="3.75" data-track-index="3">
+        <div class="s1-band"></div><div class="s1-wipe"></div>
+      </div>
+
+      <div id="s1-intro-grain" class="clip layer grain" data-start="0" data-duration="3.75" data-track-index="8"></div>
+    </div>
+    <script>
+      (function () {
+
+        const root = document.querySelector('[data-composition-id="s1-intro"]');
+        const q = (s) => root.querySelector(s);
+        const qa = (s) => Array.from(root.querySelectorAll(s));
+        const tl = gsap.timeline({ paused: true });
+        const grain = q(".grain");
+        for (let i = 0; i * (1 / 12) < 3.75; i++) {
+          tl.set(grain, { backgroundPosition: ((i * 137) % 512) + "px " + ((i * 241) % 512) + "px" }, i / 12);
+        }
+        // centre every word box horizontally once (left: 50% in CSS)
+        gsap.set(qa(".w"), { xPercent: -50 });
+        // deterministic decaying camera shake
+        const shake = (el, at, amp, dur) => {
+          const n = Math.round(dur / 0.033);
+          for (let i = 0; i < n; i++) {
+            const k = 1 - i / n, s = (i % 2 ? -1 : 1);
+            tl.set(el, { x: s * amp * k * ((i * 7) % 5 + 1) / 5, y: -s * amp * 0.6 * k * ((i * 3) % 4 + 1) / 4 }, at + i * 0.033);
+          }
+          tl.set(el, { x: 0, y: 0 }, at + n * 0.033);
+        };
+
+        tl.fromTo(q(".s1-band"), { x: -1900, rotation: -12, opacity: 1 }, { x: 1900, rotation: -12, opacity: 1, duration: 0.38, ease: "expo.inOut" }, 0);
+        tl.fromTo(q(".s1-glow"), { opacity: 0 }, { opacity: 1, duration: 0.9, ease: "power2.out" }, 0.12);
+        tl.fromTo(q(".s1-p"), { filter: "brightness(0)" }, { filter: "brightness(1)", duration: 0.9, ease: "power2.out" }, 0.2);
+        tl.fromTo(q(".s1-p .relight"), { opacity: 0.2 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.15);
+        tl.fromTo(q(".s1-create"), { scaleY: 0, filter: "blur(20px)", transformOrigin: "50% 100%" },
+          { scaleY: 1, filter: "blur(0px)", duration: 0.55, ease: "expo.out" }, 0.94);
+        tl.fromTo(q(".s1-create"), { x: 0 }, { x: -60, duration: 2.81, ease: "none" }, 0.94);
+        tl.fromTo(q(".s1-camp"), { scale: 1 }, { scale: 1.08, duration: 3.75, ease: "none" }, 0);
+        tl.fromTo(q(".s1-camt"), { scale: 1 }, { scale: 1.1, duration: 3.75, ease: "none" }, 0);
+        tl.fromTo(q(".s1-wipe"), { y: 2200, rotation: -8 }, { y: -340, rotation: -8, duration: 0.22, ease: "power3.in" }, 3.53);
+
+        window.__timelines["s1-intro"] = tl;
+      })();
+    </script>
+</template>
