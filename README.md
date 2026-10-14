@@ -11,7 +11,37 @@ original voice-over and music are kept untouched.
 | Audio | the original AAC stream, **copied bit for bit** (no re-encode) |
 | Final file | `deliverables/TIAVOYAGES_PREMIUM_MOTION_9x16.mp4` |
 
-## Timeline
+## Two versions
+
+| Composition | Concept | File |
+|---|---|---|
+| `TiavoyagesPremium` (V1) | Premium edit of the original footage | `deliverables/TIAVOYAGES_PREMIUM_MOTION_9x16.mp4` |
+| `TiavoyagesV2` (V2) | **Completely new** 100 % vector motion design on the original voice-over — no original footage | `deliverables/TIAVOYAGES_V2_MOTION_9x16.mp4` |
+
+### V2 — new motion design (`src/v2/`)
+
+| Scene | Time | Content |
+|---|---|---|
+| 01 | 00:00–00:04 | Yellow pin drops on royal blue → pin portal opens onto a vector Dubai (skyline growing from the ground, sun, sea, palms). Emirati mascot pops up. Kinetic type « DUBAÏ, oui… » → « mais à VOTRE FAÇON ! » |
+| 02 | 00:04–00:09 | Royal-blue dot-grid world. « Réserver mon voyage ». The Vols / Visa / Hébergement / Dates tiles fly in, one per voice-over phrase, each with a check |
+| 03 | 00:09–00:14 | Sky with parallax clouds, airliner and contrail, a « CARTE D’EMBARQUEMENT » (VOUS → DXB Dubaï), a « VISA ✓ » stamp, and the mascot walking in with its passport |
+| 04 | 00:14–00:19.2 | Flat city road: a premium black sedan drives in (spinning wheels, settle, paint sheen). « Transfert privé » |
+| 05 | 00:19.2–00:25.2 | Three illustrated postcards flip in (Découverte / Excursions / Liberté) and fan out. The mascot walks |
+| 06 | 00:25.2–00:30 | Royal blue with drifting pins. « DUBAÏ À VOTRE FAÇON. » A white card holds the original logo (the pin drops in, then a light glint) and « Votre voyage, sur mesure. » The mascot gives a thumbs-up |
+
+V2 transitions:
+
+- 0:04 — pin portal
+- 0:09 — stacked colour panels
+- 0:14 — cloud pass
+- 0:19.2 — speed panels
+- 0:25.2 — pin portal
+
+The mascot is a 2.5D puppet built from cut-outs of the supplied artwork (`public/v2/`). It has a spring entrance, breathing, sway, a walk bob and **real eyelid blinks** drawn over its eyes (`src/v2/MascotPuppet.tsx`). Every graphic is drawn in code (`src/v2/Illustrations.tsx`). The audio is the original soundtrack, re-muxed bit for bit.
+
+Render V2: `npm run render:v2`
+
+## V1 timeline
 
 | Scene | Time | Shot | Added motion design |
 |---|---|---|---|

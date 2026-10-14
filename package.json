@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "remotion studio",
     "render": "bash scripts/render.sh",
+    "render:v2": "COMP=TiavoyagesV2 bash scripts/render.sh",
     "still": "remotion still src/index.ts TiavoyagesPremium",
     "typecheck": "tsc --noEmit"
   },

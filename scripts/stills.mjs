@@ -9,7 +9,7 @@ const [outDir, ...frames] = process.argv.slice(2);
 fs.mkdirSync(outDir, {recursive: true});
 const serveUrl = await bundle({entryPoint: path.resolve('src/index.ts')});
 const browserExecutable = process.env.REMOTION_BROWSER_EXECUTABLE ?? null;
-const composition = await selectComposition({serveUrl, id: 'TiavoyagesPremium', browserExecutable});
+const composition = await selectComposition({serveUrl, id: process.env.COMP ?? 'TiavoyagesPremium', browserExecutable});
 for (const f of frames) {
 	const output = path.join(outDir, `f${String(f).padStart(3, '0')}.jpg`);
 	await renderStill({serveUrl, composition, frame: Number(f), output, imageFormat: 'jpeg', jpegQuality: 90, browserExecutable, scale: Number(process.env.SCALE ?? 0.5)});

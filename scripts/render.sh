@@ -5,8 +5,13 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 OUT_DIR=${OUT_DIR:-deliverables}
-FINAL="$OUT_DIR/TIAVOYAGES_PREMIUM_MOTION_9x16.mp4"
-TMP="out/picture.mp4"
+COMP=${COMP:-TiavoyagesPremium}
+if [[ "$COMP" == "TiavoyagesV2" ]]; then
+  FINAL="$OUT_DIR/TIAVOYAGES_V2_MOTION_9x16.mp4"
+else
+  FINAL="$OUT_DIR/TIAVOYAGES_PREMIUM_MOTION_9x16.mp4"
+fi
+TMP="out/picture-$COMP.mp4"
 mkdir -p out "$OUT_DIR"
 
 BROWSER_ARGS=()
@@ -14,7 +19,7 @@ if [[ -n "${REMOTION_BROWSER_EXECUTABLE:-}" ]]; then
   BROWSER_ARGS=(--browser-executable "$REMOTION_BROWSER_EXECUTABLE")
 fi
 
-npx remotion render src/index.ts TiavoyagesPremium "$TMP" \
+npx remotion render src/index.ts "$COMP" "$TMP" \
   --codec h264 --crf 12 --pixel-format yuv420p --muted \
   "${BROWSER_ARGS[@]}" "$@"
 
