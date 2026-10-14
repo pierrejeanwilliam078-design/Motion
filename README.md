@@ -19,6 +19,7 @@ npm run render              # → out/GSN2_40s_1080p.mp4
 npm run render:4k           # → out/GSN2_40s_2160p.mp4 (3840×2160, --scale=2)
 npm run render:v2           # → out/GSN2_40s_V2_1080p.mp4 (version 2 « Pop Kinetic »)
 npm run render:v3           # → out/GSN2_40s_V3_1080p.mp4 (version 3 « Destination Toamasina »)
+npm run render:v4           # → out/GSN2_40s_V4_1080p.mp4 (version 4 « L'île des opportunités »)
 npm run typecheck           # contrôle TypeScript
 npm run audio:build         # régénère musique + SFX originaux V1 (python3 + numpy)
 python3 scripts/build_audio_v2.py   # idem pour la V2
@@ -28,7 +29,7 @@ node scripts/stills.mjs 0 250 500   # images de contrôle → out/stills/ (COMP=
 Sur une machine sans Chrome Headless Shell téléchargeable, ajouter
 `--browser-executable=/chemin/vers/headless_shell` (ou `REMOTION_BROWSER=…` pour `stills.mjs`).
 
-## Trois versions
+## Quatre versions
 
 | | V1 — « Cinématique » (`GSN40`) | V2 — « Pop Kinetic » (`GSN40-V2`) | V3 — « Destination Toamasina » (`GSN40-V3`) |
 |---|---|---|---|
@@ -38,6 +39,21 @@ Sur une machine sans Chrome Headless Shell téléchargeable, ajouter
 | Effets clés | Ligne → masque, carte, fenêtre hexagonale, plongée dans le « O » | Un mot par temps, carte 3D, grille bento 3D, anneau 3D, stickers | Photos en parallaxe 2,5D, iris bordé de l'arc du logo, cartes postales épinglées sur la silhouette de Madagascar, texte rempli par les photos, épingle « ARENA TOAMASINA » posée sur la salle |
 | Musique | Électro cinématique 125 BPM (ré mineur) | Électro 150 BPM (mi mineur) | Pop lumineuse 125 BPM (ré majeur), cordes pincées Karplus-Strong, marimba |
 | Fichiers | `src/scenes/`, `public/audio/` | `src/v2/`, `public/audio/v2/` | `src/v3/`, `public/audio/v3/`, `public/media/v3/` |
+
+### V4 — « L'île des opportunités » (`GSN40-V4`)
+
+La silhouette exacte de Madagascar est le fil conducteur de chaque scène. Les points de lumière symbolisent les opportunités.
+
+| Scène | Ce qui se passe |
+|---|---|
+| 01 · 0–6 s | Une étincelle explose en ~1 000 points qui s'assemblent en Madagascar. Antananarivo s'allume. Les mots basculent en 3D, « OPPORTUNITÉS » se décode, « AU-DELÀ » arrive étiré pendant que l'île émet des échos à sa forme. Les lettres tombent, puis les points fusionnent en île pleine. |
+| 02 · 6–12 s | La caméra plonge sur l'île. **« LA TRAJECTOIRE D'UNE ENTREPRISE » est écrit le long de la route** Antananarivo → Toamasina, révélé par la comète. Recul rapide, puis « NOUVELLES OPPORTUNITÉS » (bascule + décodage). |
+| 03 · 12–19 s | **La photo de l'Arena apparaît à l'intérieur de la silhouette.** « RAYONNER » s'ouvre du centre vers l'extérieur pendant que l'île émet des ondes à sa forme. Plongée finale dans l'île. |
+| 04 · 19–25 s | RENCONTRES : collision en relief et gerbe de points. VISIBILITÉ : **iris en forme de Madagascar**. OPPORTUNITÉS se décode, puis **ses lettres se dissolvent en points qui reforment l'île**. |
+| 05 · 25–33 s | Drop : ondes lumineuses depuis Toamasina, **nom du salon qui court le long des côtes**, dates qui roulent, logo, titre décodé, trait de rappel vers « ARENA TOAMASINA » et sa photo. L'île se transforme en cercle blanc. |
+| 06 · 33–40 s | Des points-opportunités défilent ; l'un d'eux se pose sur Toamasina au mot « place ». « RÉSERVEZ VOTRE STAND », coordonnées, logo, mini-île qui rayonne. |
+
+Musique : future bass originale, 120 BPM, fa majeur (`scripts/build_audio_v4.py`).
 
 ### Photos de la V3
 
@@ -67,10 +83,12 @@ src/
   data/madagascar.ts          Silhouette exacte de Madagascar (Natural Earth 1:50m, domaine public)
   v2/                         VERSION 2 : GSN40_V2.tsx, kit.tsx (transitions, marquees, stickers, 3D), scenes/, timeline.json
   v3/                         VERSION 3 : GSN40_V3.tsx, kit3.tsx (photos 2,5D, ArcIris, PhotoType, PinDrop), scenes/, timeline.json
+  v4/                         VERSION 4 : island.ts (morphing, grille de points, contour lissé), kit4.tsx (FlipChars, Scramble, WaveChars, Burst), scenes/
 scripts/
   build_audio.py              Synthèse de la musique et des SFX V1 (créations originales)
   build_audio_v2.py           Synthèse de la musique et des SFX V2 (150 BPM)
   build_audio_v3.py           Synthèse de la musique et des SFX V3 (125 BPM, ré majeur)
+  build_audio_v4.py           Synthèse de la musique et des SFX V4 (future bass 120 BPM, fa majeur)
   prep_photos_v3.py           Agrandissement des photos fournies + calques de parallaxe
   logo_alpha.py               Fond blanc du logo → transparence (rendu identique au pixel sur blanc)
   madagascar.mjs              Extraction de la silhouette + projection des villes

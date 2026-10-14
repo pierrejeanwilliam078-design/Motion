@@ -8,6 +8,7 @@
     "render": "remotion render src/index.ts GSN40 out/GSN2_40s_1080p.mp4 --codec=h264 --crf=16",
     "render:v2": "remotion render src/index.ts GSN40-V2 out/GSN2_40s_V2_1080p.mp4 --codec=h264 --crf=16",
     "render:v3": "remotion render src/index.ts GSN40-V3 out/GSN2_40s_V3_1080p.mp4 --codec=h264 --crf=16",
+    "render:v4": "remotion render src/index.ts GSN40-V4 out/GSN2_40s_V4_1080p.mp4 --codec=h264 --crf=16",
     "render:4k": "remotion render src/index.ts GSN40 out/GSN2_40s_2160p.mp4 --codec=h264 --crf=16 --scale=2",
     "still": "remotion still src/index.ts GSN40 out/still.png",
     "typecheck": "tsc --noEmit",
