@@ -18,6 +18,7 @@ npm run studio              # prévisualisation interactive des 40 s
 npm run render              # → out/GSN2_40s_1080p.mp4
 npm run render:4k           # → out/GSN2_40s_2160p.mp4 (3840×2160, --scale=2)
 npm run render:v2           # → out/GSN2_40s_V2_1080p.mp4 (version 2 « Pop Kinetic »)
+npm run render:v3           # → out/GSN2_40s_V3_1080p.mp4 (version 3 « Destination Toamasina »)
 npm run typecheck           # contrôle TypeScript
 npm run audio:build         # régénère musique + SFX originaux V1 (python3 + numpy)
 python3 scripts/build_audio_v2.py   # idem pour la V2
@@ -27,16 +28,23 @@ node scripts/stills.mjs 0 250 500   # images de contrôle → out/stills/ (COMP=
 Sur une machine sans Chrome Headless Shell téléchargeable, ajouter
 `--browser-executable=/chemin/vers/headless_shell` (ou `REMOTION_BROWSER=…` pour `stills.mjs`).
 
-## Deux versions
+## Trois versions
 
-| | V1 — « Cinématique » (`GSN40`) | V2 — « Pop Kinetic » (`GSN40-V2`) |
-|---|---|---|
-| Ambiance | Nuit bleue, éditoriale, premium | Aplats vifs (orange, cyan, marine), très rythmée |
-| Typographie | Space Grotesk / Inter | **Unbounded** (très large) + Space Grotesk / Inter |
-| Montage | Transitions continues, caméra fluide | Coupes sur le tempo (150 BPM = 1 temps toutes les 10 frames), cercles, rayures, stores |
-| Effets clés | Ligne → masque, carte, fenêtre hexagonale, plongée dans le « O » | Un mot par temps, cadre débordé par « AU-DELÀ », carte 3D en orbite, grille bento 3D, anneau typographique 3D, afficheur à palettes, stickers, bandeaux défilants |
-| Musique | Électro cinématique 125 BPM (ré mineur) | Électro énergique 150 BPM (mi mineur), break puis drop sur la révélation |
-| Fichiers | `src/scenes/`, `src/config/timeline.json`, `public/audio/` | `src/v2/`, `src/v2/timeline.json`, `public/audio/v2/` |
+| | V1 — « Cinématique » (`GSN40`) | V2 — « Pop Kinetic » (`GSN40-V2`) | V3 — « Destination Toamasina » (`GSN40-V3`) |
+|---|---|---|---|
+| Ambiance | Nuit bleue, éditoriale | Aplats vifs, très rythmée | **Vraies photos** des lieux, promo d'événement |
+| Couleurs | Charte + palette de travail | Charte + orange vif | **Charte stricte du logo** : #02426E, #0F9EDA, #F9AE2F, #F0592E, blanc |
+| Typographie | Space Grotesk / Inter | Unbounded + Space Grotesk / Inter | Space Grotesk / Inter |
+| Effets clés | Ligne → masque, carte, fenêtre hexagonale, plongée dans le « O » | Un mot par temps, carte 3D, grille bento 3D, anneau 3D, stickers | Photos en parallaxe 2,5D, iris bordé de l'arc du logo, cartes postales épinglées sur la silhouette de Madagascar, texte rempli par les photos, épingle « ARENA TOAMASINA » posée sur la salle |
+| Musique | Électro cinématique 125 BPM (ré mineur) | Électro 150 BPM (mi mineur) | Pop lumineuse 125 BPM (ré majeur), cordes pincées Karplus-Strong, marimba |
+| Fichiers | `src/scenes/`, `public/audio/` | `src/v2/`, `public/audio/v2/` | `src/v3/`, `public/audio/v3/`, `public/media/v3/` |
+
+### Photos de la V3
+
+Les photos d'Antananarivo et de l'Arena de Toamasina ont été **fournies par le client** (`public/media/v3/source-*`).
+Elles ne font que 474 px de large. `scripts/prep_photos_v3.py` les agrandit ×3 (Lanczos) et découpe un calque de premier plan pour la parallaxe. Les photos ne sont ni recolorées ni retouchées.
+- **Droits à vérifier :** la photo de l'Arena porte un filigrane (médaillon en bas à droite). Il faut obtenir l'autorisation de son auteur avant toute diffusion, ou la remplacer par une photo dont vous détenez les droits.
+- **Qualité :** pour un rendu net en grand format, fournissez les originaux en haute définition (≥ 2 000 px). Remplacez ensuite les fichiers et relancez `python3 scripts/prep_photos_v3.py` après avoir mis les nouveaux fichiers sous les mêmes noms `source-*`.
 
 Les deux versions utilisent la même voix off, le même logo officiel (jamais déformé) et les mêmes coordonnées.
 
@@ -58,9 +66,12 @@ src/
   scenes/Scene01_Hook … Scene06_CTA, mapCamera.ts
   data/madagascar.ts          Silhouette exacte de Madagascar (Natural Earth 1:50m, domaine public)
   v2/                         VERSION 2 : GSN40_V2.tsx, kit.tsx (transitions, marquees, stickers, 3D), scenes/, timeline.json
+  v3/                         VERSION 3 : GSN40_V3.tsx, kit3.tsx (photos 2,5D, ArcIris, PhotoType, PinDrop), scenes/, timeline.json
 scripts/
   build_audio.py              Synthèse de la musique et des SFX V1 (créations originales)
   build_audio_v2.py           Synthèse de la musique et des SFX V2 (150 BPM)
+  build_audio_v3.py           Synthèse de la musique et des SFX V3 (125 BPM, ré majeur)
+  prep_photos_v3.py           Agrandissement des photos fournies + calques de parallaxe
   logo_alpha.py               Fond blanc du logo → transparence (rendu identique au pixel sur blanc)
   madagascar.mjs              Extraction de la silhouette + projection des villes
 ```
