@@ -25,6 +25,8 @@ export const COLORS = {
 export const FONTS = {
   display: '"Space Grotesk", "Inter", sans-serif',
   body: '"Inter", "Helvetica Neue", Arial, sans-serif',
+  /** version 2 : géométrique très large */
+  wide: '"Unbounded", "Space Grotesk", sans-serif',
 } as const;
 
 export const VIDEO = {

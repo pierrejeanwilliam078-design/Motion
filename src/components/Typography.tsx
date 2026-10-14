@@ -4,13 +4,13 @@ import {COLORS, FONTS} from '../config/theme';
 import {EASE, clamp01, lerp, prog} from '../lib/motion';
 
 export type FontSpec = {
-  fontFamily: 'Space Grotesk' | 'Inter';
+  fontFamily: 'Space Grotesk' | 'Inter' | 'Unbounded';
   fontSize: number;
   fontWeight: number;
   letterSpacing?: number; // em
 };
 
-const family = (f: FontSpec['fontFamily']) => (f === 'Space Grotesk' ? FONTS.display : FONTS.body);
+const family = (f: FontSpec['fontFamily']) => (f === 'Space Grotesk' ? FONTS.display : f === 'Unbounded' ? FONTS.wide : FONTS.body);
 
 /** Largeur réelle (px) d'un texte, mesurée dans le navigateur avec la vraie police. */
 export const textWidth = (text: string, spec: FontSpec) =>

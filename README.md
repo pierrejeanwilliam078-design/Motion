@@ -17,13 +17,28 @@ npm install                 # dépendances (Remotion 4.0.535, React 19)
 npm run studio              # prévisualisation interactive des 40 s
 npm run render              # → out/GSN2_40s_1080p.mp4
 npm run render:4k           # → out/GSN2_40s_2160p.mp4 (3840×2160, --scale=2)
+npm run render:v2           # → out/GSN2_40s_V2_1080p.mp4 (version 2 « Pop Kinetic »)
 npm run typecheck           # contrôle TypeScript
-npm run audio:build         # régénère musique + SFX originaux (python3 + numpy)
-node scripts/stills.mjs 0 250 500   # images de contrôle → out/stills/
+npm run audio:build         # régénère musique + SFX originaux V1 (python3 + numpy)
+python3 scripts/build_audio_v2.py   # idem pour la V2
+node scripts/stills.mjs 0 250 500   # images de contrôle → out/stills/ (COMP=GSN40-V2 pour la V2)
 ```
 
 Sur une machine sans Chrome Headless Shell téléchargeable, ajouter
 `--browser-executable=/chemin/vers/headless_shell` (ou `REMOTION_BROWSER=…` pour `stills.mjs`).
+
+## Deux versions
+
+| | V1 — « Cinématique » (`GSN40`) | V2 — « Pop Kinetic » (`GSN40-V2`) |
+|---|---|---|
+| Ambiance | Nuit bleue, éditoriale, premium | Aplats vifs (orange, cyan, marine), très rythmée |
+| Typographie | Space Grotesk / Inter | **Unbounded** (très large) + Space Grotesk / Inter |
+| Montage | Transitions continues, caméra fluide | Coupes sur le tempo (150 BPM = 1 temps toutes les 10 frames), cercles, rayures, stores |
+| Effets clés | Ligne → masque, carte, fenêtre hexagonale, plongée dans le « O » | Un mot par temps, cadre débordé par « AU-DELÀ », carte 3D en orbite, grille bento 3D, anneau typographique 3D, afficheur à palettes, stickers, bandeaux défilants |
+| Musique | Électro cinématique 125 BPM (ré mineur) | Électro énergique 150 BPM (mi mineur), break puis drop sur la révélation |
+| Fichiers | `src/scenes/`, `src/config/timeline.json`, `public/audio/` | `src/v2/`, `src/v2/timeline.json`, `public/audio/v2/` |
+
+Les deux versions utilisent la même voix off, le même logo officiel (jamais déformé) et les mêmes coordonnées.
 
 ## Architecture
 
@@ -42,8 +57,10 @@ src/
   audio/AudioController.tsx   Voix off découpée, musique avec ducking, SFX
   scenes/Scene01_Hook … Scene06_CTA, mapCamera.ts
   data/madagascar.ts          Silhouette exacte de Madagascar (Natural Earth 1:50m, domaine public)
+  v2/                         VERSION 2 : GSN40_V2.tsx, kit.tsx (transitions, marquees, stickers, 3D), scenes/, timeline.json
 scripts/
-  build_audio.py              Synthèse de la musique et des SFX (créations originales)
+  build_audio.py              Synthèse de la musique et des SFX V1 (créations originales)
+  build_audio_v2.py           Synthèse de la musique et des SFX V2 (150 BPM)
   logo_alpha.py               Fond blanc du logo → transparence (rendu identique au pixel sur blanc)
   madagascar.mjs              Extraction de la silhouette + projection des villes
 ```
@@ -97,7 +114,7 @@ Ajustez-les à l'écoute dans le Studio si une voix finale différente est inté
 | Logo vectoriel (SVG/PDF) ou PNG ≥ 2000 px | remplacer `public/brand/gsn-logo.png` (garder le ratio 517:392 ou mettre à jour `LOGO_RATIO`) | Netteté en 4K. Le PNG actuel ne fait que 517 px utiles. |
 | Logo officiel « GSN 2.0 » (s'il existe) | idem | Le logo fourni porte seulement « GSN ». « 2.0 » est donc affiché séparément (badge « ÉDITION 2.0 », titre). |
 | Photo ou vidéo d'Antananarivo sous licence | `public/media/antananarivo.jpg` ou `.mp4` | Remplace l'illustration (scène 01). |
-| Vidéo de stand professionnel | `public/media/stand.mp4` | Scène 03, plan 1. |
+| Vidéo de stand professionnel | `public/media/stand.mp4` | V1 scène 03 plan 1 ; V2 tuile « Stand d'exposition ». |
 | Vidéo de présentation / pitch | `public/media/presentation.mp4` | Scène 03, plan 2. |
 | Vidéo de rencontre d'affaires | `public/media/rencontre.mp4` | Scène 03, plan 3. |
 | Musique de compositeur / banque licenciée | remplacer `public/audio/music_bed.wav` (40,00 s) | Le ducking reste automatique. |
@@ -120,7 +137,7 @@ Si vous ajoutez des images génériques (banques d'images), elles ne doivent pas
 
 ## Licences
 
-- Polices : Space Grotesk et Inter, SIL Open Font License 1.1 (usage commercial autorisé).
+- Polices : Space Grotesk, Inter et Unbounded, SIL Open Font License 1.1 (usage commercial autorisé).
 - Carte : Natural Earth, domaine public (via le paquet `world-atlas`).
 - Musique, SFX et illustrations : créations originales de ce dépôt.
 - Remotion : vérifiez la [licence Remotion](https://www.remotion.dev/license). Une licence d'entreprise est requise pour les sociétés de plus de 3 personnes.

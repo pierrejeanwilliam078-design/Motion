@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {AbsoluteFill, continueRender, delayRender, useCurrentFrame} from 'remotion';
-import './lib/fonts';
+import React from 'react';
+import {AbsoluteFill, useCurrentFrame} from 'remotion';
+import {useFontsReady} from './lib/fonts';
 import {COLORS} from './config/theme';
 import {SCENES} from './config/timeline';
 import {AudioController} from './audio/AudioController';
@@ -26,34 +26,6 @@ const WINDOWS: {id: string; from: number; to: number; C: React.FC<{f: number}>}[
   {id: 's5', from: 596, to: 832, C: Scene05_EventReveal},
   {id: 's6', from: 806, to: SCENES.s6[1], C: Scene06_CTA},
 ];
-
-/** Attend le chargement effectif des polices avant toute mesure typographique. */
-const useFontsReady = () => {
-  const [ready, setReady] = useState(false);
-  const [handle] = useState(() => delayRender('Polices GSN'));
-  useEffect(() => {
-    const sample = 'AÀÉÈ0123456789?';
-    Promise.all([
-      document.fonts.load('700 120px "Space Grotesk"', sample),
-      document.fonts.load('500 120px "Space Grotesk"', sample),
-      document.fonts.load('400 40px "Inter"', sample),
-      document.fonts.load('500 40px "Inter"', sample),
-      document.fonts.load('600 40px "Inter"', sample),
-      document.fonts.load('700 40px "Inter"', sample),
-    ])
-      .then(() => document.fonts.ready)
-      .then(() => {
-        setReady(true);
-        continueRender(handle);
-      })
-      .catch((e) => {
-        console.error(e);
-        setReady(true);
-        continueRender(handle);
-      });
-  }, [handle]);
-  return ready;
-};
 
 export const GSN40: React.FC = () => {
   const f = useCurrentFrame();
