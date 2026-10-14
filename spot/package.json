@@ -1,0 +1,16 @@
+{
+  "name": "abonivo-spot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Spot publicitaire ABONIVO 30 s, 9:16 (1080x1920) — rendu 3D temps réel Three.js image par image",
+  "type": "module",
+  "scripts": {
+    "build": "bash tools/build.sh",
+    "audio": "python3 tools/build_audio.py",
+    "preview": "python3 -m http.server 8765"
+  },
+  "dependencies": {
+    "@fontsource/montserrat": "5.1.0",
+    "three": "0.169.0"
+  }
+}
