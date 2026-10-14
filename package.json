@@ -1,0 +1,23 @@
+{
+  "name": "tiavoyages-premium-motion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TIAVOYAGES — publicité motion design premium 9:16 (Remotion)",
+  "scripts": {
+    "dev": "remotion studio",
+    "render": "bash scripts/render.sh",
+    "still": "remotion still src/index.ts TiavoyagesPremium",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.535",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.535"
+  },
+  "devDependencies": {
+    "@fontsource/montserrat": "^5.1.0",
+    "@types/react": "^18.3.12",
+    "typescript": "^5.6.3"
+  }
+}
