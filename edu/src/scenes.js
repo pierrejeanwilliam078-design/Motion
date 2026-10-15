@@ -56,7 +56,8 @@ function texPlane(cv, width, opts = {}) {
   }
   const m = new THREE.Mesh(
     new THREE.PlaneGeometry(width, width * (cv.height / cv.width)),
-    new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false, depthWrite: false, side: THREE.DoubleSide }),
+    // depthWrite : la profondeur de champ doit voir le plan à sa propre distance
+    new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false, depthWrite: true, alphaTest: 0.05, side: THREE.DoubleSide }),
   );
   m.renderOrder = opts.order || 0;
   return m;
@@ -209,7 +210,7 @@ export function scene2(assets) {
         [10.15, [1.0, cy + 0.5, 4.3], easeInOut],
       ]);
       look(cam, p, [lerp(-0.25, 0.25, range(t, 5, 10)), cy - 0.15, 0]);
-      this.dof.focus = cam.position.distanceTo(V(0, cy, 0));
+      this.dof.focus = lerp(cam.position.distanceTo(V(0, cy, 0)), 2.6, easeInOut(range(t, 8.6, 9.3)));
       this.cards.forEach((m, i) => {
         const k = range(t, 8.55 + i * 0.18, 9.15 + i * 0.18);
         const e = expoOut(k);
@@ -386,6 +387,7 @@ export function scene4() {
       notif.quaternion.copy(cam.quaternion);
       notif.scale.setScalar(Math.max(0.01, backOut(nk, 1.4)));
       notif.material.opacity = clamp(nk * 3);
+      this.dof.focus = lerp(this.dof.focus, cam.position.distanceTo(notif.position), easeInOut(range(t, 18.1, 18.5)));
       ring.position.set(0, -0.1, 0);
       ring.rotation.set(1.3, 0.25, u * 0.5);
       ring.scale.set(1, 1.0, 1);
