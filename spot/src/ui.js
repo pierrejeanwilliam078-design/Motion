@@ -108,7 +108,7 @@ export function icon(ctx, name, cx, cy, s, color = C.white, lw = 0.11) {
 }
 
 // ombre portée économique (le flou de canvas est très coûteux en rendu logiciel)
-function softShadow(ctx, x, y, w, h, r, a = 0.35, spread = 26, dy = 14) {
+export function softShadow(ctx, x, y, w, h, r, a = 0.35, spread = 26, dy = 14) {
   for (let i = 4; i >= 1; i--) {
     const e = (spread * i) / 4;
     rr(ctx, x - e, y - e + dy, w + e * 2, h + e * 2, r + e);
@@ -117,7 +117,7 @@ function softShadow(ctx, x, y, w, h, r, a = 0.35, spread = 26, dy = 14) {
   }
 }
 
-function glassPanel(ctx, x, y, w, h, r, a = 1) {
+export function glassPanel(ctx, x, y, w, h, r, a = 1) {
   const g = ctx.createLinearGradient(x, y, x + w * 0.4, y + h);
   g.addColorStop(0, `rgba(30,38,96,${0.96 * a})`);
   g.addColorStop(1, `rgba(11,16,48,${0.96 * a})`);
@@ -133,7 +133,7 @@ function glassPanel(ctx, x, y, w, h, r, a = 1) {
   ctx.stroke();
 }
 
-function iconTile(ctx, x, y, s, ico, c1, c2) {
+export function iconTile(ctx, x, y, s, ico, c1, c2) {
   const g = ctx.createLinearGradient(x, y, x + s, y + s);
   g.addColorStop(0, c1);
   g.addColorStop(1, c2);
