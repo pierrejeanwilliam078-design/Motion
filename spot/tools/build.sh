@@ -19,7 +19,7 @@ node tools/render.mjs --out out/frames --from 0 --to 900 --workers "$WORKERS"
 
 mkdir -p ../livrable
 ffmpeg -v error -y -framerate 30 -i out/frames/f%04d.png -i out/audio_mix.wav \
-  -map 0:v -map 1:a -c:v libx264 -preset slow -crf 15 -profile:v high -level 4.2 -pix_fmt yuv420p \
+  -map 0:v -map 1:a -c:v libx264 -preset slow -crf 17 -maxrate 18M -bufsize 36M -profile:v high -level 4.2 -pix_fmt yuv420p \
   -colorspace bt709 -color_primaries bt709 -color_trc bt709 \
   -c:a aac -b:a 320k -ar 48000 -t 30 -movflags +faststart \
   -metadata title="ABONIVO — Vos abonnements numériques, simplifiés." \

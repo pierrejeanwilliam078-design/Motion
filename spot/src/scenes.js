@@ -574,7 +574,7 @@ export function scene6(assets) {
       rings.forEach((r, i) => {
         r.position.set(0, 1.75, -1);
         r.rotation.set(1.22 + i * 0.06, (i - 1) * 0.25, u * (0.25 - i * 0.08));
-        r.material.opacity = k * [0.55, 0.3, 0.18][i];
+        r.material.opacity = k * [0.32, 0.2, 0.12][i];
       });
     },
   };
