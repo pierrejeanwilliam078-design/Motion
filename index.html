@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="mg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fanokafana 2026-2027 — Live</title>
+<link rel="stylesheet" href="assets/fonts.css">
+<style>
+  :root{
+    --violet:#4b3592; --violet2:#7a46a0; --orange:#ee8a12; --orange2:#e2690c;
+    --yellow:#f6e10c; --green:#1d6a10; --green2:#5cbf1a; --ink:#1c1c1c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#111;height:100%;overflow:hidden;font-family:'Montserrat',sans-serif}
+
+  /* ---------- stage 1080x1920 ---------- */
+  #stage{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;background:#f2f2f4;transform-origin:0 0}
+  .abs{position:absolute}
+  #bg{position:absolute;inset:-120px;will-change:transform}
+  #bg .base{position:absolute;inset:0;background:
+      radial-gradient(1200px 900px at 30% 20%,#ffffff 0%,rgba(255,255,255,0) 60%),
+      radial-gradient(1000px 1100px at 80% 75%,#ffffff 0%,rgba(255,255,255,0) 60%),
+      linear-gradient(160deg,#ececef 0%,#f7f7f8 40%,#e9e9ec 70%,#f5f5f6 100%)}
+  #bg .silk{position:absolute;border-radius:50%;filter:blur(38px)}
+  #curves{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible}
+  #curves path{fill:none;stroke:var(--green);stroke-width:5;stroke-linecap:round}
+
+  .bar{position:absolute;left:0;width:1080px;display:flex;z-index:50}
+  #barTop{top:0;height:12px;transform-origin:0 50%}
+  #barBot{bottom:0;height:14px;transform-origin:100% 50%}
+
+  #cam{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:540px 0}
+
+  /* logos */
+  #logos{position:absolute;left:0;top:104px;width:1080px;display:flex;justify-content:center;align-items:center;gap:20px}
+  #logos img{display:block;height:126px;filter:drop-shadow(0 6px 10px rgba(30,20,60,.18))}
+  #logos img.big{height:140px}
+
+  #quote{left:0;width:1080px;top:262px;text-align:center;font-size:27px;font-weight:400;color:#8b8b8f;white-space:nowrap}
+  #quote b{font-weight:700;color:#77777b}
+  #fariWrap{left:0;width:1080px;top:290px;height:116px;overflow:hidden;text-align:center}
+  #fari{display:inline-block;font-family:'Oswald';font-weight:700;font-size:88px;line-height:116px;letter-spacing:1px;color:transparent;-webkit-background-clip:text;background-clip:text;white-space:nowrap}
+
+  /* LIVE */
+  #liveGlow{left:540px;top:620px;width:900px;height:520px;margin:-260px 0 0 -450px;border-radius:50%;
+    background:radial-gradient(closest-side,rgba(255,150,120,.55),rgba(190,110,200,.28) 45%,rgba(255,255,255,0) 100%);filter:blur(10px)}
+  #live{left:0;width:1080px;top:398px;text-align:center;white-space:nowrap}
+  #liveWord{display:inline-block;position:relative;font-weight:900;font-size:352px;line-height:380px;letter-spacing:-13px}
+  #liveWord .ch{display:inline-block;color:transparent;-webkit-background-clip:text;background-clip:text;background-repeat:no-repeat;padding:0 6px;margin:0 -6px}
+  #tri{position:absolute;width:128px;height:146px;background:var(--yellow);clip-path:polygon(0 0,100% 52%,8% 100%);
+    filter:drop-shadow(0 6px 10px rgba(120,100,0,.25))}
+
+  /* polaroids */
+  .pol{position:absolute;width:470px;will-change:transform}
+  .pol .frame{background:#fff;padding:18px 18px 30px;box-shadow:0 30px 60px rgba(20,10,40,.28),0 6px 14px rgba(20,10,40,.18)}
+  .pol .ph{position:relative;overflow:hidden;background:#ddd}
+  .pol .ph img{display:block;width:100%;height:100%;object-fit:cover}
+  .pol .flash{position:absolute;inset:0;background:#fff}
+  .tape{position:absolute;left:50%;top:-34px;width:210px;height:66px;margin-left:-105px;background:rgba(247,200,60,.88);
+    clip-path:polygon(0 6%,4% 0,8% 5%,12% 0,100% 0,97% 10%,100% 22%,96% 35%,100% 50%,96% 64%,100% 78%,97% 90%,100% 100%,0 100%,3% 86%,0 72%,4% 58%,0 44%,3% 30%,0 18%);
+    transform-origin:0 50%;mix-blend-mode:multiply}
+
+  /* people */
+  .halo{position:absolute;border-radius:50%}
+  #girl,#woman{position:absolute;filter:drop-shadow(0 0 6px rgba(255,255,255,.9)) drop-shadow(0 18px 24px rgba(0,0,0,.18))}
+  #girl{left:4px;top:1150px;width:230px}
+  #woman{left:838px;top:1068px;width:242px}
+
+  /* title block */
+  #boxSvg{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible}
+  #boxSvg path{fill:none;stroke:#4b4596;stroke-width:3}
+  #fano{left:0;width:1080px;top:1392px;text-align:center;white-space:nowrap}
+  #fano .m{display:inline-block;overflow:hidden;vertical-align:top;padding:0 2px;margin:0 -2px}
+  #fano .ch{display:inline-block;font-family:'Anton';font-size:146px;line-height:184px;letter-spacing:2px;color:transparent;-webkit-background-clip:text;background-clip:text;background-repeat:no-repeat}
+  #taom{left:0;width:1080px;top:1574px;text-align:center;white-space:nowrap}
+  #taom span{display:inline-block;font-weight:800;font-size:58px;line-height:70px;color:var(--violet);letter-spacing:-1px}
+  #year{left:0;width:1080px;top:1638px;text-align:center;white-space:nowrap;font-weight:900;font-size:100px;line-height:108px;letter-spacing:-3px}
+  #year .col{display:inline-block;height:108px;overflow:hidden;vertical-align:top}
+  #year .strip{display:block}
+  #year .cell{display:block;height:108px;color:transparent;-webkit-background-clip:text;background-clip:text;
+    background-image:linear-gradient(180deg,#f7a51c 10%,#ea7a10 60%,#e0640b 100%)}
+  #date{left:0;width:1080px;top:1750px;text-align:center;font-weight:500;font-size:35px;line-height:44px;color:#1b1b1d;white-space:nowrap}
+  #date .ul{position:absolute;left:50%;height:8px;top:42px;background:var(--yellow);border-radius:4px;transform-origin:0 50%}
+  #date span{display:inline-block;position:relative}
+  #banner{left:140px;width:800px;top:1810px;height:66px}
+  #banner .bgb{position:absolute;inset:0;background:linear-gradient(90deg,#ec8a10,#f29a1a 50%,#e57f0d);box-shadow:0 10px 24px rgba(200,100,0,.35);transform-origin:50% 50%}
+  #banner .txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:24px;overflow:hidden;
+    font-weight:800;font-size:38px;color:#fbecb0;letter-spacing:.5px;white-space:nowrap}
+  #banner .sep{width:5px;height:38px;background:#fbecb0;border-radius:2px}
+  #banner .shine{position:absolute;inset:0;overflow:hidden}
+  #banner .shine i{position:absolute;top:-20px;bottom:-20px;width:120px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.75),rgba(255,255,255,0));transform:skewX(-20deg)}
+
+  #leak{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen}
+  #fade{position:absolute;inset:0;background:#fff;pointer-events:none;z-index:60}
+
+  /* ---------- preview UI (hidden in render mode) ---------- */
+  #ui{position:fixed;left:0;right:0;bottom:0;display:flex;gap:12px;align-items:center;padding:10px 16px;background:rgba(0,0,0,.75);color:#eee;font:13px/1 system-ui,sans-serif;z-index:100}
+  #ui button{background:#ee8a12;color:#111;border:0;border-radius:6px;padding:8px 14px;font-weight:700;cursor:pointer}
+  #ui input{flex:1;accent-color:#ee8a12}
+  #ui output{min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+  body.render #ui{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg">
+    <div class="base"></div>
+    <div class="silk" style="left:-200px;top:180px;width:900px;height:380px;background:rgba(255,255,255,.95);transform:rotate(-24deg)"></div>
+    <div class="silk" style="left:420px;top:520px;width:1000px;height:300px;background:rgba(222,222,228,.75);transform:rotate(-30deg)"></div>
+    <div class="silk" style="left:-260px;top:1180px;width:1100px;height:340px;background:rgba(255,255,255,.95);transform:rotate(-18deg)"></div>
+    <div class="silk" style="left:380px;top:1420px;width:900px;height:280px;background:rgba(225,225,231,.7);transform:rotate(-26deg)"></div>
+    <div class="silk" style="left:200px;top:-140px;width:900px;height:300px;background:rgba(228,228,234,.7);transform:rotate(-14deg)"></div>
+  </div>
+
+  <svg id="curves" viewBox="0 0 1080 1920">
+    <path id="c1" d="M 1010 -10 C 1020 90, 960 170, 985 260 C 1010 350, 1075 380, 1068 520 C 1060 700, 1035 820, 1040 960 C 1045 1100, 990 1250, 960 1400"/>
+    <path id="c2" d="M -10 760 C 70 735, 175 725, 168 790 C 160 850, 70 860, 62 810 C 55 760, 120 760, 120 830 C 118 950, 40 1080, 32 1300 C 25 1500, 50 1700, 80 1930"/>
+  </svg>
+
+  <div id="cam">
+    <div id="logos">
+      <img src="assets/img/logo1.png" alt=""><img src="assets/img/logo2.png" alt=""><img src="assets/img/logo3.png" alt="">
+      <img src="assets/img/logo4.png" alt=""><img src="assets/img/logo5.png" alt=""><img class="big" src="assets/img/logo6.png" alt="">
+    </div>
+    <div id="quote" class="abs">« Ataovy mpianatry ny firenena rehetra » <b>Mat 28 : 19e</b></div>
+    <div id="fariWrap" class="abs"><span id="fari">FARITANY ATSINANANA</span></div>
+
+    <div id="liveGlow" class="abs"></div>
+    <div id="live" class="abs"><span id="liveWord"><span class="ch">L</span><span class="ch">i</span><span class="ch">v</span><span class="ch">e</span><div id="tri"></div></span></div>
+
+    <div class="halo" id="haloG"></div>
+    <div class="halo" id="haloW"></div>
+
+    <div class="pol" id="polL"><div class="frame"><div class="ph" style="height:450px"><img src="assets/img/photo-left.jpg" alt=""><div class="flash"></div></div></div><div class="tape"></div></div>
+    <div class="pol" id="polR"><div class="frame"><div class="ph" style="height:462px"><img src="assets/img/photo-right.jpg" alt=""><div class="flash"></div></div></div><div class="tape"></div></div>
+
+    <img id="girl" src="assets/img/girl.png" alt="">
+
+    <svg id="boxSvg" viewBox="0 0 1080 1920"><path id="boxL"/><path id="boxR"/></svg>
+    <div id="fano" class="abs"></div>
+    <div id="taom" class="abs"><span>Taom-panabeazana</span></div>
+    <div id="year" class="abs"></div>
+    <div id="date" class="abs"><span id="dateTxt"></span></div>
+    <div id="banner" class="abs"><div class="bgb"></div>
+      <div class="txt"><span class="w1">FJKM ZIONA SALAZAMAY</span><span class="sep"></span><span class="w2">14H 00</span></div>
+      <div class="shine"><i></i></div></div>
+
+    <img id="woman" src="assets/img/woman.png" alt="">
+  </div>
+
+  <div id="leak"></div>
+  <div class="bar" id="barTop"><div style="width:36%;background:#f6c400"></div><div style="flex:1;background:#5cbf1a"></div></div>
+  <div class="bar" id="barBot"><div style="width:37%;background:#3b1a10"></div><div style="flex:1;background:#b81e1e"></div></div>
+  <div id="fade"></div>
+</div>
+
+<div id="ui"><button id="play">Pause</button><input id="scrub" type="range" min="0" max="35" step="0.01" value="0"><output id="tc">0.00 s</output></div>
+
+<script>
+const DURATION = 35;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const E = {
+  lin: x => x,
+  outCubic: x => 1 - Math.pow(1 - x, 3),
+  outQuint: x => 1 - Math.pow(1 - x, 5),
+  inOutCubic: x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2,
+  inOutSine: x => -(Math.cos(Math.PI * x) - 1) / 2,
+  outExpo: x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x),
+  outBack: (x, s = 1.6) => 1 + (s + 1) * Math.pow(x - 1, 3) + s * Math.pow(x - 1, 2),
+  outBackSoft: x => E.outBack(x, 1.1),
+};
+// progress of a tween starting at t0 lasting d seconds
+const P = (t, t0, d, ease = E.outCubic) => ease(clamp((t - t0) / d));
+// bell: 0 -> 1 -> 0 between t0 and t0+d
+const bell = (t, t0, d) => { const x = clamp((t - t0) / d); return Math.sin(Math.PI * x); };
+
+/* ---------- build dynamic DOM ---------- */
+const FANO = 'FANOKAFANA';
+$('#fano').innerHTML = [...FANO].map(c => `<span class="m"><span class="ch">${c}</span></span>`).join('');
+const YEAR = '2026-2027';
+const ROLL = 9; // digits scrolled before landing
+$('#year').innerHTML = [...YEAR].map((c, i) => {
+  if (c === '-') return `<span class="col dash"><span class="strip"><span class="cell">-</span></span></span>`;
+  const d = +c, cells = [];
+  for (let k = ROLL; k >= 0; k--) cells.push((d - k + 100 * 10) % 10);
+  return `<span class="col"><span class="strip">${cells.map(n => `<span class="cell">${n}</span>`).join('')}</span></span>`;
+}).join('');
+const DATE = 'Sabotsy 17 Oktobra 2026';
+$('#dateTxt').innerHTML = [...DATE].map(c => `<span>${c === ' ' ? '&nbsp;' : c}</span>`).join('') + '<i class="ul"></i>';
+
+/* ---------- static refs / measurements ---------- */
+const R = {};
+function measure() {
+  R.logos = $$('#logos img');
+  R.liveCh = $$('#liveWord .ch');
+  const word = $('#liveWord');
+  R.liveW = word.offsetWidth; R.liveH = word.offsetHeight;
+  R.liveOff = R.liveCh.map(c => c.offsetLeft);
+  // yellow play triangle sits above-right of the "i"
+  const iCh = R.liveCh[1];
+  const tri = $('#tri');
+  tri.style.left = (iCh.offsetLeft + iCh.offsetWidth * 0.86) + 'px';
+  tri.style.top = '6px';
+  R.fanoCh = $$('#fano .ch');
+  R.fanoM = $$('#fano .m');
+  const fano = $('#fano');
+  const f0 = R.fanoM[0].offsetLeft, fl = R.fanoM.at(-1);
+  R.fanoW = fl.offsetLeft + fl.offsetWidth - f0;
+  R.fanoOff = R.fanoM.map(m => m.offsetLeft - f0);
+  R.yearCols = $$('#year .col'); R.yearStrips = $$('#year .strip');
+  R.dateCh = $$('#dateTxt > span');
+  R.dateUl = $('#dateTxt .ul');
+  const dt = $('#dateTxt'); R.dateUl.style.left = '6px'; R.dateUl.style.width = (dt.offsetWidth - 12) + 'px';
+  // title box with a gap around "Taom-panabeazana"
+  const taom = $('#taom span');
+  const tx0 = taom.offsetLeft - 22, tx1 = taom.offsetLeft + taom.offsetWidth + 22;
+  const yT = 1574 + 36, x0 = 108, x1 = 972, yB = 1843;
+  $('#boxL').setAttribute('d', `M ${tx0} ${yT} L ${x0} ${yT} L ${x0} ${yB}`);
+  $('#boxR').setAttribute('d', `M ${tx1} ${yT} L ${x1} ${yT} L ${x1} ${yB}`);
+  R.boxLen = [$('#boxL').getTotalLength(), $('#boxR').getTotalLength()];
+  R.curves = [$('#c1'), $('#c2')]; R.curveLen = R.curves.map(c => c.getTotalLength());
+  R.curves.forEach((c, i) => c.style.strokeDasharray = R.curveLen[i]);
+  $('#boxL').style.strokeDasharray = R.boxLen[0]; $('#boxR').style.strokeDasharray = R.boxLen[1];
+  // polaroid base positions (centre x/y, rotation)
+  R.polL = { el: $('#polL'), cx: 316, cy: 1086, rot: 11 };
+  R.polR = { el: $('#polR'), cx: 754, cy: 1062, rot: -14 };
+  for (const p of [R.polL, R.polR]) {
+    p.w = p.el.offsetWidth; p.h = p.el.offsetHeight;
+    p.el.style.left = (p.cx - p.w / 2) + 'px'; p.el.style.top = (p.cy - p.h / 2) + 'px';
+    p.img = p.el.querySelector('img'); p.flash = p.el.querySelector('.flash'); p.tape = p.el.querySelector('.tape');
+  }
+  // halos behind the two people
+  Object.assign($('#haloG').style, { left: '-90px', top: '1150px', width: '420px', height: '420px',
+    background: 'radial-gradient(closest-side,rgba(246,200,40,.55),rgba(246,200,40,0))' });
+  Object.assign($('#haloW').style, { left: '760px', top: '1020px', width: '460px', height: '560px',
+    background: 'radial-gradient(closest-side,rgba(122,70,160,.38),rgba(122,70,160,0))' });
+}
+
+/* ---------- the timeline: pure function of t ---------- */
+function renderAt(t) {
+  // ===== global: background, bars, camera =====
+  $('#fade').style.opacity = 1 - P(t, 0, 0.9, E.inOutSine);
+  const bgP = P(t, 0, 8, E.outCubic);
+  $('#bg').style.transform = `translate(${Math.sin(t * .18) * 18}px, ${-t * 2.2 + Math.cos(t * .23) * 10}px) scale(${lerp(1.1, 1.02, bgP)})`;
+  $('#barTop').style.transform = `scaleX(${P(t, .15, .9, E.outExpo)})`;
+  $('#barBot').style.transform = `scaleX(${P(t, .35, .9, E.outExpo)})`;
+  R.curves.forEach((c, i) => {
+    const p = P(t, .25 + i * .35, 3.2, E.inOutCubic);
+    c.style.strokeDashoffset = R.curveLen[i] * (1 - p);
+  });
+  $('#curves').style.transform = `translate(${Math.sin(t * .3) * 6}px, ${Math.cos(t * .26) * 8 - t * 1.2}px)`;
+
+  // camera keys: [time, scale, translateY]
+  const CAM = [[0, 1.16, 668], [3.9, 1.13, 675], [5.1, 1.1, 475], [8.1, 1.09, 470], [9.4, 1.04, 170], [13.7, 1.03, 150],
+    [15.0, 1.05, -96], [22, 1.06, -115], [28, 1.05, -96], [30.6, 1.0, 0], [35, 1.0, 0]];
+  let s = 1, ty = 0;
+  for (let k = 0; k < CAM.length - 1; k++) {
+    const [ta, sa, ya] = CAM[k], [tb, sb, yb] = CAM[k + 1];
+    if (t >= ta && t <= tb) { const p = E.inOutSine((t - ta) / (tb - ta)); s = lerp(sa, sb, p); ty = lerp(ya, yb, p); break; }
+    if (t > tb) { s = sb; ty = yb; }
+  }
+  const breathe = t > 30.6 ? 1 + 0.006 * Math.sin((t - 30.6) * 1.6) : 1;
+  $('#cam').style.transform = `translateY(${ty}px) scale(${s * breathe})`;
+
+  // ===== scene 1 : logos, quote, FARITANY =====
+  R.logos.forEach((el, i) => {
+    const t0 = .55 + i * .16, p = P(t, t0, .8, E.outBack), o = P(t, t0, .35, E.lin);
+    const float = Math.sin(t * 1.3 + i * .9) * 2.5 * P(t, t0 + .8, 1);
+    el.style.opacity = o;
+    el.style.transform = `translateY(${lerp(46, 0, p) + float}px) scale(${lerp(.4, 1, p)}) rotate(${lerp(-25, 0, P(t, t0, .9, E.outCubic))}deg)`;
+  });
+  {
+    const p = P(t, 2.0, 1.0, E.outCubic);
+    const q = $('#quote');
+    q.style.opacity = p; q.style.letterSpacing = lerp(8, 0, p) + 'px'; q.style.transform = `translateY(${lerp(14, 0, p)}px)`;
+    const f = P(t, 2.5, .95, E.outExpo);
+    const fari = $('#fari');
+    fari.style.transform = `translateY(${lerp(120, 0, f)}px)`;
+    const sh = lerp(-40, 140, P(t, 3.45, 1.0, E.inOutSine)) + (t > 31 ? lerp(-40, 140, P(t, 31.2, 1.2, E.inOutSine)) - lerp(-40, 140, 1) : 0);
+    fari.style.backgroundImage = `linear-gradient(105deg,rgba(255,255,255,0) ${sh - 8}%,rgba(255,255,255,.85) ${sh}%,rgba(255,255,255,0) ${sh + 8}%),linear-gradient(180deg,#5c5c5e 0%,#111 45%,#2a2a2b 70%,#6a6a6c 100%)`;
+  }
+
+  // ===== scene 2 : LIVE =====
+  {
+    const gP = P(t, 4.0, 1.4, E.outCubic);
+    const glowPulse = (t > 8 ? .12 * Math.sin((t - 8) * 1.7) : 0) + bell(t, 4.6, 1.8) * .35;
+    $('#liveGlow').style.opacity = gP * (.8 + glowPulse);
+    $('#liveGlow').style.transform = `scale(${lerp(.4, 1, gP) * (1 + glowPulse * .1)})`;
+    const zoom = lerp(.9, 1, P(t, 4.1, 3.9, E.outCubic));
+    const live = $('#liveWord');
+    live.style.transform = `scale(${zoom})`;
+    const glowA = .25 + bell(t, 4.5, 2.2) * .45 + (t > 8 ? .12 + .1 * Math.sin((t - 8) * 1.7) : 0);
+    live.style.filter = `drop-shadow(0 0 ${18 + glowA * 30}px rgba(170,90,200,${glowA.toFixed(3)})) drop-shadow(0 16px 22px rgba(60,30,110,.22))`;
+    // shine sweeps across the word (once on entrance, again in the final)
+    let shX = -400;
+    if (t > 6.1 && t < 7.6) shX = lerp(-300, R.liveW + 300, P(t, 6.1, 1.4, E.inOutSine));
+    if (t > 30.8 && t < 32.4) shX = lerp(-300, R.liveW + 300, P(t, 30.8, 1.5, E.inOutSine));
+    const warm = .85 + bell(t, 4.8, 2.4) * .15 + (t > 8 ? .08 * Math.sin((t - 8) * 1.7) : 0);
+    R.liveCh.forEach((c, i) => {
+      const t0 = 4.15 + i * .13, p = P(t, t0, .75, E.outExpo), o = P(t, t0, .3, E.lin);
+      c.style.opacity = o;
+      c.style.filter = `blur(${lerp(22, 0, p)}px)`;
+      c.style.transform = `translateY(${lerp(-40, 0, p)}px) scale(${lerp(2.1, 1, p)})`;
+      const off = R.liveOff[i];
+      c.style.backgroundImage =
+        `linear-gradient(110deg,rgba(255,255,255,0) 0,rgba(255,255,255,.75) 60px,rgba(255,255,255,0) 120px),` +
+        `radial-gradient(260px 200px at ${R.liveW * .5}px ${R.liveH * .78}px,rgba(255,150,110,${warm}) 0%,rgba(225,120,150,${warm * .7}) 40%,rgba(225,120,150,0) 100%),` +
+        `linear-gradient(90deg,#45308f 0%,#6a3f9c 40%,#7b4a9f 60%,#4f3593 100%)`;
+      c.style.backgroundSize = `120px ${R.liveH}px, ${R.liveW}px ${R.liveH}px, ${R.liveW}px ${R.liveH}px`;
+      c.style.backgroundPosition = `${shX - off}px 0, ${-off}px 0, ${-off}px 0`;
+    });
+    const tp = P(t, 5.0, .9, E.outBack), to = P(t, 5.0, .25, E.lin);
+    const triPulse = t > 6 ? 1 + .05 * Math.sin((t - 6) * 3.2) : 1;
+    const tri = $('#tri');
+    tri.style.opacity = to;
+    tri.style.transform = `translate(${lerp(-120, 0, tp)}px, ${lerp(80, 0, tp)}px) rotate(${lerp(-120, 0, tp)}deg) scale(${lerp(.2, 1, tp) * triPulse})`;
+  }
+
+  // ===== scene 3 : polaroids + people =====
+  const pol = (p, t0, fromX, fromRot, floatPhase) => {
+    const m = P(t, t0, 1.25, E.outBackSoft), o = P(t, t0, .2, E.lin);
+    const depth = P(t, t0, 1.25, E.outCubic);
+    const fl = P(t, t0 + 1.2, 1.5);
+    const fx = Math.sin(t * .7 + floatPhase) * 4 * fl, fy = Math.cos(t * .6 + floatPhase) * 6 * fl, fr = Math.sin(t * .5 + floatPhase) * .7 * fl;
+    p.el.style.opacity = o;
+    p.el.style.transform = `translate(${lerp(fromX, 0, m) + fx}px, ${lerp(-60, 0, depth) + fy}px) rotate(${lerp(fromRot, p.rot, m) + fr}deg) scale(${lerp(1.25, 1, depth)})`;
+    // polaroid "develops": flash then colour comes in
+    const dev = P(t, t0 + .3, 1.6, E.outCubic);
+    p.flash.style.opacity = .85 * (1 - dev);
+    p.img.style.filter = `saturate(${lerp(.2, 1, dev)}) brightness(${lerp(1.4, 1, dev)})`;
+    p.img.style.transform = `scale(${lerp(1.18, 1.0, P(t, t0, 26, E.outCubic))})`; // slow Ken Burns
+    const tp = P(t, t0 + 1.05, .45, E.outCubic);
+    p.tape.style.opacity = P(t, t0 + 1.05, .1, E.lin);
+    p.tape.style.transform = `translateY(${lerp(-14, 0, tp)}px) rotate(${lerp(-6, -2, tp)}deg) scaleX(${tp})`;
+  };
+  pol(R.polL, 8.25, -820, -32, 0);
+  pol(R.polR, 8.85, 820, 30, 2);
+  {
+    const g = P(t, 11.0, 1.0, E.outBackSoft), go = P(t, 11.0, .4, E.lin);
+    const br = t > 12 ? 1 + .012 * Math.sin((t - 12) * 1.9) : 1;
+    $('#girl').style.opacity = go;
+    $('#girl').style.transform = `translateY(${lerp(140, 0, g)}px) scale(${lerp(.85, 1, g) * br})`;
+    $('#girl').style.transformOrigin = '50% 100%';
+    const hg = P(t, 11.2, 1.2);
+    $('#haloG').style.opacity = hg * (.75 + .25 * Math.sin(t * 1.8));
+    $('#haloG').style.transform = `scale(${lerp(.3, 1, hg)})`;
+    const w = P(t, 11.6, 1.2, E.outCubic), wo = P(t, 11.6, .5, E.lin);
+    const brw = t > 13 ? 1 + .01 * Math.sin((t - 13) * 1.6 + 1) : 1;
+    $('#woman').style.opacity = wo;
+    $('#woman').style.transform = `translateX(${lerp(260, 0, w)}px) scale(${brw})`;
+    $('#woman').style.transformOrigin = '100% 100%';
+    const hw = P(t, 11.9, 1.3);
+    $('#haloW').style.opacity = hw * (.75 + .25 * Math.sin(t * 1.5 + 1));
+    $('#haloW').style.transform = `scale(${lerp(.3, 1, hw)})`;
+  }
+
+  // ===== scene 4 : FANOKAFANA / Taom-panabeazana / 2026-2027 =====
+  {
+    let shX = -400;
+    if (t > 15.5 && t < 16.9) shX = lerp(-200, R.fanoW + 200, P(t, 15.5, 1.3, E.inOutSine));
+    if (t > 32.2 && t < 33.7) shX = lerp(-200, R.fanoW + 200, P(t, 32.2, 1.4, E.inOutSine));
+    R.fanoCh.forEach((c, i) => {
+      const t0 = 14.0 + i * .065, p = P(t, t0, .85, E.outExpo);
+      c.style.transform = `translateY(${lerp(105, 0, p)}%) rotate(${lerp(8, 0, p)}deg)`;
+      c.style.backgroundImage = `linear-gradient(105deg,rgba(255,255,255,0) 0,rgba(255,250,220,.85) 70px,rgba(255,255,255,0) 140px),linear-gradient(180deg,#fbb21f 0%,#f39418 45%,#e5700c 100%)`;
+      c.style.backgroundSize = `140px 100%, 100% 100%`;
+      c.style.backgroundPosition = `${shX - R.fanoOff[i]}px 0, 0 0`;
+    });
+    const fp = P(t, 14.0, 1.6, E.outCubic);
+    $('#fano').style.transform = `scale(${lerp(1.08, 1, fp) * (1 + .025 * bell(t, 20.0, 1.0))})`;
+    $('#fano').style.filter = `drop-shadow(0 10px 16px rgba(200,100,0,${(.22 * fp).toFixed(3)}))`;
+
+    const tm = P(t, 16.0, 1.0, E.outExpo);
+    const taom = $('#taom span');
+    taom.style.clipPath = `inset(-10px ${lerp(100, 0, tm)}% -10px 0)`;
+    taom.style.transform = `translateX(${lerp(-50, 0, tm)}px)`;
+    const bl = P(t, 16.5, 1.3, E.inOutCubic);
+    $('#boxL').style.strokeDashoffset = R.boxLen[0] * (1 - bl);
+    $('#boxR').style.strokeDashoffset = R.boxLen[1] * (1 - bl);
+
+    R.yearCols.forEach((col, i) => {
+      const t0 = 17.6 + i * .085;
+      const o = P(t, t0, .25, E.lin);
+      col.style.opacity = o;
+      const strip = R.yearStrips[i];
+      if (col.classList.contains('dash')) {
+        col.style.transform = `scaleX(${P(t, t0 + .3, .5, E.outBack)})`;
+      } else {
+        const p = P(t, t0, 1.35, E.outExpo);
+        strip.style.transform = `translateY(${-p * ROLL * 108}px)`;
+        strip.style.filter = `blur(${(bell(t, t0, 1.0) * 3).toFixed(2)}px)`;
+      }
+    });
+    const yp = P(t, 17.6, 1.6, E.outCubic);
+    $('#year').style.transform = `scale(${lerp(.92, 1, yp) * (1 + .03 * bell(t, 20.6, .9))})`;
+  }
+
+  // ===== scene 5 : date + banner =====
+  {
+    R.dateCh.forEach((c, i) => {
+      const t0 = 22.1 + i * .035, p = P(t, t0, .6, E.outCubic);
+      c.style.opacity = p;
+      c.style.transform = `translateY(${lerp(22, 0, p)}px)`;
+      c.style.filter = `blur(${lerp(6, 0, p)}px)`;
+    });
+    const ds = P(t, 22.1, 1.6, E.outCubic);
+    $('#dateTxt').style.letterSpacing = lerp(10, 0, ds) + 'px';
+    $('#dateTxt').style.transform = `scale(${1 + .06 * bell(t, 23.4, .9)})`;
+    const ul = P(t, 23.2, .7, E.outExpo);
+    R.dateUl.style.transform = `translateX(-50%) scaleX(${ul})`;
+    R.dateUl.style.transformOrigin = '0 50%';
+    R.dateUl.style.left = '50%';
+    R.dateUl.style.opacity = .85;
+
+    const b = P(t, 24.0, .8, E.outExpo);
+    const bb = $('#banner .bgb');
+    bb.style.transform = `scaleX(${b}) scaleY(${lerp(.25, 1, P(t, 24.0, .5, E.outCubic))})`;
+    bb.style.opacity = P(t, 24.0, .15, E.lin);
+    const w1 = P(t, 24.5, .7, E.outExpo), w2 = P(t, 24.75, .7, E.outExpo), sp = P(t, 24.65, .5, E.outBack);
+    $('#banner .w1').style.transform = `translateY(${lerp(80, 0, w1)}px)`;
+    $('#banner .w2').style.transform = `translateY(${lerp(80, 0, w2)}px)`;
+    $('#banner .sep').style.transform = `scaleY(${sp})`;
+    const pop = 1 + .045 * bell(t, 27.0, .8);
+    $('#banner').style.transform = `scale(${pop})`;
+    let shx = -300;
+    if (t > 26.0 && t < 27.0) shx = lerp(-200, 1000, P(t, 26.0, .95, E.inOutSine));
+    if (t > 33.1 && t < 34.2) shx = lerp(-200, 1000, P(t, 33.1, 1.0, E.inOutSine));
+    $('#banner .shine i').style.left = shx + 'px';
+  }
+
+  // ===== light leaks (subtle, screen blend) =====
+  {
+    const a = .35 * bell(t, 4.2, 3.2) + .25 * bell(t, 8.4, 3) + .22 * bell(t, 14, 3) + .2 * bell(t, 22, 3) + (t > 28 ? .18 + .06 * Math.sin(t * 1.2) : 0);
+    const x = 50 + 30 * Math.sin(t * .21), y = 30 + 25 * Math.cos(t * .17);
+    $('#leak').style.background =
+      `radial-gradient(520px 420px at ${x}% ${y}%, rgba(255,170,90,${(a * .55).toFixed(3)}), rgba(255,170,90,0) 70%),` +
+      `radial-gradient(600px 500px at ${100 - x}% ${100 - y * .8}%, rgba(170,110,255,${(a * .35).toFixed(3)}), rgba(170,110,255,0) 70%)`;
+  }
+}
+
+/* ---------- boot ---------- */
+const params = new URLSearchParams(location.search);
+const RENDER = params.has('render');
+if (RENDER) document.body.classList.add('render');
+
+function fit() {
+  if (RENDER) { $('#stage').style.transform = 'none'; return; }
+  const H = innerHeight - 48, W = innerWidth;
+  const k = Math.min(W / 1080, H / 1920);
+  const st = $('#stage');
+  st.style.transform = `scale(${k})`;
+  st.style.left = ((W - 1080 * k) / 2) + 'px';
+}
+
+async function boot() {
+  await Promise.all(['900 372px Montserrat', '400 200px Anton', '700 96px Oswald', '800 62px Montserrat', '500 35px Montserrat'].map(f => document.fonts.load(f)));
+  await document.fonts.ready;
+  await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  measure(); fit(); renderAt(+params.get('t') || 0);
+  window.renderAt = renderAt;
+  window.__ready = true;
+  if (RENDER) return;
+  addEventListener('resize', fit);
+  let playing = true, t0 = performance.now() - (+params.get('t') || 0) * 1000;
+  const btn = $('#play'), scrub = $('#scrub'), tc = $('#tc');
+  const tick = now => {
+    if (playing) {
+      let t = (now - t0) / 1000;
+      if (t > DURATION) { t = 0; t0 = now; }
+      renderAt(t); scrub.value = t; tc.textContent = t.toFixed(2) + ' s';
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+  btn.onclick = () => { playing = !playing; btn.textContent = playing ? 'Pause' : 'Lecture'; t0 = performance.now() - scrub.value * 1000; };
+  scrub.oninput = () => { playing = false; btn.textContent = 'Lecture'; renderAt(+scrub.value); tc.textContent = (+scrub.value).toFixed(2) + ' s'; };
+}
+boot();
+</script>
+</body>
+</html>
