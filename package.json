@@ -1,0 +1,24 @@
+{
+  "name": "escapades-nanilina-motion",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Publicité motion design 9:16 — Les Escapades de Nanilina à Akanin'ny Nofy",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render EscapadeAd out/escapade-akanin-ny-nofy.mp4",
+    "render:60fps": "remotion render EscapadeAd60 out/escapade-akanin-ny-nofy-60fps.mp4",
+    "still": "remotion still EscapadeAd out/preview.png",
+    "audio": "python3 scripts/make_audio.py"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "@remotion/fonts": "4.0.536",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.8",
+    "typescript": "5.8.3"
+  }
+}
