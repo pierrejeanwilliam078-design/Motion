@@ -3,7 +3,24 @@
 Publicité verticale **1080 × 1920 (9:16)**, **35 s**, 30 i/s (version 60 i/s disponible), pour Facebook Ads, Instagram Reels et TikTok.
 Projet [Remotion](https://www.remotion.dev) (React) : animation réelle, synchronisée sur la voix off, exportable en MP4.
 
-**Vidéo finale :** [`out/escapade-akanin-ny-nofy.mp4`](out/escapade-akanin-ny-nofy.mp4)
+**Vidéos :**
+- **Version 2 (recommandée)** : [`out/escapade-akanin-ny-nofy-v2.mp4`](out/escapade-akanin-ny-nofy-v2.mp4). 33 s, montage plus rythmé, palette sobre, voix off seule.
+- Version 1 : [`out/escapade-akanin-ny-nofy.mp4`](out/escapade-akanin-ny-nofy.mp4). 35 s, très colorée, avec musique et effets sonores.
+
+## Version 2 : ce qui change
+
+- **Montage plus dynamique** : coupes rapides en plein écran sur les photos, zooms « punch-in », photos qui défilent derrière l'accroche, mosaïque 2×2 sur « GOOD VIBES », pauses de la voix resserrées (33 s au lieu de 35).
+- **Palette sobre, tirée des photos** : bleu nuit `#0E1A26`, sable `#F3E7D3`, lagon `#5CC8BC`, et une seule couleur d'accent, corail `#EE7B57`, réservée au prix et à l'urgence. Il n'y a plus de dégradés arc-en-ciel, de fuites de lumière ni de particules.
+- **Typographie éditoriale** : Anton (titres condensés), Montserrat (libellés), Playfair Display italique (« Imaginez… »).
+- **Son** : voix off seule, sans musique ni effets sonores. Pour ajouter un morceau de votre choix, renseignez `V2_MUSIC.file` dans `src/v2/timeline.ts`. Il baissera automatiquement sous la voix.
+- Réglages (palette, minutage, voix) : `src/v2/timeline.ts`. Les textes restent dans `src/config.ts` et sont communs aux deux versions.
+
+```bash
+npm run render:v2        # → out/escapade-akanin-ny-nofy-v2.mp4
+npm run render:v2-60fps  # version 60 i/s
+```
+
+Le tableau ci-dessous décrit la version 1.
 
 ## Déroulé (synchronisé sur la voix off)
 

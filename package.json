@@ -7,6 +7,8 @@
     "studio": "remotion studio",
     "render": "remotion render EscapadeAd out/escapade-akanin-ny-nofy.mp4",
     "render:60fps": "remotion render EscapadeAd60 out/escapade-akanin-ny-nofy-60fps.mp4",
+    "render:v2": "remotion render EscapadeAdV2 out/escapade-akanin-ny-nofy-v2.mp4",
+    "render:v2-60fps": "remotion render EscapadeAdV2-60 out/escapade-akanin-ny-nofy-v2-60fps.mp4",
     "still": "remotion still EscapadeAd out/preview.png",
     "audio": "python3 scripts/make_audio.py"
   },
