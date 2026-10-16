@@ -27,14 +27,14 @@ export const RemotionRoot: React.FC = () => (
       durationInFrames={DURATION * 60}
       defaultProps={CONTENT}
     />
-    {/* Version 2 : montage plus rythmé, palette sobre, voix off seule */}
+    {/* Version 2 : montage rythmé calé sur la musique, palette sobre */}
     <Composition
       id="EscapadeAdV2"
       component={EscapadeAdV2}
       width={WIDTH}
       height={HEIGHT}
       fps={30}
-      durationInFrames={V2_DURATION * 30}
+      durationInFrames={Math.round(V2_DURATION * 30)}
       defaultProps={CONTENT}
     />
     <Composition
@@ -43,7 +43,7 @@ export const RemotionRoot: React.FC = () => (
       width={WIDTH}
       height={HEIGHT}
       fps={60}
-      durationInFrames={V2_DURATION * 60}
+      durationInFrames={Math.round(V2_DURATION * 60)}
       defaultProps={CONTENT}
     />
   </>

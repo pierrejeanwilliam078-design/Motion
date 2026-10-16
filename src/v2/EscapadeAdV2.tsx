@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, staticFile, useVideoConfig} from 'remotion';
-import {AdContent, VOICE_FILE} from '../config';
+import {AdContent} from '../config';
 import {FilmFinish} from '../components/Atmosphere';
 import {tw} from '../lib/anim';
 import {HookV2} from './scenes/HookV2';
@@ -9,7 +9,7 @@ import {ExperiencesV2} from './scenes/ExperiencesV2';
 import {PriceV2} from './scenes/PriceV2';
 import {DatesV2} from './scenes/DatesV2';
 import {CallToActionV2} from './scenes/CallToActionV2';
-import {PALETTE, V2_MUSIC, V2_SCENES, V2_VOICE} from './timeline';
+import {PALETTE, V2_MUSIC, V2_SCENES, V2_VOICE, V2_VOICE_FILE} from './timeline';
 import '../fonts';
 
 const SCENE_LIST = [
@@ -23,13 +23,13 @@ const SCENE_LIST = [
 
 const voiceWindows = V2_VOICE.map((v) => [v.at, v.at + (v.src[1] - v.src[0])] as const);
 
-/** Volume de la musique facultative, abaissé sous la voix off. */
+/** Volume de la musique, abaissé sous la voix off (ducking). */
 const musicVolumeAt = (t: number) => {
-  const duck = Math.max(0, ...voiceWindows.map(([a, b]) => Math.min(tw(t, a - 0.2, a, 0, 1), tw(t, b, b + 0.3, 1, 0))));
+  const duck = Math.max(0, ...voiceWindows.map(([a, b]) => Math.min(tw(t, a - 0.12, a, 0, 1), tw(t, b, b + 0.25, 1, 0))));
   return V2_MUSIC.volume + (V2_MUSIC.underVoice - V2_MUSIC.volume) * duck;
 };
 
-/** Version 2 : montage nerveux, palette sobre, voix off seule. */
+/** Version 2 : montage nerveux calé sur la musique, palette sobre. */
 export const EscapadeAdV2: React.FC<AdContent> = (content) => {
   const {fps} = useVideoConfig();
   return (
@@ -42,7 +42,7 @@ export const EscapadeAdV2: React.FC<AdContent> = (content) => {
       <FilmFinish />
       {V2_VOICE.map((v, i) => (
         <Sequence key={`voice-${i}`} from={Math.round(v.at * fps)} durationInFrames={Math.ceil((v.src[1] - v.src[0]) * fps)} layout="none">
-          <Audio src={staticFile(VOICE_FILE)} trimBefore={Math.round(v.src[0] * fps)} trimAfter={Math.round(v.src[1] * fps)} />
+          <Audio src={staticFile(V2_VOICE_FILE)} trimBefore={Math.round(v.src[0] * fps)} trimAfter={Math.round(v.src[1] * fps)} />
         </Sequence>
       ))}
       {V2_MUSIC.file ? <Audio src={staticFile(V2_MUSIC.file)} volume={(f) => musicVolumeAt(f / fps)} /> : null}

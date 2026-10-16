@@ -4,15 +4,19 @@ Publicité verticale **1080 × 1920 (9:16)**, **35 s**, 30 i/s (version 60 i/s d
 Projet [Remotion](https://www.remotion.dev) (React) : animation réelle, synchronisée sur la voix off, exportable en MP4.
 
 **Vidéos :**
-- **Version 2 (recommandée)** : [`out/escapade-akanin-ny-nofy-v2.mp4`](out/escapade-akanin-ny-nofy-v2.mp4). 33 s, montage plus rythmé, palette sobre, voix off seule.
+- **Version 2 (recommandée)** : [`out/escapade-akanin-ny-nofy-v2.mp4`](out/escapade-akanin-ny-nofy-v2.mp4). 34 s, montage rythmé calé sur la musique, palette sobre.
 - Version 1 : [`out/escapade-akanin-ny-nofy.mp4`](out/escapade-akanin-ny-nofy.mp4). 35 s, très colorée, avec musique et effets sonores.
 
 ## Version 2 : ce qui change
 
-- **Montage plus dynamique** : coupes rapides en plein écran sur les photos, zooms « punch-in », photos qui défilent derrière l'accroche, mosaïque 2×2 sur « GOOD VIBES », pauses de la voix resserrées (33 s au lieu de 35).
+- **Montage plus dynamique** : coupes rapides en plein écran sur les photos, zooms « punch-in », photos qui défilent derrière l'accroche, mosaïque 2×2 sur « GOOD VIBES », pauses de la voix resserrées (34 s).
 - **Palette sobre, tirée des photos** : bleu nuit `#0E1A26`, sable `#F3E7D3`, lagon `#5CC8BC`, et une seule couleur d'accent, corail `#EE7B57`, réservée au prix et à l'urgence. Il n'y a plus de dégradés arc-en-ciel, de fuites de lumière ni de particules.
 - **Typographie éditoriale** : Anton (titres condensés), Montserrat (libellés), Playfair Display italique (« Imaginez… »).
-- **Son** : voix off seule, sans musique ni effets sonores. Pour ajouter un morceau de votre choix, renseignez `V2_MUSIC.file` dans `src/v2/timeline.ts`. Il baissera automatiquement sous la voix.
+- **Son** : tropical house acoustique (102 BPM) composée pour ce montage et jouée avec de vrais instruments échantillonnés : marimba, guitare nylon, steel drum, basse, congas (banque FluidR3_GM, licence MIT). Pas d'effets sonores ajoutés.
+  - Chaque phrase de la voix off démarre sur un temps de la musique, et chaque transition tombe sur le rythme. La musique s'efface sur « Imaginez… », marque un impact sur « 200 000 Ar », monte sur les dates, coupe un temps, puis repart en drop sur « Les places sont très limitées ! ».
+  - La voix off est traitée pour passer au-dessus de la musique (graves nettoyés, présence, compression) et la musique baisse automatiquement pendant qu'elle parle.
+  - Régénérer la musique et la voix : `python3 scripts/make_music_v2.py` (nécessite `fluidsynth`, la banque `fluid-soundfont-gm` et `pip install mido`).
+  - Autre musique : changer `V2_MUSIC.file` dans `src/v2/timeline.ts` (`null` = voix seule).
 - Réglages (palette, minutage, voix) : `src/v2/timeline.ts`. Les textes restent dans `src/config.ts` et sont communs aux deux versions.
 
 ```bash
