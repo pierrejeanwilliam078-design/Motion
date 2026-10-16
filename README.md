@@ -37,9 +37,36 @@ node render.mjs --fps 60                # version 60 i/s
 | 22–28 s | 5. Infos | Sabotsy 17 Oktobra 2026 (resserrement + soulignement jaune) ; bandeau orange qui s'ouvre, FJKM ZIONA SALAZAMAY │ 14H 00, reflet |
 | 28–35 s | 6. Final | dézoom vers l'affiche complète, respiration, halo du Live, reflets successifs, fin nette sur l'image finale |
 
-## Ambiance sonore suggérée
+## Versions avec son
 
-La vidéo est livrée **sans son** (droits musicaux à choisir par l'organisateur).
+| Fichier | Contenu |
+|---|---|
+| `output/fanokafana-2026-2027.mp4` | vidéo seule, sans son |
+| `output/fanokafana-2026-2027-V1-son.mp4` | **V1** : musique inspirante (piano, nappes chaudes, percussions légères), montée progressive, point culminant à 28 s, accord final à 34 s |
+| `output/fanokafana-2026-2027-V2-sound-design.mp4` | **V2** : musique électronique moderne (supersaw, pluck, basse sidechain, drops à 14 s et 28 s) + sound design synchronisé |
+
+La musique et les effets sont **entièrement synthétisés** par `audio/make_audio.py`
+(aucun échantillon ni morceau externe, donc aucun droit à gérer). Tempo de 120 BPM :
+une mesure dure 2 s, donc chaque changement de scène (4, 8, 14, 22, 24, 28 s) tombe sur une mesure.
+Volume normalisé à -14 LUFS (standard Facebook / YouTube / Instagram).
+
+Sound design de la V2 : souffle d'ouverture, « pops » des 6 logos, whoosh de la citation,
+montée (riser) puis impact sur **Live**, whoosh du triangle play, scintillements sur chaque
+reflet lumineux, whoosh gauche/droite + déclencheur photo + scotch pour les polaroids,
+entrée des personnages, roulement + drop sur **FANOKAFANA** avec un « tic » par lettre,
+« zip » du cadre, tics de compteur et cloche pour **2026-2027**, souffle de la date,
+impact du bandeau, dézoom final et accord final avec cloche.
+
+Re-générer le son puis l'assembler :
+
+```bash
+python3 audio/make_audio.py     # nécessite numpy, scipy, numba
+ffmpeg -i output/fanokafana-2026-2027.mp4 -i audio/v2-mix.wav -map 0:v -map 1:a -c:v copy \
+  -af "loudnorm=I=-14:TP=-1.5:LRA=11" -c:a aac -b:a 192k -shortest output/fanokafana-2026-2027-V2-sound-design.mp4
+```
+
+## Utiliser une autre musique
+
 Recommandation : piste *corporate / inspiring / uplifting* moderne, 100–120 BPM,
 montée progressive, sans effet agressif. Points de synchronisation :
 
