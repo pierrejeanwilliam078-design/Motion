@@ -2,3 +2,4 @@ node_modules
 output/.frames/
 output/stills/
 audio/*.wav
+__pycache__/
