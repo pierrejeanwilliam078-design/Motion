@@ -144,3 +144,30 @@ risers ; tout est synthétisé (libre de droits).
 
 Polices : Inter / Inter Display, Anton, Playfair Display — SIL Open Font License 1.1
 (`three/fonts/`, `assets/fonts/`).
+
+## Vidéo 25 — version II (motion design 2D, direction claire)
+
+Livrable : `deliverables/DigitalSub_25_v2.mp4` — H.264, 1082×1920, 25 i/s, 51,25 s, -14 LUFS / -1 dBTP.
+Reconstruction : `./build25b.sh /chemin/vers/HeyGen_-_AI_Spokesperson_Video_Creator_25.mp4` (pas de 3D).
+
+Direction opposée à la version I : canevas papier clair, aplats violet / cyan / bleu nuit, typographie
+Inter Display Black serrée, surligneurs, pastilles, frise, gribouillis. Le locuteur vit dans une
+**fenêtre qui se transforme** (plein écran → carte → cercle → pastille → disparition), toujours cadrée
+sur son visage suivi ; le texte n'occupe que le canevas (0 chevauchement sur 1 281 images).
+
+| Temps | Fenêtre / fond | Animation |
+|---|---|---|
+| 0–2,7 | plein écran → carte | « Tu veux un » · **abonnement** · **digital** sur bloc violet · « sans te *compliquer* la vie » surligné cyan |
+| 2,7–9,3 | cercle | « Tu veux » + pastilles qui rebondissent : Canva Pro, ChatGPT, Netflix, Spotify, un autre service |
+| 9,3–13,3 | carte | « entre le choix de » · formule / paiement / activation reliés par un gribouillis · « tu perds **du temps ?** » + horloge |
+| 13,3–16,3 | cercle central sur **bloc violet** | « DigitalSub » · **simplifie** + flèche droite · « ce parcours. » · ondes |
+| 16,3–28,8 | pastille | Frise 1-2-3-4 : nœuds qui se cochent, textes au mot ; interrupteur plat qui bascule sur « l'activation » |
+| 28,8–30,6 | carte | « L'idée est » **simple.** surligné |
+| 30,6–34,4 | pastille d'angle sur **bloc cyan** | « moins de **complications** » : gribouillis qui se dessine → **se redresse en ligne droite** sur « plus de **clarté.** » |
+| 34,4–39,9 | carte | « Que tu sois » + rouleau façon machine à sous : étudiant / créateur / entrepreneur / divertissement |
+| 39,9–44,7 | demi-carte | « commence par » **ton besoin,** · « pas par le produit » **le plus populaire.** barré |
+| 44,7–48,1 | cercle | **Découvre** les offres disponibles sur · bouton **digitalsub.org** cliqué par un curseur |
+| 48,1–51,25 | **bloc bleu nuit** | logo officiel (échelle uniforme), filet dégradé, `www.digitalsub.org` |
+
+Son : nouvelle musique originale en fa majeur, marimba, 120 BPM, clap ; break avant « plus de clarté » ;
+pops des pastilles, stylo pour les gribouillis, snap du redressement, clic de souris, whooshs des volets.

@@ -4,7 +4,6 @@
 face cam or full-frame shots with designed transitions. All type is 2D (Anton, Playfair Display
 italic, Inter Display), synced word by word, never over the tracked face.
 """
-import json
 import os
 import subprocess
 import sys
@@ -15,34 +14,18 @@ from PIL import Image, ImageFilter
 
 import cues25 as C
 import mg
+from v25data import KEEP, SRC_FRAMES, words
 from kinetic import box_word, chunk, chunks, fit, pop_in, rise_word
-from mg import (CYAN, FPS, H, NAVY, VIOLET, W, WHITE, Transcript, hline, inout3, out3, out5, out_back, out_expo, prog,
+from mg import (CYAN, FPS, H, NAVY, VIOLET, W, WHITE, hline, inout3, out3, out5, out_back, out_expo, prog,
                 scrim, smooth, swoosh, text, text_width, to_canvas, to_image)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
 R3D = os.environ.get("R3D", os.path.join(ROOT, "out", "r3d25"))
 
-TR = Transcript(os.path.join(ROOT, "v25", "words.json"))
-FIXES = {"arrière": "ariary", "Découvres": "Découvre"}  # ASR: « en ariary » (MGA), imperative « découvre »
-ONSETS = {"L'idée": 29.78}  # Whisper glued it to the end of the previous sentence (pause 28.78–29.78)
-for i, (w, s, e) in enumerate(TR.words):
-    w = FIXES.get(w, w)
-    s = ONSETS.get(w, s)
-    for p0, p1 in C.PAUSES:  # onsets Whisper placed inside a measured pause start when the pause ends
-        if p0 <= s < p1 - 0.02:
-            s = p1
-    TR.words[i] = (w, s, e)
-
-KEEP = np.array(json.load(open(os.path.join(ROOT, "v25", "face_track.json")))["keepout"], np.float32)
 ANCHOR = (float(np.median((KEEP[:, 0] + KEEP[:, 2]) / 2)), float(np.median((KEEP[:, 1] + KEEP[:, 3]) / 2)))
 X0 = 96
-SRC_FRAMES = 1205
 END = 51.25
-
-
-def words(s, near):
-    return TR.timed(s, near)
 
 
 def prep(spec):

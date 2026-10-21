@@ -75,14 +75,19 @@ def reverb(x, decay=2.2, tau=0.5, wet=0.25, hi=7000, predelay=0.018):
 
 
 # ---------------------------------------------------------------- music bed
-CHORDS = {  # pad voicing, bass note
+CHORDS = getattr(cues, "CHORDS", {  # pad voicing, bass note
     "D": ([50, 57, 61, 64, 66], 38),   # Dmaj9
     "Bm": ([54, 57, 62, 64, 66], 35),  # Bm7(11)
     "G": ([55, 59, 62, 66, 69], 43),   # Gmaj9
     "A": ([57, 62, 64, 66, 69], 45),   # A6sus4
-}
-PROG = ["A"] + ["D", "Bm", "G", "A"] * 2 + ["D"]  # lands on D under the logo
-CHORD_LEN = 8 * BEAT  # 5 s
+})
+CYCLE = getattr(cues, "CYCLE", ["D", "Bm", "G", "A"])  # first chord = tonic
+CHORD_LEN = 8 * BEAT
+# enough chords to start before 0 s, ending on the tonic under the logo
+_n = int(np.ceil(CARD / CHORD_LEN)) + 1
+PROG = [CYCLE[k % len(CYCLE)] for k in range(-_n, 0)] + [CYCLE[0]]
+PLUCK = getattr(cues, "PLUCK", "soft")
+PAD_GAIN = getattr(cues, "PAD_GAIN", 0.035)
 FIRST = CARD - (len(PROG) - 1) * CHORD_LEN  # chord grid aligned on the end card
 
 
@@ -99,6 +104,13 @@ def pad_note(f, dur, attack=1.2, release=1.6):
         out[:, 0] += v * env * np.cos(a)
         out[:, 1] += v * env * np.sin(a)
     return out
+
+
+def marimba(f, dur=0.8):
+    t = np.arange(int(dur * SR)) / SR
+    env = np.minimum(t / 0.002, 1) * np.exp(-t / 0.3)
+    return (np.sin(2 * np.pi * f * t) + 0.45 * np.sin(2 * np.pi * 3.93 * f * t) * np.exp(-t / 0.035)
+            + 0.15 * np.sin(2 * np.pi * 9.2 * f * t) * np.exp(-t / 0.012)) * env
 
 
 def pluck(f, dur=0.9, tau=0.22):
@@ -147,7 +159,7 @@ def music():
             sig = pad_note(midi(m), dur, release=2.4 if last else 1.6)
             s = max(t0, 0)
             sig = sig[int((s - t0) * SR):]
-            place(pads, sig, s, 0.035)
+            place(pads, sig, s, PAD_GAIN)
         if t0 >= 0 and not last:
             place(low, bass_note(midi(bass), BEAT * 3.5), t0, 0.22)
             place(low, bass_note(midi(bass), BEAT * 3.5), t0 + 4 * BEAT, 0.18)
@@ -161,7 +173,8 @@ def music():
                 continue
             m = notes[pattern[k % 8]] + 12
             vel = (0.85 if k % 2 == 0 else 0.6) * rng.uniform(0.85, 1.0) * min(1, (t + 0.5) / 4)
-            place(plk, pluck(midi(m)), t, 0.05 * vel, pan=rng.uniform(-0.35, 0.35))
+            note = marimba(midi(m)) if PLUCK == "marimba" else pluck(midi(m))
+            place(plk, note, t, 0.05 * vel, pan=rng.uniform(-0.35, 0.35))
             if k % 2 == 1 and 5.8 < t < CARD - 0.1 and not in_break(t):
                 place(hats, hat(), t, 0.018 * rng.uniform(0.8, 1.0), pan=0.25)
     # soft pulse: a round kick on every beat once the hook is over
@@ -386,7 +399,36 @@ def ui_blip():
     return out
 
 
+def pen(dur=0.8):
+    """Felt pen scribble: band-passed noise with a jittery stroke envelope."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    x = fft_filter(rng.standard_normal(n).astype(np.float32), lo=2500, hi=7500)
+    strokes = 0.55 + 0.45 * np.sin(2 * np.pi * (7 + 3 * np.sin(2 * np.pi * 1.3 * t)) * t) ** 2
+    return x * strokes * np.minimum(t / 0.03, 1) * np.clip((dur - t) / 0.08, 0, 1)
+
+
+def snap():
+    t = np.arange(int(0.25 * SR)) / SR
+    click = fft_filter(rng.standard_normal(len(t)).astype(np.float32), lo=1800, hi=9000) * np.exp(-t / 0.004)
+    body = np.sin(2 * np.pi * 180 * t) * np.exp(-t / 0.04) * 0.6
+    return click + body
+
+
+def mouse_click():
+    out = np.zeros(int(0.15 * SR), np.float32)
+    for d, g in ((0.0, 1.0), (0.06, 0.6)):
+        t = np.arange(int(0.02 * SR)) / SR
+        c = fft_filter(rng.standard_normal(len(t)).astype(np.float32), lo=2000, hi=8000) * np.exp(-t / 0.0025) * g
+        i = int(d * SR)
+        out[i:i + len(c)] += c
+    return out
+
+
 SFX_KINDS = {
+    "pen": pen,
+    "snap": snap,
+    "click": mouse_click,
     "bass": bass_hit,
     "atmo": atmo,
     "glass": glass_ping,
