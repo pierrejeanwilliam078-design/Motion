@@ -4,22 +4,29 @@ Everything is generated from oscillators and noise, so the result is free of
 third-party rights and cleared for commercial use.
 Outputs 48 kHz / 24-bit stereo WAV stems: music.wav, sfx.wav and logo.wav.
 """
+import importlib
+import os
 import sys
 import wave
 
 import numpy as np
 
-import cues
+cues = importlib.import_module(os.environ.get("CUES", "cues"))  # CUES=cues16 for video 16
 
 SR = 48000
-TOTAL = 44.2
+TOTAL = cues.CARD_AT + 3.35
 N = int(TOTAL * SR)
 rng = np.random.default_rng(2024)
 
-BEAT = 60 / 96
+BEAT = 60 / getattr(cues, "BPM", 96)
 CARD = cues.CARD_AT  # end card starts (dissolve)
 LOGO_HIT = cues.LOGO_HIT  # logo reveal
-BREAK = (13.75, 16.35)  # "pas magique": the pulse drops out
+BREAKS = getattr(cues, "BREAKS", [(13.75, 16.35)])  # the pulse drops out
+CLAP = getattr(cues, "CLAP", False)
+
+
+def in_break(t, pad=0.0):
+    return any(b0 - pad < t < b1 for b0, b1 in BREAKS)
 
 
 def midi(m):
@@ -113,6 +120,14 @@ def kick():
     return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.minimum(t / 0.002, 1) * np.exp(-t / 0.16)
 
 
+def clap():
+    n = int(0.25 * SR)
+    t = np.arange(n) / SR
+    x = fft_filter(rng.standard_normal(n).astype(np.float32), lo=900, hi=5000)
+    env = sum(np.exp(-np.maximum(t - d, 0) / 0.012) * (t >= d) for d in (0.0, 0.011, 0.022))
+    return x * (env * 0.6 + np.exp(-t / 0.09) * 0.4)
+
+
 def hat():
     n = int(0.05 * SR)
     x = rng.standard_normal(n).astype(np.float32)
@@ -147,17 +162,21 @@ def music():
             m = notes[pattern[k % 8]] + 12
             vel = (0.85 if k % 2 == 0 else 0.6) * rng.uniform(0.85, 1.0) * min(1, (t + 0.5) / 4)
             place(plk, pluck(midi(m)), t, 0.05 * vel, pan=rng.uniform(-0.35, 0.35))
-            if k % 2 == 1 and 5.8 < t < CARD - 0.1 and not BREAK[0] < t < BREAK[1]:
+            if k % 2 == 1 and 5.8 < t < CARD - 0.1 and not in_break(t):
                 place(hats, hat(), t, 0.018 * rng.uniform(0.8, 1.0), pan=0.25)
     # soft pulse: a round kick on every beat once the hook is over
     kicks = [FIRST + k * BEAT for k in range(int((CARD - FIRST) / BEAT) + 1)]
-    kicks = [t for t in kicks if 5.8 < t < CARD - 0.05 and not BREAK[0] - 0.1 < t < BREAK[1]]
+    kicks = [t for t in kicks if 5.8 < t < CARD - 0.05 and not in_break(t, 0.1)]
     pump = np.ones(N, np.float32)
     for t in kicks:
         place(low, kick(), t, 0.16)
         i = int(t * SR)
         n = min(int(0.45 * SR), N - i)
         pump[i:i + n] *= 1 - 0.32 * np.exp(-np.arange(n) / SR / 0.13)
+    if CLAP:  # soft clap on beats 2 and 4
+        for k, t in enumerate(kicks):
+            if round((t - FIRST) / BEAT) % 2 == 1:
+                place(hats, clap(), t, 0.05, pan=-0.1)
     pads *= pump[:, None]
     plk *= pump[:, None]
     # ping-pong dotted-eighth delay on the plucks
@@ -304,7 +323,27 @@ def split_whoosh():
     return a + b * 0.7
 
 
+def riser(dur=0.85):
+    w = sweep_noise(dur, 400, 6000, bw=0.7, shape=0.97)
+    t = np.arange(len(w)) / SR
+    tone = np.sin(2 * np.pi * np.cumsum(220 * 2 ** (2 * t / dur)) / SR) * (t / dur) ** 2 * 0.25
+    return w + tone
+
+
+def swish():
+    return sweep_noise(0.28, 3000, 7000, bw=0.45, shape=0.35)
+
+
+def zoom_through():
+    a = whoosh(0.5, 300, 3500, (0.0, 0.0))
+    b = sweep_noise(0.5, 120, 400, bw=0.8, shape=0.5)
+    return a + np.stack([b, b], 1) * 0.6
+
+
 SFX_KINDS = {
+    "riser": riser,
+    "swish": swish,
+    "zoom_through": zoom_through,
     "impact": lambda: soft_impact(),
     "impact_deep": lambda: soft_impact(base=36, decay=0.5),
     "tick": lambda: tick(rng.uniform(0.95, 1.08)),

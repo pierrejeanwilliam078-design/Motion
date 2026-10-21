@@ -5,6 +5,7 @@ RGBA float arrays. Everything is drawn with sub-pixel-free integer placement
 but animated through eased parameters, which reads as smooth at 25 fps.
 """
 import json
+import os
 import re
 import unicodedata
 from functools import lru_cache
@@ -20,7 +21,15 @@ WEIGHTS = {
     "medium": "InterDisplay-Medium.otf", "semibold": "InterDisplay-SemiBold.otf",
     "bold": "InterDisplay-Bold.otf", "xbold": "InterDisplay-ExtraBold.otf",
     "black": "InterDisplay-Black.otf",
+    # cinematic display faces (SIL OFL, assets/fonts)
+    "anton": os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "fonts", "Anton-Regular.ttf"),
+    "serif": os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "fonts",
+                          "PlayfairDisplay-ExtraBoldItalic.ttf"),
 }
+
+# Bounding boxes of everything drawn over the face cam (for the keep-out check).
+DRAWN = []
+TRACK = [False]
 
 # DigitalSub palette (0..1)
 def rgb(h):
@@ -109,12 +118,15 @@ class Transcript:
         """Map each token of `text` to (token, start, end) from the transcript."""
         first = _norm(text.split()[0])
         i = next(k for k, w in enumerate(self.words)
-                 if w[1] >= near - 0.6 and first.startswith(_norm(w[0])))
+                 if w[1] >= near - 0.6 and _norm(w[0]) and first.startswith(_norm(w[0])))
         out = []
         for tok in text.split():
             target, acc, s = _norm(tok), "", None
             while _norm(acc) != target:
                 w = self.words[i]
+                if not acc and not _norm(w[0]):  # punctuation-only token (« » ?)
+                    i += 1
+                    continue
                 s = w[1] if s is None else s
                 acc += w[0]
                 i += 1
@@ -127,7 +139,8 @@ class Transcript:
 # ------------------------------------------------------------------ text
 @lru_cache(None)
 def font(weight, size):
-    return ImageFont.truetype(FONT_DIR + WEIGHTS[weight], size)
+    path = WEIGHTS[weight]
+    return ImageFont.truetype(path if os.path.isabs(path) else FONT_DIR + path, size)
 
 
 def text_width(text, weight, size, tracking=0.0):
@@ -166,6 +179,10 @@ def blend_mask(cv, mask, color, x, y, alpha=1.0):
     x1, y1 = min(x + w, W), min(y + h, H)
     if x1 <= x0 or y1 <= y0:
         return
+    if TRACK[0]:
+        nz = np.argwhere(mask[y0 - y:y1 - y, x0 - x:x1 - x] * alpha > 0.04)
+        if len(nz):
+            DRAWN.append((x0 + nz[:, 1].min(), y0 + nz[:, 0].min(), x0 + nz[:, 1].max(), y0 + nz[:, 0].max()))
     m = mask[y0 - y:y1 - y, x0 - x:x1 - x, None] * alpha
     reg = cv[y0:y1, x0:x1]
     reg *= 1 - m
@@ -349,3 +366,89 @@ def to_canvas(img):
 
 def to_image(cv):
     return Image.fromarray((np.clip(cv, 0, 1) * 255 + 0.5).astype(np.uint8))
+
+
+# ------------------------------------------------------------------ brush, icons
+def swoosh(cv, x0, y0, x1, y1, progress, color=VIOLET, color2=CYAN, width=12, bend=-28, alpha=1.0):
+    """Hand-drawn style underline: tapered quadratic stroke drawn left to right."""
+    if progress <= 0 or alpha <= 0:
+        return
+    ss = 3
+    bx0, by0 = int(min(x0, x1) - width), int(min(y0, y1) - abs(bend) - width)
+    w, h = int(abs(x1 - x0) + 2 * width), int(abs(y1 - y0) + 2 * abs(bend) + 2 * width)
+    img = Image.new("L", (w * ss, h * ss), 0)
+    d = ImageDraw.Draw(img)
+    cxm, cym = (x0 + x1) / 2, (y0 + y1) / 2 + bend
+    for u in np.linspace(0, clamp(progress), max(2, int(160 * progress))):
+        px = (1 - u) ** 2 * x0 + 2 * (1 - u) * u * cxm + u ** 2 * x1
+        py = (1 - u) ** 2 * y0 + 2 * (1 - u) * u * cym + u ** 2 * y1
+        r = width / 2 * (0.35 + 0.65 * np.sin(np.pi * min(1, u * 1.05)) ** 0.6) * ss
+        X, Y = (px - bx0) * ss, (py - by0) * ss
+        d.ellipse((X - r, Y - r, X + r, Y + r), fill=255)
+    m = np.asarray(img.resize((w, h), Image.LANCZOS), np.float32) / 255
+    u = np.linspace(0, 1, w, dtype=np.float32)[None, :, None]
+    col = np.asarray(color, np.float32) * (1 - u) + np.asarray(color2, np.float32) * u
+    spr = np.concatenate([np.broadcast_to(col, (h, w, 3)), m[..., None]], 2)
+    if TRACK[0]:
+        DRAWN.append((bx0, by0, bx0 + w, by0 + h))
+    blend_rgba(cv, spr, bx0, by0, alpha)
+
+
+def icon(cv, name, x, y, size, progress, color=WHITE, width=5, alpha=1.0):
+    """Line icons drawn progressively: people, clock, devices, target, cross, check, chat."""
+    if progress <= 0 or alpha <= 0:
+        return
+    ss, p = 4, clamp(progress)
+    S = size * ss
+    img = Image.new("L", (S, S), 0)
+    d = ImageDraw.Draw(img)
+    lw = width * ss
+
+    def arc(cx, cy, r, a0, sweep):
+        d.arc((cx - r, cy - r, cx + r, cy + r), a0, a0 + sweep * p, fill=255, width=lw)
+
+    if name == "people":
+        arc(0.38 * S, 0.33 * S, 0.14 * S, -90, 360)
+        arc(0.38 * S, 0.88 * S, 0.28 * S, 180, 180)
+        arc(0.70 * S, 0.38 * S, 0.11 * S, -90, 360)
+        arc(0.72 * S, 0.86 * S, 0.21 * S, 230, 130)
+    elif name == "clock":
+        arc(0.5 * S, 0.5 * S, 0.40 * S, -90, 360)
+        d.line((0.5 * S, 0.5 * S, 0.5 * S, (0.5 - 0.26 * p) * S), fill=255, width=lw)
+        d.line((0.5 * S, 0.5 * S, (0.5 + 0.18 * p) * S, 0.5 * S), fill=255, width=lw)
+    elif name == "devices":
+        k = p
+        d.rounded_rectangle((0.10 * S, 0.22 * S, (0.10 + 0.58 * k) * S, 0.68 * S), 0.04 * S, outline=255, width=lw)
+        d.line((0.04 * S, 0.78 * S, (0.04 + 0.70 * k) * S, 0.78 * S), fill=255, width=lw)
+        if k > 0.5:
+            d.rounded_rectangle((0.70 * S, 0.36 * S, 0.94 * S, 0.84 * S), 0.05 * S, outline=255, width=lw)
+    elif name == "target":
+        for r in (0.40, 0.26, 0.11):
+            arc(0.5 * S, 0.5 * S, r * S, -90, 360)
+    elif name == "cross":
+        a = min(1, p * 2)
+        b = clamp(p * 2 - 1)
+        d.line((0.22 * S, 0.22 * S, (0.22 + 0.56 * a) * S, (0.22 + 0.56 * a) * S), fill=255, width=lw)
+        if b > 0:
+            d.line((0.78 * S, 0.22 * S, (0.78 - 0.56 * b) * S, (0.22 + 0.56 * b) * S), fill=255, width=lw)
+    elif name == "check":
+        pts = [(0.2, 0.52), (0.42, 0.72), (0.8, 0.3)]
+        seg1 = min(1, p / 0.35)
+        d.line((pts[0][0] * S, pts[0][1] * S, (pts[0][0] + (pts[1][0] - pts[0][0]) * seg1) * S,
+                (pts[0][1] + (pts[1][1] - pts[0][1]) * seg1) * S), fill=255, width=lw)
+        if p > 0.35:
+            q = (p - 0.35) / 0.65
+            d.line((pts[1][0] * S, pts[1][1] * S, (pts[1][0] + (pts[2][0] - pts[1][0]) * q) * S,
+                    (pts[1][1] + (pts[2][1] - pts[1][1]) * q) * S), fill=255, width=lw)
+    m = np.asarray(img.resize((size, size), Image.LANCZOS), np.float32) / 255
+    blend_mask(cv, m, color, int(x), int(y), alpha)
+
+
+def chat_bubble(cv, x, y, w, h, color, alpha=1.0, tail="left"):
+    rrect(cv, x, y, w, h, h * 0.42, color, alpha)
+    ss = 4
+    t = Image.new("L", (60 * ss, 50 * ss), 0)
+    pts = [(8 * ss, 0), (40 * ss, 0), (4 * ss, 46 * ss)] if tail == "left" else [(20 * ss, 0), (52 * ss, 0), (56 * ss, 46 * ss)]
+    ImageDraw.Draw(t).polygon(pts, fill=255)
+    m = np.asarray(t.resize((60, 50), Image.LANCZOS), np.float32) / 255
+    blend_mask(cv, m, color, int(x + (14 if tail == "left" else w - 74)), int(y + h - 22), alpha)

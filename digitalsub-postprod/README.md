@@ -62,3 +62,41 @@ python3 tools/preview.py source.mp4 apercu.png 1.0 9.6 28.4             # planch
 | `tools/render_endcard.py` | outro logo + URL |
 | `tools/make_audio.py` | musique, SFX, sound logo |
 | `build.sh` | mixage, normalisation, assemblage et export |
+
+---
+
+# Vidéo 16 — « Quelle formule choisir ? » (typographie cinématographique)
+
+Livrable : `deliverables/DigitalSub_16.mp4` — H.264, 1082×1920, 25 i/s, 44,72 s, -14 LUFS / -1 dBTP.
+Reconstruction : `./build16.sh /chemin/vers/HeyGen_-_AI_Spokesperson_Video_Creator_16.mp4`.
+
+**Typographie** (inspirée des références, sans les copier) : Anton (titres condensés en capitales),
+Playfair Display ExtraBold Italic (mots d'accent), Inter Display (sous-titres). Anton et Playfair sont
+sous licence SIL OFL 1.1 (`assets/fonts/OFL-*.txt`), utilisables commercialement.
+
+**Visage protégé** : le visage est suivi image par image (`tools/face_track.py`, OpenCV ;
+résultat dans `v16/face_track.json`). Chaque image face caméra est contrôlée automatiquement :
+aucun texte, forme ou logo ne chevauche la zone tête + cheveux + menton, corrigée du zoom
+(0 violation sur 1 053 images). Les textes vivent sur le buste (y 1095–1560).
+
+**Transcription** : Whisper horodaté au mot (`v16/words.json`). Corrections : « prémien » →
+« premium » ; « Digital Sub » → « DigitalSub ». « Individual » est conservé tel que prononcé.
+« aide » (confiance ASR 0,30) est cohérent avec « Écris … en message » : à confirmer à l'écoute.
+
+| Temps | Plan | Intervention |
+|---|---|---|
+| 0–3,0 | Face cam, poussée d'ouverture | « Tu veux passer au » + « premium » (serif italique cyan, trait de pinceau) ; « mais tu ne sais / même pas » en sous-titres pop ; « QUELLE FORMULE » révélé par masque + « CHOISIR ? » sur bloc cyan. |
+| 3,0–9,7 | **B-roll** (ouverture en iris) | « C'est normal / DE SE PERDRE ENTRE » ; les 7 formules apparaissent en pastilles flottantes reliées par un tracé (« se perdre »), chacune sur son mot. Médaillon du locuteur. Sortie en *push* latéral. |
+| 10,3–13,8 | Face cam (break musical) | « Le mauvais RÉFLEXE » + ✕ ; « c'est de choisir / UNIQUEMENT » ; « LE PRIX LE PLUS BAS » barré en violet. |
+| 14,1–17,0 | Face cam, punch-in sur le *drop* | « Le bon » + « RÉFLEXE » sur bloc cyan + ✓ ; « c'est de / COMMENCER par » ; « ton usage. » + trait de pinceau. |
+| 17,0–22,1 | **B-roll** (volet montant) | 4 cartes questions : PERSONNES, TEMPS, APPAREILS, OBJECTIFS, avec icônes tracées et numérotation. Sortie en zoom traversant. |
+| 22,6–26,5 | Face cam | « Chez » + logo officiel DigitalSub ; « tu peux DEMANDER » ; « UNE orientation » ; « avant ta COMMANDE ». |
+| 26,5–33,1 | **B-roll** (volet latéral) | Comparaison : « LA FORMULE LA PLUS CHÈRE EST INUTILE. » (barre haute ✕) / « LA MOINS CHÈRE NE CORRESPOND PAS à ton besoin. » (barre basse ✕). Sortie par ouverture en deux volets. |
+| 33,8–37,5 | Face cam, poussée lente | « LE BON ABONNEMENT » ; « est celui qui / FONCTIONNE pour ton » ; « UTILISATION réelle. » |
+| 37,8–41,6 | Face cam, CTA | « Écris » + bulle de message où « AIDE » se tape lettre par lettre (✓ envoyé), « en message » ; « si tu HÉSITES entre » ; « PLUSIEURS FORMULES ». |
+| 41,6–44,7 | Outro | Défocalisation + fondu, logo officiel, `www.digitalsub.org` animé, sound logo, musique résolue. |
+
+**Son** (`tools/cues16.py`) : musique originale 100 BPM avec clap doux, break sur « le mauvais
+réflexe » et retour sur « le bon réflexe » ; risers avant les B-rolls ; whooshs orientés selon chaque
+transition ; pops sur les pastilles, ticks sur les cartes, trait de pinceau sonore sur les
+soulignements, frappes clavier sur « AIDE » ; sound logo à l'apparition du logo.
