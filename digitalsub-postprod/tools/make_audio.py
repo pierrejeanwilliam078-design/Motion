@@ -340,7 +340,58 @@ def zoom_through():
     return a + np.stack([b, b], 1) * 0.6
 
 
+def bass_hit():
+    """Deep sub drop, lightly saturated so it still reads on phone speakers."""
+    t = np.arange(int(1.4 * SR)) / SR
+    f = 32 + 26 * np.exp(-t / 0.18)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.minimum(t / 0.004, 1) * np.exp(-t / 0.75)
+    return np.tanh(1.8 * x) / np.tanh(1.8)
+
+
+def atmo(dur=2.6):
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    air = fft_filter(rng.standard_normal(n).astype(np.float32), lo=1800, hi=8000) * 0.5
+    drone = np.sin(2 * np.pi * 70 * t) * 0.35 + np.sin(2 * np.pi * 105 * t) * 0.15
+    env = np.minimum(t / 0.8, 1) * np.clip((dur - t) / 1.0, 0, 1)
+    return (air + drone) * env
+
+
+def glass_ping():
+    t = np.arange(int(0.9 * SR)) / SR
+    f = rng.uniform(2200, 3000)
+    mod = 0.8 * np.exp(-t / 0.08) * np.sin(2 * np.pi * f * 1.41 * t)
+    return np.sin(2 * np.pi * f * t + mod) * np.minimum(t / 0.001, 1) * np.exp(-t / 0.28)
+
+
+def servo():
+    t = np.arange(int(0.42 * SR)) / SR
+    f = 180 + 140 * (t / 0.36) ** 0.7
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    saw = sum(np.sin(k * ph) / k for k in range(1, 9))
+    body = fft_filter(saw.astype(np.float32), lo=300, hi=3200) * np.minimum(t / 0.02, 1) * np.clip((0.38 - t) / 0.05, 0, 1)
+    click = np.zeros_like(t)
+    i = int(0.37 * SR)
+    click[i:i + 600] = fft_filter(rng.standard_normal(600).astype(np.float32), lo=1500, hi=7000) * np.exp(-np.arange(600) / 90)
+    return body * 0.6 + click
+
+
+def ui_blip():
+    out = np.zeros(int(0.2 * SR), np.float32)
+    for k, (f, d) in enumerate(((1250, 0.0), (1880, 0.055))):
+        t = np.arange(int(0.05 * SR)) / SR
+        b = (np.sin(2 * np.pi * f * t) + 0.25 * np.sin(6 * np.pi * f * t)) * np.exp(-t / 0.018)
+        i = int(d * SR)
+        out[i:i + len(b)] += b
+    return out
+
+
 SFX_KINDS = {
+    "bass": bass_hit,
+    "atmo": atmo,
+    "glass": glass_ping,
+    "servo": servo,
+    "ui": ui_blip,
     "riser": riser,
     "swish": swish,
     "zoom_through": zoom_through,

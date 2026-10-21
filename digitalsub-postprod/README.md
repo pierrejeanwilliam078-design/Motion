@@ -100,3 +100,47 @@ aucun texte, forme ou logo ne chevauche la zone tête + cheveux + menton, corrig
 réflexe » et retour sur « le bon réflexe » ; risers avant les B-rolls ; whooshs orientés selon chaque
 transition ; pops sur les pastilles, ticks sur les cartes, trait de pinceau sonore sur les
 soulignements, frappes clavier sur « AIDE » ; sound logo à l'apparition du logo.
+
+---
+
+# Vidéo 25 — « Abonnement digital sans te compliquer la vie » (3D + typographie 2D)
+
+Livrable : `deliverables/DigitalSub_25.mp4` — H.264, 1082×1920, 25 i/s, 51,25 s, -14 LUFS / -1 dBTP.
+Reconstruction : `./build25.sh /chemin/vers/HeyGen_-_AI_Spokesperson_Video_Creator_25.mp4`
+(rendus 3D : `three/render25.sh`, Node + Chromium Playwright ; `npm install` dans `three/`).
+
+**Vraie 3D, texte en 2D.** Les objets et décors sont rendus en 3D temps réel (Three.js r170, matériaux
+PBR, studio HDR procédural, sol miroir, verre à effet Fresnel, réfraction en espace écran) dans
+Chromium headless (`three/scenes/*.js`). Toute la typographie est en 2D (Anton, Playfair Display
+italique, Inter Display), animée mot par mot dans le compositeur (`tools/edit_25.py`).
+
+**Visage protégé** : suivi du visage + contrôle de chaque image face caméra (0 violation sur
+1 281 images). « SIMPLIFIE » passe derrière la tête grâce à un détourage de personne (modèle
+MediaPipe Selfie Segmenter, Apache-2.0, exécuté avec LiteRT ; masques dans `v25/matte`).
+
+**Transcription** (`v25/words.json`) : « en arrière » → **« en ariary »** (monnaie malgache, cohérent
+avec « MG » du logo) ; « Découvres » → « Découvre » ; « Digital Sub » → « DigitalSub ». Les noms
+Canva Pro, ChatGPT, Netflix, Spotify sont affichés en texte, sans logos de marques.
+
+| Temps | Section | Image | Typo 2D | Son |
+|---|---|---|---|---|
+| 0–2,7 | Accroche | Dolly-in à rampe de vitesse 1,20 → 1,04 ; sphères chrome 3D en parallaxe | ABONNEMENT (Anton, interlettrage) + *digital* (Playfair) + trait de pinceau ; « sans te COMPLIQUER la vie » | basse sub, impact, swish |
+| 2,7–9,3 | Montée | **Recul hors de l'image** : le plan devient un écran de verre flottant en 3D, cartes de verre à l'arrivée de chaque service ; **replongée** dans l'écran (raccords invisibles) | « Tu veux » + CANVA PRO / CHATGPT / NETFLIX / SPOTIFY soulignés ; *ou un autre service* | riser, whoosh, pings de verre, nappe |
+| 9,3–13,3 | Friction | Face caméra, poussée lente ; anneau de chargement chrome 3D | « entre le CHOIX de » ; FORMULE / PAIEMENT / ACTIVATION ; « tu perds du TEMPS » | ticks, servo, blip UI |
+| 14,2–16,3 | Impact | Punch-in sur le drop musical | « DigitalSub » ; **SIMPLIFIE derrière la tête** ; « ce PARCOURS. » | basse + impact grave, shimmer |
+| 16,3–25,0 | Développement | Rampe de vitesse → **voyage caméra 3D** : 3 dalles de verre sur sol miroir, objets chrome/satin | 01 *Tu consultes* LES OFFRES DISPONIBLES · 02 *Tu choisis* CELLE QUI CORRESPOND À TON BESOIN · 03 *Tu paies* EN ARIARY AVEC LES MOYENS PROPOSÉS | whooshs latéraux, blips UI |
+| 25,3–28,8 | Activation | **Interrupteur 3D verre/chrome** qui bascule | « Puis notre ÉQUIPE / T'ACCOMPAGNE pour » ; ACTIVATION ; « selon le service. » | servo + basse au déclic |
+| 29,8–30,6 | Annonce | Poussée accélérée | *L'idée est* + SIMPLE. sur bloc cyan | impact |
+| 30,6–34,4 | Apogée | Coupe franche + flash : **nœuds chrome chaotiques** → **sphère de verre réfractante** ; plongée dans la sphère | « moins de COMPLICATIONS » → « plus de *clarté.* » | break, riser, **drop** (basse + impact) |
+| 34,4–39,9 | Personas | Face caméra | ÉTUDIANT / CRÉATEUR / ENTREPRENEUR / DIVERTISSEMENT lettre par lettre | pops |
+| 40,3–43,7 | Message | Poussée lente | « commence par » *ton* BESOIN ; « pas par le produit le plus POPULAIRE. » | impact, swish |
+| 44,7–48,1 | CTA | **Plaque de verre 3D** qui se pose à plat | « DÉCOUVRE les offres disponibles sur » + `digitalsub.org` | servo, blip, ping |
+| 48,1–51,25 | Outro | Poussée dans le noir → studio 3D, sol miroir, sphères ; **logo officiel inchangé** révélé, balayage lumineux | `www.digitalsub.org` (interlettrage) | sound logo, résolution musicale |
+
+**Son** (`tools/cues25.py`, 67 événements) : musique originale 112 BPM qui démarre sur
+« DigitalSub simplifie », break avant l'apogée et drop sur « plus de clarté » ; basses sub,
+whooshs spatialisés, pings de verre, servo mécanique, blips d'interface, nappe d'ambiance,
+risers ; tout est synthétisé (libre de droits).
+
+Polices : Inter / Inter Display, Anton, Playfair Display — SIL Open Font License 1.1
+(`three/fonts/`, `assets/fonts/`).

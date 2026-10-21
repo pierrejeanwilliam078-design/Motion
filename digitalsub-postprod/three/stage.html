@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent;overflow:hidden}
+@font-face{font-family:"Inter Display";src:url(fonts/InterDisplay-Bold.otf);font-weight:700}
+@font-face{font-family:"Inter Display";src:url(fonts/InterDisplay-Black.otf);font-weight:900}
+@font-face{font-family:"Inter Display";src:url(fonts/InterDisplay-Medium.otf);font-weight:500}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script></head>
+<body><script type="module">
+// Generic stage: ?scene=<name> loads scenes/<name>.js which exports async setup() and update(t).
+const name = new URLSearchParams(location.search).get('scene');
+const mod = await import(`./scenes/${name}.js`);
+await document.fonts.load('700 40px "Inter Display"'); await document.fonts.load('900 40px "Inter Display"'); await document.fonts.load('500 40px "Inter Display"');
+const S = await mod.setup();
+window.render = async (t, arg) => { await S.update(t, arg); return S.renderer.domElement.toDataURL('image/png'); };
+window.ready = true;
+</script></body></html>
