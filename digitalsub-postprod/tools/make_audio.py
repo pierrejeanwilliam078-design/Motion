@@ -9,14 +9,17 @@ import wave
 
 import numpy as np
 
+import cues
+
 SR = 48000
 TOTAL = 44.2
 N = int(TOTAL * SR)
 rng = np.random.default_rng(2024)
 
 BEAT = 60 / 96
-CARD = 40.85  # end card starts (dissolve)
-LOGO_HIT = 41.20  # logo reveal
+CARD = cues.CARD_AT  # end card starts (dissolve)
+LOGO_HIT = cues.LOGO_HIT  # logo reveal
+BREAK = (13.75, 16.35)  # "pas magique": the pulse drops out
 
 
 def midi(m):
@@ -104,6 +107,12 @@ def bass_note(f, dur):
     return (np.sin(2 * np.pi * f * t) + 0.25 * np.sin(4 * np.pi * f * t)) * env
 
 
+def kick():
+    t = np.arange(int(0.4 * SR)) / SR
+    f = 48 + 70 * np.exp(-t / 0.03)
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.minimum(t / 0.002, 1) * np.exp(-t / 0.16)
+
+
 def hat():
     n = int(0.05 * SR)
     x = rng.standard_normal(n).astype(np.float32)
@@ -138,8 +147,19 @@ def music():
             m = notes[pattern[k % 8]] + 12
             vel = (0.85 if k % 2 == 0 else 0.6) * rng.uniform(0.85, 1.0) * min(1, (t + 0.5) / 4)
             place(plk, pluck(midi(m)), t, 0.05 * vel, pan=rng.uniform(-0.35, 0.35))
-            if k % 2 == 1 and 5.8 < t < CARD - 0.1:
+            if k % 2 == 1 and 5.8 < t < CARD - 0.1 and not BREAK[0] < t < BREAK[1]:
                 place(hats, hat(), t, 0.018 * rng.uniform(0.8, 1.0), pan=0.25)
+    # soft pulse: a round kick on every beat once the hook is over
+    kicks = [FIRST + k * BEAT for k in range(int((CARD - FIRST) / BEAT) + 1)]
+    kicks = [t for t in kicks if 5.8 < t < CARD - 0.05 and not BREAK[0] - 0.1 < t < BREAK[1]]
+    pump = np.ones(N, np.float32)
+    for t in kicks:
+        place(low, kick(), t, 0.16)
+        i = int(t * SR)
+        n = min(int(0.45 * SR), N - i)
+        pump[i:i + n] *= 1 - 0.32 * np.exp(-np.arange(n) / SR / 0.13)
+    pads *= pump[:, None]
+    plk *= pump[:, None]
     # ping-pong dotted-eighth delay on the plucks
     d = int(0.75 * BEAT * SR)
     echo = np.zeros_like(plk)
@@ -181,10 +201,10 @@ def whoosh(dur=0.6, f0=300, f1=2600, pan=(-0.6, 0.6)):
     return np.stack([w * np.cos(a), w * np.sin(a)], 1) * np.sqrt(2)
 
 
-def soft_impact():
-    t = np.arange(int(1.0 * SR)) / SR
-    f = 42 + 30 * np.exp(-t / 0.06)
-    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.minimum(t / 0.003, 1) * np.exp(-t / 0.32)
+def soft_impact(base=42, decay=0.32):
+    t = np.arange(int(1.4 * SR)) / SR
+    f = base + 30 * np.exp(-t / 0.06)
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.minimum(t / 0.003, 1) * np.exp(-t / decay)
     click = fft_filter(rng.standard_normal(len(t)).astype(np.float32), hi=2500) * np.exp(-t / 0.008) * 0.25
     air = fft_filter(rng.standard_normal(len(t)).astype(np.float32), lo=250, hi=1400) * np.exp(-t / 0.25) * 0.08
     return body + click + air
@@ -199,7 +219,7 @@ def digital_swipe(dur=0.24):
 
 
 def sparkle(count=5, spread=0.03):
-    out = np.zeros(int(0.6 * SR), np.float32)
+    out = np.zeros(int((0.45 + count * spread) * SR), np.float32)
     for k in range(count):
         f = rng.uniform(3200, 6800)
         t = np.arange(int(0.4 * SR)) / SR
@@ -240,20 +260,74 @@ def place_local(buf, sig, t, gain=1.0, pan=0.0):
     buf[i:j] += sig[: j - i] * gain
 
 
+def tick(pitch=1.0):
+    t = np.arange(int(0.12 * SR)) / SR
+    f = 2100 * pitch
+    blip = (np.sin(2 * np.pi * f * t) + 0.3 * np.sin(4 * np.pi * f * t)) * np.exp(-t / 0.018)
+    grit = fft_filter(rng.standard_normal(len(t)).astype(np.float32), lo=3000, hi=9000) * np.exp(-t / 0.004) * 0.3
+    return blip + grit
+
+
+def ticks_run(n=14, step=0.054):
+    out = np.zeros(int((n * step + 0.2) * SR), np.float32)
+    for k in range(n):
+        s = tick(0.9 + 0.03 * k) * (0.6 + 0.4 * k / n)
+        i = int(k * step * SR)
+        out[i:i + len(s)] += s
+    return out
+
+
+def pop():
+    t = np.arange(int(0.15 * SR)) / SR
+    f = 620 + 520 * np.exp(-t / 0.02)
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.minimum(t / 0.002, 1) * np.exp(-t / 0.045)
+
+
+def key():
+    t = np.arange(int(0.08 * SR)) / SR
+    click = fft_filter(rng.standard_normal(len(t)).astype(np.float32), lo=1500, hi=6000) * np.exp(-t / 0.006)
+    body = np.sin(2 * np.pi * rng.uniform(180, 230) * t) * np.exp(-t / 0.015) * 0.5
+    return click + body
+
+
+def send():
+    t = np.arange(int(0.3 * SR)) / SR
+    chirp = np.sin(2 * np.pi * np.cumsum(700 * 2 ** (t / 0.12)) / SR) * np.exp(-t / 0.06) * 0.6
+    sw = digital_swipe(0.2)
+    out = np.zeros(len(t), np.float32)
+    out[:len(sw)] += sw * 0.7
+    return out + chirp
+
+
+def split_whoosh():
+    a, b = whoosh(0.55, 2600, 300, (-0.3, -0.7)), whoosh(0.55, 300, 2600, (0.3, 0.7))
+    return a + b * 0.7
+
+
+SFX_KINDS = {
+    "impact": lambda: soft_impact(),
+    "impact_deep": lambda: soft_impact(base=36, decay=0.5),
+    "tick": lambda: tick(rng.uniform(0.95, 1.08)),
+    "ticks_run": ticks_run,
+    "pop": pop,
+    "key": key,
+    "send": send,
+    "swipe": lambda: digital_swipe(0.26),
+    "sparkle": lambda: sparkle(),
+    "shimmer": lambda: sparkle(7, 0.045),
+    "whoosh": lambda: whoosh(0.75, 250, 3200),
+    "whoosh_s": lambda: whoosh(0.45, 400, 2800),
+    "whoosh_up": lambda: whoosh(0.6, 250, 3000, (0.0, 0.0)),
+    "whoosh_side": lambda: whoosh(0.6, 300, 2600, (0.7, -0.7)),
+    "whoosh_split": split_whoosh,
+}
+
+
 def sfx():
+    """Every accent is driven by the shared cue sheet (tools/cues.py)."""
     out = stereo()
-    place(out, digital_swipe(), 0.02, 0.05, pan=0.2)                 # first subtitle
-    place(out, whoosh(0.70, 250, 2200), 5.10, 0.085)                  # punch-in, list
-    place(out, whoosh(0.45, 400, 3000, (0.5, -0.5)), 13.45, 0.075)    # punch-in
-    place(out, soft_impact(), 13.86, 0.32)                             # "Mais ... pas magique"
-    place(out, whoosh(0.50, 2200, 350, (-0.4, 0.4)), 15.95, 0.05)     # ease out
-    place(out, whoosh(0.70, 300, 2400, (0.6, -0.6)), 24.80, 0.07)     # new idea
-    place(out, whoosh(0.55, 300, 2600), 31.75, 0.06)                  # push to DigitalSub
-    place(out, sparkle(), 32.36, 0.035, pan=-0.2)                      # "DigitalSub" highlight
-    place(out, digital_swipe(0.28), 37.32, 0.07, pan=-0.3)            # CTA panel in
-    place(out, sparkle(4, 0.025), 37.90, 0.03, pan=0.3)                # « ChatGPT »
-    place(out, whoosh(0.75, 250, 3200), 40.45, 0.07)                  # into the end card
-    place(out, sparkle(3, 0.04), 42.42, 0.022, pan=0.25)               # light sweep
+    for t, kind, gain, pan in cues.SFX:
+        place(out, SFX_KINDS[kind](), t, gain, pan)
     bed = fft_filter(rng.standard_normal(int(3.3 * SR)).astype(np.float32), lo=3000, hi=11000)
     tb = np.arange(len(bed)) / SR
     place(out, bed * np.minimum(tb / 0.8, 1) * np.clip((3.3 - tb) / 1.0, 0, 1), CARD, 0.012)  # air texture

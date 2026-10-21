@@ -67,9 +67,8 @@ def load_logo(path):
     return out
 
 
-def url_layer():
+def url_layer(track=3.0):
     font = ImageFont.truetype(FONT, 50)
-    track = 3
     widths = [font.getlength(c) for c in URL]
     total = sum(widths) + track * (len(URL) - 1)
     lay = Image.new("L", (int(total) + 40, 90), 0)
@@ -141,6 +140,8 @@ def frame(t, logo, glow, url):
     # URL: fade + slide up, then holds for reading
     r = ease_out((t - 1.30) / 0.6)
     if r > 0:
+        # letter-spacing settles from wide to final while it fades up
+        url = url_layer(3 + 16 * (1 - ease_out((t - 1.30) / 1.1)))
         m = url.point(lambda v: int(v * r))
         if r < 0.98:
             m = m.filter(ImageFilter.GaussianBlur(3 * (1 - r)))

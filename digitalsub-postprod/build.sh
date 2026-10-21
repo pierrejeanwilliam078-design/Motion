@@ -11,16 +11,13 @@ mkdir -p "$OUT"
 CARD_AT=40.85    # dissolve into the end card starts (last word ends ~40.86 s)
 CARD_FADE=0.55
 
-echo "1/5 subtitles"
-python3 tools/make_subs.py "$OUT/subs.ass"
+echo "1/4 main sequence (face cam, kinetic type, subtitles, motion B-roll)"
+python3 tools/edit_v2.py "$SRC" "$OUT/main.mp4"
 
-echo "2/5 main picture (grade, punch-ins, CTA panel, subtitles)"
-python3 tools/render_main.py "$SRC" "$OUT/subs.ass" "$OUT/main.mp4"
-
-echo "3/5 end card"
+echo "2/4 end card"
 python3 tools/render_endcard.py assets/digitalsub-logo.png "$OUT/endcard.mp4"
 
-echo "4/5 music, SFX, sound logo + mix"
+echo "3/4 music, SFX, sound logo + mix"
 python3 tools/make_audio.py "$OUT"
 
 DUR=$(python3 -c "print(round($CARD_AT + $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUT/endcard.mp4"), 3))")
@@ -40,7 +37,7 @@ MEAS=$(ffmpeg -hide_banner -i "$OUT/mix_pre.wav" -af loudnorm=I=-14:TP=-1.0:LRA=
 get() { echo "$MEAS" | python3 -c "import json,sys;print(json.load(sys.stdin)['$1'])"; }
 ffmpeg -v error -y -i "$OUT/mix_pre.wav" -af "loudnorm=I=-14:TP=-1.0:LRA=9:measured_I=$(get input_i):measured_TP=$(get input_tp):measured_LRA=$(get input_lra):measured_thresh=$(get input_thresh):offset=$(get target_offset):linear=true,aresample=48000" -c:a pcm_s24le "$OUT/mix.wav"
 
-echo "5/5 final export"
+echo "4/4 final export"
 ffmpeg -v error -y -i "$OUT/main.mp4" -i "$OUT/endcard.mp4" -i "$OUT/mix.wav" \
   -filter_complex "[0:v][1:v]xfade=transition=fade:duration=$CARD_FADE:offset=$CARD_AT,format=yuv420p[v]" \
   -map "[v]" -map 2:a -t "$DUR" \
