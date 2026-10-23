@@ -1,0 +1,109 @@
+{
+  "intro": {
+    "title": "AMIN'NY FIAINANA ANDAVANANDRO",
+    "subtitle": "Fantatrao ve fa afaka manampy anao isan'andro ny IA?"
+  },
+  "toolLabel": "FITAOVANA",
+  "chatgpt": {
+    "name": "ChatGPT",
+    "uses": [
+      "Hafatra",
+      "Fandaminana asa",
+      "Fianarana"
+    ],
+    "prompt": "Ampio aho handamina ny asako rahampitso.",
+    "replyTitle": "Drafitra ho an'ny rahampitso",
+    "replyItems": [
+      "08:00 · Hafatra",
+      "10:00 · Fivoriana",
+      "14:00 · Fianarana"
+    ]
+  },
+  "gemini": {
+    "name": "Gemini",
+    "uses": [
+      "Fikarohana",
+      "Fanazavana lesona"
+    ],
+    "query": "Hazavao ny tantaran'i Madagasikara",
+    "results": [
+      "Famintinana",
+      "Daty manan-danja",
+      "Fanontaniana fanazaran-tena"
+    ]
+  },
+  "claude": {
+    "name": "Claude",
+    "text": "Famintinana sy fandinihana lahatsoratra",
+    "summaryLabel": "Famintinana"
+  },
+  "canva": {
+    "name": "Canva AI",
+    "text": "Famoronana visuel",
+    "posterTitle": "VAOVAO!"
+  },
+  "tip": {
+    "remember": "TSAROVY!",
+    "line1": "Tsy marina foana izay avoakan'ny IA.",
+    "line1Emphasis": [
+      "Tsy",
+      "marina",
+      "foana"
+    ],
+    "line2": "Hamarino sy diniho aloha!",
+    "line2Emphasis": [
+      "Hamarino",
+      "diniho"
+    ],
+    "conclusion": "Fitaovana ny IA, fa tsy misolo ny fisainanao.",
+    "conclusionEmphasis": [
+      "fisainanao"
+    ]
+  },
+  "brand": {
+    "name": "DigitalSub",
+    "tagline": "Ampiasao amim-pahendrena ny IA.",
+    "taglineEmphasis": [
+      "amim-pahendrena"
+    ],
+    "contact": "Mifandraisa aminay",
+    "whatsappNumber": ""
+  },
+  "voiceover": [
+    {
+      "start": 0.5,
+      "end": 3.7,
+      "text": "Fantatrao ve fa afaka manampy anao isan'andro ny IA?"
+    },
+    {
+      "start": 4.4,
+      "end": 9.4,
+      "text": "Amin'ny ChatGPT dia afaka manoratra hafatra, mandamina ny asanao ary mianatra ianao."
+    },
+    {
+      "start": 10.3,
+      "end": 15.2,
+      "text": "Ny Gemini kosa dia manampy anao amin'ny fikarohana sy ny fanazavana lesona."
+    },
+    {
+      "start": 16.5,
+      "end": 19.4,
+      "text": "Ny Claude dia mamintina sy mandinika lahatsoratra."
+    },
+    {
+      "start": 20.4,
+      "end": 23.2,
+      "text": "Ary ny Canva AI dia mamorona visuel ho anao."
+    },
+    {
+      "start": 24.4,
+      "end": 30.4,
+      "text": "Tsarovy! Tsy marina foana izay avoakan'ny IA. Hamarino sy diniho aloha! Fitaovana ny IA, fa tsy misolo ny fisainanao."
+    },
+    {
+      "start": 31.4,
+      "end": 34.4,
+      "text": "DigitalSub: ampiasao amim-pahendrena ny IA. Mifandraisa aminay!"
+    }
+  ]
+}
