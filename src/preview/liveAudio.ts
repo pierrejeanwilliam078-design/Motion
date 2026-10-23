@@ -1,8 +1,8 @@
 // Lecture audio en direct, synchronisée sur l'horloge du contexte audio.
-import { createGraph, scheduleSoundtrack, type Graph } from '../audio/soundtrack';
-import type { VoiceCue } from '../timeline';
+import { createGraph, scheduleSoundtrack, type Graph, type Scheduler } from '../audio/soundtrack';
+import { VIDEO, type VoiceCue } from '../timeline';
 
-export type LiveOptions = { synthMusic: boolean; sfx: boolean; voiceCues: VoiceCue[] };
+export type LiveOptions = { synthMusic: boolean; sfx: boolean; voiceCues: VoiceCue[]; schedule?: Scheduler };
 
 type MediaSlot = { el: HTMLAudioElement; node: MediaElementAudioSourceNode | null; url: string };
 
@@ -13,6 +13,7 @@ export class LiveAudio {
   private anchorCtx = 0;
   private anchorT = 0;
   private timers: number[] = [];
+  private pump: number | null = null;
   running = false;
   muted = false;
   voice: MediaSlot | null = null;
@@ -67,16 +68,28 @@ export class LiveAudio {
     this.stop();
     const when = this.ctx.currentTime + 0.08;
     const hasVoice = !!this.voice || (this.useSpeech && !!this.speechVoice);
-    this.sources = scheduleSoundtrack(this.ctx, this.graph, {
-      from,
-      when,
-      music: opts.synthMusic && !this.music,
-      sfx: opts.sfx,
-      voiceCues: hasVoice ? opts.voiceCues : undefined,
-    });
+    const schedule = opts.schedule ?? scheduleSoundtrack;
+    const base = { from, when, music: opts.synthMusic && !this.music, sfx: opts.sfx, voiceCues: hasVoice ? opts.voiceCues : undefined };
+    // Programmation par tranches : seuls les sons des ~1,5 prochaines secondes existent dans le graphe audio,
+    // ce qui garde la charge CPU faible et l'horloge stable, même avec la partition dense de la V2.
+    const AHEAD = 1.5;
+    const SLICE = 0.5;
+    let next = from;
+    const fill = () => {
+      const now = this.time() ?? from;
+      while (next < Math.min(now + AHEAD, VIDEO.duration + 0.5)) {
+        const end = next + SLICE;
+        this.sources.push(...schedule(this.ctx!, this.graph!, { ...base, window: { start: next, end } }));
+        next = end;
+      }
+      // Les sources terminées sont oubliées pour libérer la mémoire.
+      if (this.sources.length > 4000) this.sources = this.sources.slice(-2000);
+    };
     this.anchorCtx = when;
     this.anchorT = from;
     this.running = true;
+    fill();
+    this.pump = window.setInterval(fill, 200);
     for (const slot of [this.voice, this.music]) {
       if (!slot) continue;
       slot.el.currentTime = from;
@@ -104,6 +117,8 @@ export class LiveAudio {
   }
 
   stop() {
+    if (this.pump !== null) clearInterval(this.pump);
+    this.pump = null;
     for (const s of this.sources) {
       try {
         s.stop(0);

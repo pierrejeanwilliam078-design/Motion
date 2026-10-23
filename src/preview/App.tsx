@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Ad } from '../Ad';
+import { Ad2 } from '../v2/Ad2';
+import { scheduleSoundtrack } from '../audio/soundtrack';
+import { scheduleSoundtrackV2 } from '../v2/soundtrack2';
 import { DEFAULT_ASSETS, DEFAULT_CONTENT } from '../defaults';
 import { SCENES, VIDEO } from '../timeline';
 import type { Assets, Content } from '../scenes/types';
@@ -74,6 +77,7 @@ export function App() {
   const [musicName, setMusicName] = useState('');
   const [copied, setCopied] = useState('');
   const [scale, setScale] = useState(0.3);
+  const [version, setVersion] = useState<1 | 2>(2);
 
   const audio = useMemo(() => new LiveAudio(), []);
   const clock = useRef({ t: 0, perf: 0, playing: false });
@@ -98,7 +102,10 @@ export function App() {
     };
   }, []);
 
-  const opts = useCallback(() => ({ synthMusic, sfx, voiceCues: content.voiceover }), [synthMusic, sfx, content.voiceover]);
+  const opts = useCallback(
+    () => ({ synthMusic, sfx, voiceCues: content.voiceover, schedule: version === 2 ? scheduleSoundtrackV2 : scheduleSoundtrack }),
+    [synthMusic, sfx, content.voiceover, version],
+  );
 
   const startAt = useCallback(
     (from: number) => {
@@ -204,7 +211,7 @@ export function App() {
       audio.play(now, opts());
     }
   };
-  useEffect(relaunchAudio, [synthMusic, sfx, useSpeech]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(relaunchAudio, [synthMusic, sfx, useSpeech, version]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -269,14 +276,23 @@ export function App() {
           <span className="sep">/</span>
           <span>IA amin'ny fiainana andavanandro</span>
         </div>
-        <div className="specs">35 s · 1080 × 1920 · 30 fps</div>
+        <div className="top-right">
+          <div className="versions" role="radiogroup" aria-label="Version">
+            {([2, 1] as const).map((v) => (
+              <button key={v} id={`version-${v}`} role="radio" aria-checked={version === v} className={version === v ? 'active' : ''} onClick={() => setVersion(v)}>
+                {v === 2 ? 'V2 · dynamique' : 'V1 · épurée'}
+              </button>
+            ))}
+          </div>
+          <div className="specs">35 s · 1080 × 1920 · 30 fps · {version === 2 ? '114' : '108'} BPM</div>
+        </div>
       </header>
 
       <main className="layout">
         <section className="player" aria-label="Aperçu de la vidéo">
           <div className="stage-wrap" ref={wrapRef}>
             <div className="stage" style={{ transform: `scale(${scale})` }}>
-              <Ad t={t} content={content} assets={assets} />
+              {version === 2 ? <Ad2 t={t} content={content} assets={assets} /> : <Ad t={t} content={content} assets={assets} />}
             </div>
             {!started && (
               <div className="start">
@@ -441,10 +457,11 @@ export function App() {
               <p>L’export MP4 se fait avec Remotion depuis le dépôt : H.264, 1080 × 1920, 30 fps, AAC 48 kHz. Les images et le son proviennent du même code que cet aperçu.</p>
               <pre><code>{`npm install
 npm run audio    # bande-son → public/audio/*.wav
-npm run render   # → out/digitalsub-ia-35s.mp4`}</code></pre>
+npm run render     # V1 → out/digitalsub-ia-35s.mp4
+npm run render:v2  # V2 → out/digitalsub-ia-35s-v2.mp4`}</code></pre>
               <p>Pour une voix off : placez <code>public/audio/voiceover.wav</code> (ou .mp3) puis relancez <code>npm run render</code>. La musique baisse automatiquement sous la voix.</p>
               <p>Pour retoucher image par image : <code>npm run studio</code> ouvre Remotion Studio.</p>
-              <p className="note">Ce lecteur ne télécharge pas de fichier : l’environnement de l’aperçu bloque les téléchargements. La vidéo MP4 déjà rendue est livrée dans le dépôt, dossier <code>out/</code>.</p>
+              <p className="note">Ce lecteur ne télécharge pas de fichier : l’environnement de l’aperçu bloque les téléchargements. Les deux vidéos MP4 déjà rendues sont livrées dans le dépôt, dossier <code>out/</code>.</p>
             </div>
           )}
         </aside>

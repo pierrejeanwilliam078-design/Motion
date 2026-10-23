@@ -39,6 +39,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text-soft); font-size: 14px; }
 .brand-name { color: var(--text); font-weight: 700; letter-spacing: -0.01em; }
 .brand .sep { opacity: 0.4; }
+.top-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.versions { display: flex; padding: 3px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+.versions button { height: 32px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: var(--text-soft); font-size: 12px; font-weight: 650; }
+.versions button.active { background: linear-gradient(120deg, var(--cyan), var(--blue) 50%, var(--violet)); color: #fff; }
 .specs { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; color: var(--text-soft); }
 
 .layout { display: flex; gap: 24px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }

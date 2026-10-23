@@ -10,9 +10,9 @@ import type { SceneProps } from './types';
 const L = CUES.claude;
 const V = CUES.canva;
 
-type Rect = { x: number; y: number; w: number; h: number; r: number; rot: number };
-const STACK: Rect = { x: 260, y: 900, w: 560, h: 720, r: 28, rot: 0 };
-const OFFSETS = [
+export type Rect = { x: number; y: number; w: number; h: number; r: number; rot: number };
+export const STACK: Rect = { x: 260, y: 900, w: 560, h: 720, r: 28, rot: 0 };
+export const OFFSETS = [
   { dx: 0, dy: 0, rot: 0 },
   { dx: -34, dy: 16, rot: -6 },
   { dx: 30, dy: -12, rot: 5 },
@@ -30,7 +30,7 @@ const KEEP = [1, 4, 8];
 const KEEP_W = [82, 70, 76];
 const CANVA_DISC: Rect = { x: 390, y: 1110, w: 300, h: 300, r: 150, rot: 0 };
 
-const mixRect = (a: Rect, b: Rect, p: number): Rect => ({
+export const mixRect = (a: Rect, b: Rect, p: number): Rect => ({
   x: lerp(a.x, b.x, p),
   y: lerp(a.y, b.y, p),
   w: lerp(a.w, b.w, p),
@@ -40,7 +40,8 @@ const mixRect = (a: Rect, b: Rect, p: number): Rect => ({
 });
 
 /** Lignes du document : lecture (balayage) puis condensation en 3 points clés. */
-function DocLines({ t, opacity }: { t: number; opacity: number }) {
+export function DocLines({ t, opacity, cues = L }: { t: number; opacity: number; cues?: { scanStart: number; scanEnd: number; condense: number } }) {
+  const L = cues;
   const scan = progress(t, L.scanStart, L.scanEnd);
   const bandY = lerp(40, 660, ease.inOut(scan));
   const cond = ease.inOut(progress(t, L.condense, L.condense + 0.55));
@@ -243,7 +244,18 @@ const SEL = [
   { x: 36, y: 742, w: 252, h: 74 },
 ];
 
-function Artboard({ t, title }: { t: number; title: string }) {
+export function Artboard({
+  t,
+  title,
+  cues = V,
+  background = GRADIENTS.brandWarm,
+}: {
+  t: number;
+  title: string;
+  cues?: { artboardIn: number; elements: readonly number[] };
+  background?: string;
+}) {
+  const V = cues;
   const E = V.elements;
   const appear = spring(t - V.artboardIn, { stiffness: 150, damping: 18 });
   const on = (i: number, k = { stiffness: 260, damping: 19 }) => spring(t - E[i], k);
@@ -296,7 +308,7 @@ function Artboard({ t, title }: { t: number; title: string }) {
       })}
       <div style={{ position: 'absolute', inset: 0, borderRadius: 28, background: '#fff', boxShadow: '0 50px 120px rgba(107, 28, 240, 0.18), 0 0 0 1.5px rgba(10,15,44,0.06)', overflow: 'hidden' }}>
         {/* e0 : fond dégradé qui se propage depuis un coin */}
-        <div style={{ position: 'absolute', inset: 0, background: GRADIENTS.brandWarm, clipPath: `circle(${bg * 150}% at 0% 100%)` }} />
+        <div style={{ position: 'absolute', inset: 0, background, clipPath: `circle(${bg * 150}% at 0% 100%)` }} />
         {/* e1 : formes */}
         <div style={{ position: 'absolute', left: 318, top: 22, width: 250, height: 250, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', transform: `scale(${on(1)})` }} />
         <div style={{ position: 'absolute', left: 420, top: 150, width: 90, height: 90, borderRadius: '50%', background: COLORS.cyan, transform: `scale(${spring(t - E[1] - 0.08, { stiffness: 260, damping: 15 })})` }} />

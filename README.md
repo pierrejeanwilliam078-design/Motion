@@ -2,9 +2,16 @@
 
 Motion design publicitaire de 35 secondes, au format vertical 9:16 (1080 × 1920, 30 fps), avec un sound design synchronisé. Le film montre comment utiliser l'IA au quotidien avec ChatGPT, Gemini, Claude et Canva AI, puis rappelle de toujours vérifier les réponses.
 
-- **Vidéo rendue** : `out/digitalsub-ia-35s.mp4` (H.264 yuv420p, AAC 48 kHz)
-- **Aperçu interactif** : `npm run dev`, ou le fichier autonome `artifact/digitalsub-motion.html`
-- **Bande-son** : `public/audio/music.wav`, `sfx.wav` et `mix.wav`, 100 % synthétisée, donc libre de droits
+Deux versions partagent les mêmes textes, logos et le même storyboard :
+
+| Version | Style | Tempo | Vidéo |
+| --- | --- | --- | --- |
+| **V2 · dynamique** | caméra qui pulse sur le tempo, transitions rapides (zoom à travers le « A », whip pan, volets tricolores, flip 3D, glitch, iris), textes qui claquent mot par mot | 114 BPM | `out/digitalsub-ia-35s-v2.mp4` |
+| **V1 · épurée** | mouvements doux, typographie révélée en masque, transitions lentes | 108 BPM | `out/digitalsub-ia-35s.mp4` |
+
+- **Format** : H.264, 1080 × 1920, 30 fps, AAC 48 kHz
+- **Aperçu interactif** : `npm run dev`, ou le fichier autonome `artifact/digitalsub-motion.html` (sélecteur V1 / V2)
+- **Bande-son** : `public/audio/` (V1) et `public/audio/v2/` (V2), stems `music.wav`, `sfx.wav` et `mix.wav`, 100 % synthétisés, donc libres de droits
 
 ## Architecture
 
@@ -28,7 +35,8 @@ src/
   components/          typographie cinétique, logos, fond
   audio/soundtrack.ts  musique + effets (Web Audio)
   preview/             lecteur interactif
-  remotion/            composition Remotion pour l'export MP4
+  remotion/            compositions Remotion (DigitalSubAd, DigitalSubAdV2)
+  v2/                  version dynamique : timeline2, fx (caméra, slam, glitch…), scènes, soundtrack2
 scripts/
   render-soundtrack.mjs  bande-son → WAV (Chromium headless)
   build-artifact.mjs     aperçu → fichier HTML autonome
@@ -39,8 +47,9 @@ scripts/
 ```bash
 npm install
 npm run dev        # aperçu interactif sur http://localhost:5173
-npm run audio      # régénère public/audio/{music,sfx,mix}.wav
-npm run render     # exporte out/digitalsub-ia-35s.mp4
+npm run audio      # régénère les bandes-son V1 et V2 (WAV)
+npm run render     # V1 → out/digitalsub-ia-35s.mp4
+npm run render:v2  # V2 → out/digitalsub-ia-35s-v2.mp4
 npm run studio     # Remotion Studio, pour retoucher image par image
 npm run still -- out/frame.png --frame=300   # une image fixe
 npm run artifact   # régénère artifact/digitalsub-motion.html
@@ -52,7 +61,7 @@ Remotion télécharge automatiquement Chrome Headless Shell au premier rendu. Po
 
 - **Textes** : modifier `src/content.json`. Dans l'aperçu, l'onglet « Textes » permet de les modifier en direct, puis « Copier le JSON » fournit le contenu à coller dans ce fichier.
 - **Logo** : remplacer `src/assets/digitalsub-logo.png` (logo complet, fond transparent) et `src/assets/digitalsub-icon.png` (symbole seul). Le logo d'origine utilise un logotype « DIGITAL » blanc ; il est donc présenté sur fond nuit à la scène 6.
-- **Musique** : déposer `public/audio/music-custom.mp3` (ou `.wav`) ; elle remplace la musique synthétisée lors du rendu.
+- **Musique** : déposer `public/audio/music-custom.mp3` (ou `.wav`) ; elle remplace la musique synthétisée lors du rendu (V1 et V2).
 - **Voix off** : déposer `public/audio/voiceover.mp3` (ou `.wav`), synchronisée à partir de 0 s. La musique baisse automatiquement pendant les répliques (*ducking*), selon les plages définies dans `content.json` → `voiceover`.
 - **Numéro WhatsApp** : `brand.whatsappNumber` dans `content.json` (vide par défaut : seul « Mifandraisa aminay » s'affiche).
 - **Logos des outils** : les tracés proviennent de [Simple Icons](https://simpleicons.org) (`src/brand-paths.ts`). Pour une diffusion commerciale, vérifier les chartes d'utilisation des marques OpenAI, Google, Anthropic et Canva.
@@ -83,3 +92,16 @@ Si le navigateur dispose d'une voix malgache (`mg`), l'aperçu propose de l'util
 | 4. Claude + Canva AI | 16 – 24 s | Feuilles qui se regroupent, analyse, résumé → morphing en logo Canva, affiche construite en rythme | papier, clics sur le temps |
 | 5. Tsarovy | 24 – 31 s | Interfaces effacées, typographie cinétique, coche de vérification | baisse de la musique, impact, tonalité d'attention |
 | 6. DigitalSub | 31 – 35 s | Logo d'origine, reflet lumineux, signature, barre WhatsApp, fondu | signature sonore, chime final |
+
+## Version 2 : ce qui change
+
+| Scène | V2 |
+| --- | --- |
+| 1. Intro | grille de tuiles « vie quotidienne » qui défile, ouverture en cercle, morphing « IA » en 0,26 s avec onde de choc, trois lignes de titre qui claquent sur les croches, zoom à travers la barre du « A » |
+| 2. ChatGPT | logo en rotation 3D avec onde de choc et éclats, titre à contours en écho, bandeaux géants en arrière-plan, carte de discussion lancée depuis le bas, whip pan avec flou de mouvement |
+| 3. Gemini | rayons lumineux tournants, étoiles qui jaillissent, champ de recherche qui s'étire, cartes lancées en alternance gauche/droite, volets cyan/bleu/violet |
+| 4. Claude + Canva AI | feuilles lancées depuis cinq directions, résumé, flip 3D en logo Canva, affiche construite sur les croches puis trois variations de couleurs « IA », glitch |
+| 5. Tsarovy | panneau plein écran, « TSAROVY! » avec secousse et ondes, panneau qui s'ouvre en deux, phrases mot par mot avec blocs de couleur sur les mots clés |
+| 6. DigitalSub | iris nuit, traînées tricolores, logo qui s'impose avec onde cyan, halo qui pulse sur le tempo |
+
+Sound design V2 : kick sur chaque temps, clap, charleston en doubles croches, basse roulante, pompage (sidechain) des nappes, roulements avant chaque transition, filtre passe-bas qui « creuse » la musique sur « TSAROVY! » puis demi-tempo plus léger pendant les messages.

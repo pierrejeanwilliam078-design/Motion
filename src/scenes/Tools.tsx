@@ -59,8 +59,19 @@ export function ToolHeader({ t, content, assets }: SceneProps) {
 // ---------------------------------------------------------------------------
 // SCÈNE 2 — ChatGPT
 
-function ChatCard({ t, c }: { t: number; c: Content['chatgpt'] }) {
-  const appear = spring(t - C.shift - 0.12, { stiffness: 120, damping: 17 });
+export type ChatCues = {
+  shift: number;
+  typingStart: number;
+  typingEnd: number;
+  send: number;
+  dotsEnd: number;
+  replyTitle: number;
+  items: readonly number[];
+};
+
+export function ChatCard({ t, c, cues = C, tilt = 0, snappy = false }: { t: number; c: Content['chatgpt']; cues?: ChatCues; tilt?: number; snappy?: boolean }) {
+  const C = cues;
+  const appear = spring(t - C.shift - 0.12, snappy ? { stiffness: 230, damping: 19 } : { stiffness: 120, damping: 17 });
   const sent = t >= C.send;
   const bubble = spring(t - C.send, { stiffness: 260, damping: 22 });
   const dots = t >= C.send + 0.12 && t < C.dotsEnd;
@@ -77,7 +88,7 @@ function ChatCard({ t, c }: { t: number; c: Content['chatgpt'] }) {
         background: '#FFFFFF',
         boxShadow: '0 50px 120px rgba(31, 91, 255, 0.16), 0 0 0 1.5px rgba(10, 15, 44, 0.05)',
         opacity: clamp(appear * 1.4),
-        transform: `translateY(${(1 - appear) * 160}px) scale(${0.94 + 0.06 * appear})`,
+        transform: `translateY(${(1 - appear) * (snappy ? 900 : 160)}px) rotate(${(1 - appear) * tilt}deg) scale(${0.94 + 0.06 * appear})`,
         overflow: 'hidden',
         fontFamily: FONT,
       }}
@@ -153,7 +164,7 @@ function ChatCard({ t, c }: { t: number; c: Content['chatgpt'] }) {
           <div style={{ fontSize: 36, fontWeight: 750, color: COLORS.ink, letterSpacing: '-0.01em' }}>{c.replyTitle}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 22, marginTop: 28 }}>
             {c.replyItems.map((item, i) => {
-              const p = ease.out(progress(t, C.items[i], C.items[i] + 0.45));
+              const p = snappy ? clamp(spring(t - C.items[i], { stiffness: 380, damping: 20 })) : ease.out(progress(t, C.items[i], C.items[i] + 0.45));
               const check = ease.inOut(progress(t, C.items[i] + 0.08, C.items[i] + 0.4));
               return (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 20, opacity: p, transform: `translateX(${(1 - p) * -30}px)` }}>

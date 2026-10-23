@@ -81,8 +81,13 @@ function IAMorph({ t }: { t: number }) {
   const bar = ease.out(progress(t, I.morphEnd - 0.2, I.morphEnd + 0.3));
   const shine = progress(t, I.morphEnd, I.morphEnd + 0.9);
   if (grow <= 0.001) return null;
+  return <IAGlyph grow={grow} m={m} bar={bar} shine={shine} width={600} />;
+}
+
+/** Glyphes « IA » morphés : cercles (m = 0) → lettres (m = 1). viewBox 700 × 560 (origine -20). */
+export function IAGlyph({ grow, m, bar, shine, width }: { grow: number; m: number; bar: number; shine: number; width: number }) {
   return (
-    <svg viewBox="-20 -20 700 560" width={600} height={480} style={{ overflow: 'visible' }}>
+    <svg viewBox="-20 -20 700 560" width={width} height={(width * 560) / 700} style={{ overflow: 'visible', display: 'block' }}>
       <defs>
         <linearGradient id="ia-grad" x1="0" y1="0" x2="660" y2="520" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor={COLORS.cyan} />

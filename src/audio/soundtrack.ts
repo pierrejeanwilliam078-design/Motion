@@ -20,6 +20,8 @@ export type Graph = {
 };
 
 export type ScheduleOptions = {
+  /** Fenêtre de programmation [start, end[ (lecture live par tranches) ; absente = toute la bande-son. */
+  window?: { start: number; end: number };
   /** Instant de la timeline (s) à partir duquel jouer. */
   from?: number;
   /** Instant du contexte audio correspondant à `from`. */
@@ -29,13 +31,13 @@ export type ScheduleOptions = {
   voiceCues?: VoiceCue[];
 };
 
-const midi = (n: number) => 440 * 2 ** ((n - 69) / 12);
+export const midi = (n: number) => 440 * 2 ** ((n - 69) / 12);
 
 // ---------------------------------------------------------------------------
 // Ressources partagées (bruit, réverbération), reproductibles grâce à une graine.
 
 const noiseCache = new WeakMap<Ctx, AudioBuffer>();
-function noise(ctx: Ctx) {
+export function noise(ctx: Ctx) {
   let buf = noiseCache.get(ctx);
   if (!buf) {
     buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
@@ -100,12 +102,24 @@ export function createGraph(ctx: Ctx, destination: AudioNode = ctx.destination):
 // ---------------------------------------------------------------------------
 // Ordonnanceur : convertit le temps de la timeline en temps du contexte audio.
 
-class Sched {
+export class Sched {
   sources: AudioScheduledSourceNode[] = [];
-  constructor(public ctx: Ctx, public from: number, public when: number) {}
-  /** Temps contexte pour un événement démarrant à `s` (null si déjà passé). */
+  /** Vrai pour la première tranche : c'est elle qui pose les automations (gains, filtres). */
+  first: boolean;
+  private lower: number;
+  constructor(
+    public ctx: Ctx,
+    public from: number,
+    public when: number,
+    winStart = from,
+    public winEnd = Infinity,
+  ) {
+    this.first = winStart <= from + 1e-6;
+    this.lower = this.first ? from - 0.001 : winStart;
+  }
+  /** Temps contexte pour un événement démarrant à `s` (null s'il est passé ou hors de la tranche). */
   at(s: number) {
-    return s < this.from - 0.001 ? null : this.when + (s - this.from);
+    return s < this.lower || s >= this.winEnd ? null : this.when + (s - this.from);
   }
   track<T extends AudioScheduledSourceNode>(n: T) {
     this.sources.push(n);
@@ -133,13 +147,13 @@ class Sched {
 }
 
 /** Enveloppe percussive : 0 → peak en `a`, puis décroissance exponentielle sur `d`. */
-function perc(g: AudioParam, at: number, peak: number, a: number, d: number) {
+export function perc(g: AudioParam, at: number, peak: number, a: number, d: number) {
   g.setValueAtTime(0.0001, at);
   g.linearRampToValueAtTime(peak, at + a);
   g.exponentialRampToValueAtTime(0.0001, at + a + d);
 }
 
-function pan(s: Sched, value: number) {
+export function pan(s: Sched, value: number) {
   const p = s.ctx.createStereoPanner();
   p.pan.value = value;
   return p;
@@ -148,10 +162,11 @@ function pan(s: Sched, value: number) {
 // ---------------------------------------------------------------------------
 // Instruments de la musique (electronic ambient, 108 BPM).
 
-function pad(s: Sched, g: Graph, start: number, dur: number, notes: number[], cutoff = 1500, level = 1) {
+export function pad(s: Sched, g: Graph, start: number, dur: number, notes: number[], cutoff = 1500, level = 1) {
   const t0 = Math.max(start, s.from);
   if (start + dur + 1.6 <= s.from) return;
-  const at = s.at(t0)!;
+  const at = s.at(t0);
+  if (at === null) return;
   const remaining = start + dur - t0;
   const attack = start >= s.from ? 1.1 : 0.25;
   const env = s.ctx.createGain();
@@ -181,7 +196,7 @@ function pad(s: Sched, g: Graph, start: number, dur: number, notes: number[], cu
   });
 }
 
-function bass(s: Sched, g: Graph, t: number, note: number, dur: number, vel = 1) {
+export function bass(s: Sched, g: Graph, t: number, note: number, dur: number, vel = 1) {
   const at = s.at(t);
   if (at === null) return;
   const lp = s.ctx.createBiquadFilter();
@@ -201,7 +216,7 @@ function bass(s: Sched, g: Graph, t: number, note: number, dur: number, vel = 1)
   s.start(o2, at, at + dur + 0.02);
 }
 
-function kick(s: Sched, g: Graph, t: number, vel = 1) {
+export function kick(s: Sched, g: Graph, t: number, vel = 1) {
   const at = s.at(t);
   if (at === null) return;
   const o = s.osc('sine', 140);
@@ -213,7 +228,7 @@ function kick(s: Sched, g: Graph, t: number, vel = 1) {
   s.start(o, at, at + 0.4);
 }
 
-function hat(s: Sched, g: Graph, t: number, vel: number, seed: number) {
+export function hat(s: Sched, g: Graph, t: number, vel: number, seed: number) {
   const at = s.at(t);
   if (at === null) return;
   const n = s.noise(seed);
@@ -227,7 +242,7 @@ function hat(s: Sched, g: Graph, t: number, vel: number, seed: number) {
   s.start(n, at, at + 0.08);
 }
 
-function rim(s: Sched, g: Graph, t: number, seed: number) {
+export function rim(s: Sched, g: Graph, t: number, seed: number) {
   const at = s.at(t);
   if (at === null) return;
   const n = s.noise(seed);
@@ -249,7 +264,7 @@ function rim(s: Sched, g: Graph, t: number, seed: number) {
   s.start(o, at, at + 0.1);
 }
 
-function pluck(s: Sched, g: Graph, t: number, note: number, vel: number, panV: number, decay = 0.38) {
+export function pluck(s: Sched, g: Graph, t: number, note: number, vel: number, panV: number, decay = 0.38) {
   const at = s.at(t);
   if (at === null) return;
   const lp = s.ctx.createBiquadFilter();
@@ -273,7 +288,7 @@ function pluck(s: Sched, g: Graph, t: number, note: number, vel: number, panV: n
   s.start(o2, at, at + decay + 0.05);
 }
 
-function riser(s: Sched, g: Graph, t0: number, t1: number, level = 0.06) {
+export function riser(s: Sched, g: Graph, t0: number, t1: number, level = 0.06) {
   const at = s.at(t0);
   if (at === null) return;
   const d = t1 - t0;
@@ -294,7 +309,7 @@ function riser(s: Sched, g: Graph, t0: number, t1: number, level = 0.06) {
 // ---------------------------------------------------------------------------
 // Effets sonores (sound design UI).
 
-function bell(s: Sched, g: Graph, t: number, note: number, vel: number, decay: number, panV = 0, verb = 0.6) {
+export function bell(s: Sched, g: Graph, t: number, note: number, vel: number, decay: number, panV = 0, verb = 0.6) {
   const at = s.at(t);
   if (at === null) return;
   const env = s.ctx.createGain();
@@ -318,7 +333,7 @@ function bell(s: Sched, g: Graph, t: number, note: number, vel: number, decay: n
   });
 }
 
-function whoosh(s: Sched, g: Graph, t: number, dur = 0.7, level = 1, dir = 1) {
+export function whoosh(s: Sched, g: Graph, t: number, dur = 0.7, level = 1, dir = 1) {
   const at = s.at(t);
   if (at === null) return;
   const n = s.noise(t * 333);
@@ -342,7 +357,7 @@ function whoosh(s: Sched, g: Graph, t: number, dur = 0.7, level = 1, dir = 1) {
   s.start(n, at, at + dur + 0.02);
 }
 
-function click(s: Sched, g: Graph, t: number, level = 1, pitch = 2400) {
+export function click(s: Sched, g: Graph, t: number, level = 1, pitch = 2400) {
   const at = s.at(t);
   if (at === null) return;
   const o = s.osc('sine', pitch);
@@ -362,7 +377,7 @@ function click(s: Sched, g: Graph, t: number, level = 1, pitch = 2400) {
   s.start(n, at, at + 0.03);
 }
 
-function pop(s: Sched, g: Graph, t: number, level = 1) {
+export function pop(s: Sched, g: Graph, t: number, level = 1) {
   const at = s.at(t);
   if (at === null) return;
   const o = s.osc('sine', 320);
@@ -377,7 +392,7 @@ function pop(s: Sched, g: Graph, t: number, level = 1) {
   s.start(o, at, at + 0.2);
 }
 
-function typing(s: Sched, g: Graph, t0: number, t1: number, level = 1) {
+export function typing(s: Sched, g: Graph, t0: number, t1: number, level = 1) {
   let t = t0;
   let i = 0;
   while (t < t1) {
@@ -399,7 +414,7 @@ function typing(s: Sched, g: Graph, t0: number, t1: number, level = 1) {
   }
 }
 
-function sparkle(s: Sched, g: Graph, t: number, level = 1, count = 7) {
+export function sparkle(s: Sched, g: Graph, t: number, level = 1, count = 7) {
   const scale = [89, 91, 93, 96, 98, 101, 103]; // F6 G6 A6 C7 D7 F7 G7
   for (let i = 0; i < count; i++) {
     bell(s, g, t + i * 0.048, scale[Math.floor(rand(i + t * 10) * scale.length)], (0.55 - i * 0.05) * level, 0.55, (rand(i + 50) - 0.5) * 1.2, 0.8);
@@ -418,7 +433,7 @@ function sparkle(s: Sched, g: Graph, t: number, level = 1, count = 7) {
   s.start(n, at, at + 0.65);
 }
 
-function paper(s: Sched, g: Graph, t: number, level = 1) {
+export function paper(s: Sched, g: Graph, t: number, level = 1) {
   const at = s.at(t);
   if (at === null) return;
   const n = s.noise(t * 57);
@@ -438,7 +453,7 @@ function paper(s: Sched, g: Graph, t: number, level = 1) {
   s.start(n, at, at + 0.3);
 }
 
-function tone(s: Sched, g: Graph, t: number, notes: number[], level: number, attack: number, decay: number) {
+export function tone(s: Sched, g: Graph, t: number, notes: number[], level: number, attack: number, decay: number) {
   const at = s.at(t);
   if (at === null) return;
   const env = s.ctx.createGain();
@@ -456,7 +471,7 @@ function tone(s: Sched, g: Graph, t: number, notes: number[], level: number, att
   });
 }
 
-function impact(s: Sched, g: Graph, t: number, level = 1) {
+export function impact(s: Sched, g: Graph, t: number, level = 1) {
   const at = s.at(t);
   if (at === null) return;
   const o = s.osc('sine', 90);
@@ -483,7 +498,7 @@ function impact(s: Sched, g: Graph, t: number, level = 1) {
 // ---------------------------------------------------------------------------
 // Partition.
 
-const CHORDS: Record<string, { bass: number; pad: number[] }> = {
+export const CHORDS: Record<string, { bass: number; pad: number[] }> = {
   F: { bass: 41, pad: [57, 60, 64, 67] }, // Fmaj9
   Dm: { bass: 38, pad: [53, 57, 60, 64] }, // Dm9
   Bb: { bass: 34, pad: [50, 53, 57, 60] }, // Bbmaj7
@@ -588,7 +603,7 @@ export function duckLevel(t: number, cues: VoiceCue[] | undefined, depth = 0.38)
   return level;
 }
 
-function automateDuck(s: Sched, g: Graph, cues?: VoiceCue[]) {
+export function automateDuck(s: Sched, g: Graph, cues?: VoiceCue[]) {
   const p = g.duck.gain;
   p.cancelScheduledValues(0);
   p.setValueAtTime(duckLevel(s.from, cues), s.when);
@@ -660,12 +675,12 @@ function scheduleSfx(s: Sched, g: Graph) {
 
 /** Programme toute la bande-son à partir de `from` ; retourne les sources pour pouvoir les arrêter. */
 export function scheduleSoundtrack(ctx: Ctx, g: Graph, opts: ScheduleOptions) {
-  const s = new Sched(ctx, opts.from ?? 0, opts.when);
+  const s = new Sched(ctx, opts.from ?? 0, opts.when, opts.window?.start, opts.window?.end);
   if (opts.music !== false) {
     scheduleMusic(s, g);
-    automateMusicBus(s, g);
+    if (s.first) automateMusicBus(s, g);
   }
-  automateDuck(s, g, opts.voiceCues);
+  if (s.first) automateDuck(s, g, opts.voiceCues);
   if (opts.sfx !== false) scheduleSfx(s, g);
   return s.sources;
 }
@@ -673,10 +688,12 @@ export function scheduleSoundtrack(ctx: Ctx, g: Graph, opts: ScheduleOptions) {
 // ---------------------------------------------------------------------------
 // Export hors ligne (utilisé par scripts/render-soundtrack.mjs dans Chromium headless).
 
-export async function renderStem(kind: 'music' | 'sfx' | 'mix', sampleRate = 48000) {
+export type Scheduler = (ctx: Ctx, g: Graph, opts: ScheduleOptions) => AudioScheduledSourceNode[];
+
+export async function renderStem(kind: 'music' | 'sfx' | 'mix', schedule: Scheduler = scheduleSoundtrack, sampleRate = 48000) {
   const ctx = new OfflineAudioContext(2, Math.ceil(VIDEO.duration * sampleRate), sampleRate);
   const g = createGraph(ctx);
-  scheduleSoundtrack(ctx, g, { from: 0, when: 0, music: kind !== 'sfx', sfx: kind !== 'music' });
+  schedule(ctx, g, { from: 0, when: 0, music: kind !== 'sfx', sfx: kind !== 'music' });
   const buffer = await ctx.startRendering();
   return encodeWav(buffer);
 }
