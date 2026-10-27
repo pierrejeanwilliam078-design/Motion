@@ -8,9 +8,10 @@ Tout est généré par le code : animation (canvas HTML), bande-son (synthèse P
 | V1 « Signal » | [`dist/open-days-teaser.mp4`](dist/open-days-teaser.mp4) | Futuriste néon : noir, bleu électrique, violet, cyan ; glitch, warp, électro 120 BPM |
 | V2 « De la graine au réseau » | [`dist/open-days-teaser-v2.mp4`](dist/open-days-teaser-v2.mp4) | Palette du logo JADE : vert `#116D30`, gris `#9B9C97`, blanc, noir ; révélations par masque, plante-logo, trap organique 100 BPM |
 | V3 « Trailer » (9:16, voix off) | [`dist/open-days-trailer-9x16.mp4`](dist/open-days-trailer-9x16.mp4) | Bande-annonce de cinéma pour Reels/TikTok : voix off ElevenLabs, orchestre hybride synthétisé, palette JADE |
+| V5 « Trailer 3D » (9:16, voix off) | [`dist/open-days-trailer-9x16-v5.mp4`](dist/open-days-trailer-9x16-v5.mp4) | Même son que la V3 ; illustration 3D (three.js) en vert et gris du logo, sans photo |
 | V4 « Trailer photos » (9:16, voix off) | [`dist/open-days-trailer-9x16-v4.mp4`](dist/open-days-trailer-9x16-v4.mp4) | Même son que la V3 ; cartons Cinzel sur noir, texture pellicule, bandes cinéma, deux photos réelles de JADE (une apparition chacune) |
 
-V1 et V2 sont en 1920×1080, V3 et V4 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
+V1 et V2 sont en 1920×1080, V3, V4 et V5 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
 
 ## V1 « Signal » — découpage
 
@@ -75,6 +76,21 @@ Chaque photo n'apparaît qu'une seule fois. Originaux dans `assets/photos/`, ver
 node src/render.js --page src/v3/trailer-v4.html --audio build/soundtrack-v3.wav --out dist/open-days-trailer-9x16-v4.mp4
 ```
 
+## V5 « Trailer 3D » — ce qui change
+
+Même découpage, même voix off et même musique que la V3. L'image est une vraie scène 3D (three.js r147, `src/v3/lib/`, licence MIT), uniquement en vert `#116D30` / `#2FA455` et gris `#9B9C97` / `#D9DAD6` :
+
+- 0 – 5 s : une graine verte lumineuse bat au rythme du cœur, un anneau gris en croissant (celui du logo) tourne autour ;
+- 5 – 10 s : des cubes et des sphères (les idées) apparaissent et se relient à la graine, caméra en orbite ;
+- 10 – 16 s : studio gris clair, plateau tournant avec un ordinateur (code), une puce, Madagascar en relief, puis une ampoule (INNOVER), le symbole de partage (PARTAGER) et une fusée qui décolle (INSPIRER) ;
+- 16 – 23 s : salle de conférence 3D (scène, écran, public en silhouettes), la lumière baisse et la caméra fonce vers l'écran ;
+- 23,5 – 29 s : l'emblème du logo se construit en 3D (anneau, tige, trois feuilles) au-dessus d'OPEN DAYS en lettres en relief ;
+- 29 – 35 s : studio clair, OPEN DAYS en relief vert, logo JADE officiel sans retouche, textes de clôture.
+
+```bash
+node src/render.js --page src/v3/trailer-v5.html --audio build/soundtrack-v3.wav --out dist/open-days-trailer-9x16-v5.mp4
+```
+
 ## Fichiers
 
 - `src/timeline.js`, `src/v2/timeline.js` — instants clés partagés par l'image et le son (modifier ici pour décaler un impact).
@@ -111,4 +127,4 @@ ffmpeg -i build/soundtrack-v3.wav -c:a libmp3lame -b:a 192k src/v3/media/trailer
 node src/render.js --stills 3.6,12.4,31.5            # -> build/still-*.jpg
 ```
 
-Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2), `http://localhost:8000/src/v3/trailer.html` (V3) ou `http://localhost:8000/src/v3/trailer-v4.html` (V4).
+Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2), `http://localhost:8000/src/v3/trailer.html` (V3), `http://localhost:8000/src/v3/trailer-v4.html` (V4) ou `http://localhost:8000/src/v3/trailer-v5.html` (V5).

@@ -1,0 +1,577 @@
+<meta charset="utf-8">
+<title>Open Days Trailer 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap">
+<style>
+  /* Version 5 : illustration 3D en vert et gris, construite autour de la pousse et de l'anneau du logo JADE. */
+  :root {
+    --bg: #e4e5e1;          /* gris clair studio */
+    --panel: #d6d7d2;
+    --line: #bfc0bb;
+    --fg: #1b1d1b;
+    --muted: #5d5e5a;
+    --accent: #116d30;      /* vert du logo */
+    --font: Inter, system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #141714; --panel: #1d211d; --line: #2c322d; --fg: #eef0ec; --muted: #9b9c97; --accent: #2fa455; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #141714; --panel: #1d211d; --line: #2c322d; --fg: #eef0ec; --muted: #9b9c97; --accent: #2fa455; color-scheme: dark; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--font); }
+  .wrap { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 420px); gap: 32px; justify-content: center; align-items: start;
+          padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .stage { display: grid; gap: 14px; justify-items: center; min-width: 0; }
+  canvas#c { display: block; height: min(78vh, 900px); aspect-ratio: 9 / 16; max-width: 100%; background: #1b1d1b; border-radius: 6px; }
+  canvas#gl { display: none; }
+  .controls { width: 100%; max-width: min(calc(min(78vh, 900px) * 9 / 16), 100%); display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+  button.play { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 16px; cursor: pointer; }
+  button.play:focus-visible, input:focus-visible, .scene:focus-visible, .lines li:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .time { font: 600 13px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .vol { display: flex; gap: 8px; align-items: center; color: var(--muted); font: 700 11px var(--font); letter-spacing: .12em; }
+  .vol input { width: 90px; }
+  .side { display: grid; gap: 20px; min-width: 0; }
+  .eyebrow { font: 700 12px var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin: 0; }
+  h1 { font: 900 30px/1.12 var(--font); margin: 6px 0 8px; text-wrap: balance; }
+  .lede { color: var(--muted); margin: 0; }
+  .track { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .scene { border: 0; border-radius: 4px; background: var(--panel); color: var(--muted); padding: 9px 10px; text-align: left; cursor: pointer; font: 700 12px var(--font); min-width: 0; }
+  .scene.on { background: var(--accent); color: #fff; }
+  .lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .lines li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; padding: 8px 10px; background: var(--panel); border-radius: 4px; border-left: 3px solid transparent; cursor: pointer; }
+  .lines li.on { border-left-color: var(--accent); color: var(--fg); font-weight: 600; }
+  .lines .ts { font: 600 12px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .note { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; }
+  body.render .wrap > :not(.stage), body.render .controls { display: none; }
+  body.render { overflow: hidden; }
+  @media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } canvas#c { height: auto; width: min(100%, 440px); } .controls { max-width: 440px; } }
+</style>
+
+<div class="wrap">
+  <div class="stage">
+    <canvas id="c" width="1080" height="1920" aria-label="Aperçu animé du trailer Open Days en 3D"></canvas>
+    <canvas id="gl" width="1080" height="1920"></canvas>
+    <div class="controls">
+      <button class="play" id="play" type="button" aria-label="Lecture">▶</button>
+      <input id="seek" type="range" min="0" max="35" step="0.01" value="0" aria-label="Position dans le trailer">
+      <span class="time" id="time">00:00 / 00:35</span>
+      <span></span>
+      <label class="vol" for="vol">VOLUME <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9"></label>
+      <span></span>
+    </div>
+  </div>
+  <aside class="side">
+    <div>
+      <p class="eyebrow">ONG JADE Madagascar · 9:16 · 35 s</p>
+      <h1>Open Days, prochaine édition</h1>
+      <p class="lede">Version illustration 3D en vert et gris : la pousse et l'anneau du logo JADE en relief, des objets illustrés et une salle de conférence en 3D. Même voix off et même musique de trailer.</p>
+    </div>
+    <div class="track" id="track" role="group" aria-label="Scènes"></div>
+    <ul class="lines" id="lines" aria-label="Voix off"></ul>
+    <p class="note">Le logo officiel OPEN DAYS n'a pas été fourni : le titre est en lettres 3D en attendant. Le logo JADE de l'écran final est le fichier officiel, sans retouche.</p>
+  </aside>
+</div>
+<audio id="audio" src="media/trailer-audio.mp3" preload="auto"></audio>
+
+<script src="timeline.js"></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/RoundedBoxGeometry.js"></script>
+<script src="lib/FontLoader.js"></script>
+<script src="lib/TextGeometry.js"></script>
+<script>
+// Même découpage, même voix off et même musique que la V3 (timeline.js). Image : scène 3D three.js + calque 2D pour les textes.
+const TL = window.TIMELINE;
+const W = TL.width, H = TL.height, CX = W / 2;
+const HEX = { green: 0x116d30, leaf: 0x2fa455, deep: 0x0a4520, gray: 0x9b9c97, light: 0xd9dad6, dark: 0x5d5e5a, white: 0xf4f5f2 };
+const CSS = { green: '#116d30', leaf: '#2fa455', gray: '#9b9c97', ink: '#1b1d1b', white: '#ffffff' };
+const SANS = 'Inter, system-ui, sans-serif';
+
+const out = document.getElementById('c'), ctx = out.getContext('2d'), glc = document.getElementById('gl');
+const jade = new Image(); jade.src = 'media/jade-logo.png';
+let S = 1;
+
+// ------------------------------------------------------------------ utilitaires
+function hash(n) {
+  n = (n | 0) ^ 0x9e3779b9; n = Math.imul(n ^ (n >>> 16), 0x85ebca6b); n = Math.imul(n ^ (n >>> 13), 0xc2b2ae35); n ^= n >>> 16;
+  return (n >>> 0) / 4294967296;
+}
+function rng(seed) { let i = 0; return () => hash(seed * 7919 + (i++) * 104729); }
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOutExpo = k => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
+const eOutCubic = k => 1 - Math.pow(1 - k, 3);
+const eInCubic = k => k * k * k;
+const eInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const eOutBack = k => (k <= 0 ? 0 : 1 + 2.7 * Math.pow(k - 1, 3) + 1.7 * Math.pow(k - 1, 2));
+const imp = (t, t0, d) => (t >= t0 ? Math.exp(-(t - t0) * d) : 0);
+const pop = (t, a, d = 0.45) => eOutBack(prog(t, a, a + d));
+
+// ------------------------------------------------------------------ moteur 3D
+THREE.ColorManagement.legacyMode = false;   // les couleurs hexadécimales sont lues en sRGB : vert et gris exacts du logo
+const renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.NoToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x000000, 16, 45);
+const camera = new THREE.PerspectiveCamera(40, W / H, 0.1, 200);
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0x6b6c68, 0.6); scene.add(hemi);
+const key = new THREE.DirectionalLight(0xffffff, 1.2);
+key.position.set(5, 12, 8); key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.radius = 4;
+Object.assign(key.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 50 });
+scene.add(key);
+const rim = new THREE.DirectionalLight(HEX.leaf, 0.0); rim.position.set(-6, 6, -8); scene.add(rim);
+const glowLight = new THREE.PointLight(HEX.leaf, 0, 12); scene.add(glowLight);
+
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.95 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: o.r ?? 0.55, metalness: o.m ?? 0.05,
+  emissive: o.e ?? 0x000000, emissiveIntensity: o.ei ?? 1, transparent: o.op != null, opacity: o.op ?? 1 });
+const MAT = { green: mat(HEX.green, { r: 0.4 }), leaf: mat(HEX.leaf, { r: 0.45 }), deep: mat(HEX.deep), gray: mat(HEX.gray), light: mat(HEX.light),
+  dark: mat(HEX.dark), white: mat(HEX.white, { r: 0.4 }), glow: mat(HEX.leaf, { e: HEX.leaf, ei: 1.2, r: 0.3 }) };
+function mesh(geo, material, parent, pos = [0, 0, 0]) {
+  const m = new THREE.Mesh(geo, material); m.castShadow = true; m.receiveShadow = true; m.position.set(...pos); parent.add(m); return m;
+}
+const rbox = (w, h, d, r = 0.08) => new THREE.RoundedBoxGeometry(w, h, d, 4, r);
+function group(parent = scene) { const g = new THREE.Group(); parent.add(g); return g; }
+function canvasTexture(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const tx = new THREE.CanvasTexture(c); tx.encoding = THREE.sRGBEncoding; return tx;
+}
+
+// ------------------------------------------------------------------ éléments du logo en 3D
+function leafGeometry(len, wid) {
+  const s = new THREE.Shape();
+  s.moveTo(0, 0); s.quadraticCurveTo(len * 0.45, wid, len, 0); s.quadraticCurveTo(len * 0.55, -wid * 0.55, 0, 0);
+  const g = new THREE.ExtrudeGeometry(s, { depth: 0.08, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: 3, curveSegments: 24 });
+  g.translate(0, 0, -0.04); return g;
+}
+// Anneau en croissant, épais en bas à droite comme l'ellipse grise du logo, posé à plat.
+function swooshGeometry(rx, rz, thick, a0 = -1.35, a1 = 3.7) {
+  const outer = [], inner = [], n = 120;
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + (a1 - a0) * i / n, th = thick * Math.pow(Math.sin(Math.PI * i / n), 0.9) + 0.02;
+    outer.push(new THREE.Vector2((rx + th / 2) * Math.cos(a), (rz + th / 2) * Math.sin(a)));
+    inner.push(new THREE.Vector2((rx - th / 2) * Math.cos(a), (rz - th / 2) * Math.sin(a)));
+  }
+  const s = new THREE.Shape([...outer, ...inner.reverse()]);
+  const g = new THREE.ExtrudeGeometry(s, { depth: 0.16, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: 2, curveSegments: 4 });
+  g.rotateX(Math.PI / 2); return g;
+}
+function makeEmblem(parent) {
+  const g = group(parent);
+  const ring = mesh(swooshGeometry(2.4, 1.15, 0.5), MAT.gray, g, [0, 0, 0]);
+  const curve = new THREE.CatmullRomCurve3([[-1.25, 0, 0.75], [-0.85, 1.1, 0.3], [-0.55, 2.3, 0.05], [-0.35, 3.3, 0]].map(p => new THREE.Vector3(...p)));
+  const stemGeo = new THREE.TubeGeometry(curve, 64, 0.07, 10);
+  const stem = mesh(stemGeo, MAT.green, g);
+  const leafAt = (u, len, wid, ang) => {
+    const p = curve.getPoint(u), pivot = group(g); pivot.position.copy(p);
+    const m = mesh(leafGeometry(len, wid), MAT.green, pivot); m.rotation.z = ang; pivot.rotation.y = 0.25; return pivot;
+  };
+  const leaves = [leafAt(0.55, 1.15, 0.42, 2.25), leafAt(0.98, 1.45, 0.5, 1.05), leafAt(0.76, 1.15, 0.4, 0.45)];
+  return { g, ring, stem, stemCount: stemGeo.index.count, leaves };
+}
+function growEmblem(e, ringK, stemK, leafK) {
+  e.ring.scale.setScalar(Math.max(0.001, ringK));
+  e.ring.rotation.y = (1 - ringK) * -1.6;
+  e.stem.geometry.setDrawRange(0, Math.floor(e.stemCount * clamp(stemK) / 6) * 6);
+  e.stem.visible = stemK > 0.01;
+  e.leaves.forEach((l, i) => l.scale.setScalar(Math.max(0.001, leafK[i])));
+}
+
+// ------------------------------------------------------------------ scène 1 : la graine et l'anneau
+const S1 = group();
+const seed = mesh(new THREE.SphereGeometry(0.5, 48, 32), MAT.glow, S1, [0, 1.6, 0]);
+const orbit = mesh(swooshGeometry(2.0, 2.0, 0.35), MAT.gray, S1, [0, 1.6, 0]);
+const DUST = (() => { const r = rng(3), a = []; for (let i = 0; i < 46; i++) { const m = mesh(rbox(0.18, 0.18, 0.18, 0.04), i % 3 ? MAT.gray : MAT.green, S1, [(r() - 0.5) * 12, r() * 9, (r() - 0.5) * 10 - 2]); m.userData = { y: m.position.y, s: 0.2 + r() * 0.5, p: r() * 6 }; a.push(m); } return a; })();
+
+// ------------------------------------------------------------------ scène 2 : les idées se connectent
+const S2 = group();
+const HUB = new THREE.Vector3(0, 2.4, 0);
+const hubMesh = mesh(new THREE.SphereGeometry(0.42, 40, 24), MAT.glow, S2, [HUB.x, HUB.y, HUB.z]);
+const IDEAS = (() => {
+  const n = 30, a = [];
+  for (let i = 0; i < n; i++) {
+    const y = 1 - (i / (n - 1)) * 2, rad = Math.sqrt(1 - y * y), th = i * 2.399963;
+    const p = new THREE.Vector3(Math.cos(th) * rad * 3.1, y * 3.1, Math.sin(th) * rad * 3.1).add(HUB);
+    const geo = i % 2 ? new THREE.SphereGeometry(0.24, 24, 16) : rbox(0.42, 0.42, 0.42, 0.1);
+    const m = mesh(geo, [MAT.green, MAT.gray, MAT.leaf, MAT.light][i % 4], S2, [p.x, p.y, p.z]);
+    a.push(m);
+  }
+  return a;
+})();
+const LINKS = (() => {
+  const a = [], geo = new THREE.CylinderGeometry(0.035, 0.035, 1, 8);
+  geo.translate(0, 0.5, 0);
+  const add = (from, to, k) => { const m = mesh(geo, MAT.leaf, S2); m.userData = { from, to, k }; a.push(m); };
+  IDEAS.forEach((p, i) => { if (i % 3 === 0) add(p.position, HUB, i); });
+  IDEAS.forEach((p, i) => IDEAS.forEach((q, j) => { if (j > i && p.position.distanceTo(q.position) < 1.9) add(p.position, q.position, i + j); }));
+  return a;
+})();
+function stretch(m, a, b, k) {
+  const d = new THREE.Vector3().subVectors(b, a), len = d.length() * k;
+  m.position.copy(a); m.scale.set(1, Math.max(0.001, len), 1);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  m.visible = k > 0.001;
+}
+
+// ------------------------------------------------------------------ scène 3 : objets illustrés sur plateau tournant
+const S3 = group();
+const platform = mesh(new THREE.CylinderGeometry(3.0, 3.1, 0.35, 72), MAT.light, S3, [0, 0.17, 0]);
+const turn = group(S3); turn.position.y = 0.35;
+function item() { const g = group(turn); g.visible = false; return g; }
+const codeTex = canvasTexture(640, 400, (g, w, h) => {
+  g.fillStyle = '#1b1d1b'; g.fillRect(0, 0, w, h);
+  const lines = [['#9b9c97', '// OPEN DAYS'], ['#2fa455', 'const jeunesse ='], ['#ffffff', "  new Communaute('MG');"], ['#2fa455', 'for (idee of idees) {'], ['#ffffff', '  idee.partager();'], ['#ffffff', '}'], ['#2fa455', 'innover();']];
+  g.font = '600 34px "JetBrains Mono", monospace';
+  lines.forEach(([c, s], i) => { g.fillStyle = c; g.fillText(s, 36, 64 + i * 48); });
+});
+const LAPTOP = item();
+mesh(rbox(2.8, 0.14, 1.9, 0.06), MAT.gray, LAPTOP, [0, 0.07, 0.2]);
+const lid = group(LAPTOP); lid.position.set(0, 0.14, -0.72); lid.rotation.x = -0.22;
+mesh(rbox(2.8, 1.8, 0.1, 0.06), MAT.dark, lid, [0, 0.9, 0]);
+const screen = new THREE.Mesh(new THREE.PlaneGeometry(2.55, 1.58), new THREE.MeshBasicMaterial({ map: codeTex, toneMapped: false }));
+screen.position.set(0, 0.9, 0.056); lid.add(screen);
+const CHIP = item();
+mesh(rbox(2.0, 0.3, 2.0, 0.1), MAT.green, CHIP, [0, 0.35, 0]);
+for (let s = 0; s < 4; s++) for (let k = 0; k < 6; k++) {
+  const off = -0.75 + k * 0.3, pin = mesh(rbox(0.12, 0.08, 0.42, 0.03), MAT.gray, CHIP);
+  if (s < 2) pin.position.set(off, 0.25, s ? 1.15 : -1.15); else { pin.position.set(s === 2 ? 1.15 : -1.15, 0.25, off); pin.rotation.y = Math.PI / 2; }
+}
+const MDG = [[49.26, -11.95], [49.95, -13.0], [50.17, -14.27], [50.28, -14.9], [50.48, -15.27], [50.2, -15.8], [49.75, -15.45],
+  [49.8, -16.2], [49.58, -16.92], [49.4, -17.38], [49.41, -18.15], [48.98, -19.33], [48.8, -19.9], [48.35, -21.23],
+  [48.02, -22.15], [47.83, -22.82], [47.6, -23.35], [46.98, -25.03], [46.3, -25.18], [45.15, -25.6], [44.6, -25.3],
+  [43.95, -24.68], [43.67, -23.35], [43.37, -21.75], [44.28, -20.28], [44.03, -18.07], [44.4, -16.2], [45.3, -16.1],
+  [46.32, -15.72], [47.0, -15.3], [47.75, -14.63], [48.4, -13.7], [48.9, -13.0], [49.3, -12.3]];
+const CITIES = [[47.52, -18.91], [49.40, -18.15], [46.32, -15.72], [49.29, -12.28], [43.67, -23.35], [47.09, -21.45], [46.99, -25.03]];
+const mdgXY = ([lon, lat]) => [(lon - 46.9) * 0.22, (lat + 18.75) * 0.22 + 1.75];
+const MADA = item();
+const island = new THREE.ExtrudeGeometry(new THREE.Shape(MDG.map(p => new THREE.Vector2(...mdgXY(p)))), { depth: 0.35, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.05, bevelSegments: 3 });
+mesh(island, MAT.green, MADA, [0, 0, -0.17]);
+CITIES.forEach((c, i) => {
+  const [x, y] = mdgXY(c);
+  mesh(new THREE.SphereGeometry(i ? 0.09 : 0.14, 16, 12), i ? MAT.white : MAT.glow, MADA, [x, y, 0.3]);
+  mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.2, 8).rotateX(Math.PI / 2), MAT.gray, MADA, [x, y, 0.2]);
+});
+const BULB = item();
+mesh(new THREE.SphereGeometry(0.95, 48, 32), mat(HEX.light, { op: 0.45, r: 0.1 }), BULB, [0, 2.0, 0]);
+const filament = mesh(new THREE.SphereGeometry(0.42, 32, 24), MAT.glow, BULB, [0, 2.0, 0]);
+for (let k = 0; k < 3; k++) mesh(new THREE.CylinderGeometry(0.5 - k * 0.04, 0.5 - k * 0.04, 0.16, 32), k % 2 ? MAT.dark : MAT.gray, BULB, [0, 0.95 - k * 0.18, 0]);
+mesh(new THREE.CylinderGeometry(0.38, 0.5, 0.25, 32), MAT.gray, BULB, [0, 1.15, 0]);
+const SHARE = item();
+const sharePts = [[-1.0, 1.0, 0], [1.0, 1.9, 0], [1.0, 0.6, 0]].map(p => new THREE.Vector3(...p));
+sharePts.forEach((p, i) => mesh(new THREE.SphereGeometry(i ? 0.42 : 0.5, 40, 24), i ? MAT.gray : MAT.green, SHARE, [p.x, p.y, p.z]));
+[[0, 1], [0, 2]].forEach(([a, b]) => { const m = mesh(new THREE.CylinderGeometry(0.1, 0.1, 1, 16).translate(0, 0.5, 0), MAT.leaf, SHARE); stretch(m, sharePts[a], sharePts[b], 1); });
+const ROCKET = item();
+const rocketBody = group(ROCKET);
+mesh(new THREE.CapsuleGeometry(0.45, 1.5, 12, 32), MAT.white, rocketBody, [0, 1.5, 0]);
+mesh(new THREE.ConeGeometry(0.46, 0.7, 32), MAT.green, rocketBody, [0, 2.75, 0]);
+mesh(new THREE.TorusGeometry(0.2, 0.06, 12, 32), MAT.gray, rocketBody, [0, 1.85, 0.43]);
+mesh(new THREE.CircleGeometry(0.2, 32), MAT.deep, rocketBody, [0, 1.85, 0.44]);
+for (let k = 0; k < 3; k++) { const f = mesh(rbox(0.08, 0.7, 0.6, 0.03), MAT.green, rocketBody); const a = k / 3 * Math.PI * 2; f.position.set(Math.sin(a) * 0.45, 0.75, Math.cos(a) * 0.45); f.rotation.y = a; }
+const flame = mesh(new THREE.ConeGeometry(0.32, 1.0, 24).rotateX(Math.PI), MAT.glow, rocketBody, [0, 0.1, 0]);
+const ITEMS = [LAPTOP, CHIP, MADA, BULB, SHARE, ROCKET];
+
+// ------------------------------------------------------------------ scène 4 : la salle de conférence
+const S4 = group();
+mesh(rbox(11, 0.7, 3.4, 0.12), MAT.light, S4, [0, 0.35, -7]);
+mesh(rbox(8.4, 4.8, 0.3, 0.14), MAT.dark, S4, [0, 3.9, -8.4]);
+const stageTex = canvasTexture(840, 480, (g, w, h) => {
+  const gr = g.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, w / 1.6); gr.addColorStop(0, '#2fa455'); gr.addColorStop(1, '#0a4520');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 10; g.lineCap = 'round';
+  g.beginPath(); g.ellipse(w / 2, h * 0.72, 210, 70, -0.12, -1.3, 3.7); g.stroke();
+  g.fillStyle = '#fff';
+  const lf = (x, y, a, l) => { g.save(); g.translate(x, y); g.rotate(a); g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(l * 0.45, -l * 0.35, l, 0); g.quadraticCurveTo(l * 0.55, l * 0.2, 0, 0); g.fill(); g.restore(); };
+  g.beginPath(); g.moveTo(w / 2 - 70, h * 0.72); g.quadraticCurveTo(w / 2 - 50, h * 0.4, w / 2 - 20, h * 0.18); g.stroke();
+  lf(w / 2 - 45, h * 0.42, -2.3, 110); lf(w / 2 - 22, h * 0.2, -1.0, 140); lf(w / 2 - 30, h * 0.3, -0.4, 110);
+});
+const stageScreen = new THREE.Mesh(new THREE.PlaneGeometry(7.8, 4.3), new THREE.MeshBasicMaterial({ map: stageTex, toneMapped: false }));
+stageScreen.position.set(0, 3.9, -8.24); S4.add(stageScreen);
+mesh(rbox(1.0, 1.3, 0.7, 0.08), MAT.green, S4, [3.2, 1.35, -6.3]);
+function person(parent, x, z, colorMat, h = 1) {
+  const p = group(parent); p.position.set(x, 0, z);
+  mesh(new THREE.CapsuleGeometry(0.3 * h, 0.45 * h, 8, 16), colorMat, p, [0, 0.62 * h + 0.35, 0]);
+  mesh(new THREE.SphereGeometry(0.24 * h, 24, 16), MAT.dark, p, [0, 1.38 * h + 0.35, 0]);
+  return p;
+}
+person(S4, 1.9, -6.6, MAT.leaf, 1.15).position.y = 0.7;
+(() => {   // public : rangées de sièges et silhouettes
+  const r = rng(8), mats = [MAT.green, MAT.gray, MAT.leaf, MAT.light, MAT.deep];
+  for (let row = 0; row < 6; row++) for (let i = 0; i < 9; i++) {
+    const x = -5 + i * 1.25 + (row % 2) * 0.3, z = -3 + row * 1.7;
+    mesh(rbox(0.9, 0.6, 0.8, 0.08), MAT.dark, S4, [x, 0.3, z + 0.25]);
+    if (r() < 0.86) person(S4, x, z, mats[Math.floor(r() * mats.length)]);
+  }
+})();
+const spots = [-3.5, 3.5].map(x => { const s = new THREE.SpotLight(0xffffff, 0, 30, 0.35, 0.6); s.position.set(x, 9, -2); s.target.position.set(0, 1, -7); S4.add(s, s.target); return s; });
+
+// ------------------------------------------------------------------ scène 5 : l'emblème et OPEN DAYS en relief
+const S5 = group();
+const emblem = makeEmblem(S5);
+const TITLE = group(S5);
+let openMesh = null, daysMesh = null;
+const TITLE_MATS = { front: mat(HEX.white, { r: 0.35 }), side: mat(HEX.green, { r: 0.4 }) };
+new THREE.FontLoader().load('lib/helvetiker_bold.typeface.json', font => {
+  const make = s => {
+    const g = new THREE.TextGeometry(s, { font, size: 1.05, height: 0.32, curveSegments: 8, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.035, bevelSegments: 3 });
+    g.center();
+    const m = new THREE.Mesh(g, [TITLE_MATS.front, TITLE_MATS.side]); m.castShadow = true; m.receiveShadow = true; TITLE.add(m); return m;
+  };
+  openMesh = make('OPEN'); daysMesh = make('DAYS');
+  window.fontReady?.();
+});
+const fontPromise = new Promise(r => { window.fontReady = r; });
+
+// ------------------------------------------------------------------ mise en scène 3D selon le temps
+function setBackground(hex) {
+  const c = new THREE.Color(hex);
+  scene.background = c; scene.fog.color.copy(c); ground.material.color.copy(c).multiplyScalar(0.92);
+}
+function look(px, py, pz, tx, ty, tz, roll = 0) { camera.position.set(px, py, pz); camera.lookAt(tx, ty, tz); camera.rotateZ(roll); }
+const mixColor = (a, b, k) => new THREE.Color(a).lerp(new THREE.Color(b), clamp(k)).getHex();
+
+function update3D(t) {
+  [S1, S2, S3, S4, S5].forEach(g => { g.visible = false; });
+  rim.intensity = 0; glowLight.intensity = 0; spots.forEach(s => { s.intensity = 0; });
+  key.intensity = 1.2; hemi.intensity = 0.6;
+  ground.visible = true;
+
+  if (t < TL.circuits) {                         // 1. mystère
+    S1.visible = true; setBackground(0x111511);
+    const hb = Math.max(0, ...TL.heartbeats.map(h => imp(t, h, 3)));
+    seed.scale.setScalar(1 + 0.18 * hb); MAT.glow.emissiveIntensity = 0.6 + 1.6 * hb;
+    glowLight.position.set(0, 1.6, 0.6); glowLight.intensity = 2 + 6 * hb;
+    orbit.rotation.set(0.45, t * 0.6, 0.15); orbit.scale.setScalar(0.8);
+    DUST.forEach(d => { d.position.y = d.userData.y + Math.sin(t * d.userData.s + d.userData.p) * 0.4; d.rotation.set(t * d.userData.s, t * 0.3, 0); });
+    key.intensity = 0.5; hemi.intensity = 0.25; rim.intensity = 1.2;
+    const k = eInOut(prog(t, 0, 5));
+    look(Math.sin(t * 0.2) * 1.2, lerp(3.6, 2.6, k), lerp(14, 9.5, k), 0, 1.7, 0);
+  } else if (t < TL.montage[0]) {                // 2. idées connectées
+    S2.visible = true; setBackground(mixColor(0x111511, 0x1f2520, prog(t, 5, 7)));
+    MAT.glow.emissiveIntensity = 1.2 + 0.6 * Math.sin(t * 4);
+    IDEAS.forEach((m, i) => { m.scale.setScalar(Math.max(0.001, pop(t, 5.0 + i * 0.045, 0.5))); m.rotation.set(t * 0.4 + i, t * 0.3, 0); });
+    LINKS.forEach((l, i) => stretch(l, l.userData.from, l.userData.to, eOutCubic(prog(t, 6.3 + (i % 23) * 0.06, 6.9 + (i % 23) * 0.06))));
+    hubMesh.scale.setScalar(1 + 0.25 * imp(t, TL.s2Text - 0.1, 3));
+    glowLight.position.copy(HUB); glowLight.intensity = 3 + 6 * imp(t, TL.s2Text - 0.1, 2);
+    key.intensity = 0.9; hemi.intensity = 0.5; rim.intensity = 1.0;
+    const a = lerp(-0.7, 0.6, eInOut(prog(t, 5, 10))), r = lerp(11.5, 9.5, prog(t, 5, 10));
+    look(Math.sin(a) * r, 3.4, Math.cos(a) * r, HUB.x, HUB.y - 0.4, HUB.z);
+  } else if (t < TL.sphere) {                    // 3. génération : objets illustrés
+    S3.visible = true; setBackground(0xdcddd9);
+    const cues = [TL.montage[0], TL.montage[1], TL.montage[2], ...TL.words, TL.sphere];
+    ITEMS.forEach((it, i) => {
+      const a = cues[i], b = cues[i + 1];
+      it.visible = t >= a && t < b;
+      if (it.visible) it.scale.setScalar(Math.max(0.001, pop(t, a, 0.4) * (i === 5 ? 1 : 1 - eInCubic(prog(t, b - 0.12, b)))));
+    });
+    turn.rotation.y = Math.sin(t * 1.3) * 0.5;   // balancement : l'objet reste lisible de face
+    MAT.glow.emissiveIntensity = 1.4 + 0.5 * Math.sin(t * 9);
+    filament.scale.setScalar(1 + 0.12 * Math.sin(t * 12));
+    rocketBody.position.y = eInCubic(prog(t, TL.words[2] + 0.35, TL.sphere)) * 9;
+    flame.scale.set(1, 0.8 + 0.4 * Math.abs(Math.sin(t * 30)), 1);
+    flame.visible = t > TL.words[2] + 0.2;
+    look(0, 3.9, 9.8, 0, 1.6 + (t > TL.words[2] ? rocketBody.position.y * 0.5 : 0), 0);
+  } else if (t < TL.silence) {                   // 4. salle de conférence, montée de tension
+    S4.visible = true;
+    const tense = prog(t, TL.s4Text, TL.silence);
+    setBackground(mixColor(0xc9cac5, 0x0f120f, eInOut(prog(t, TL.s4Text - 0.6, TL.s4Text + 1.2))));
+    key.intensity = lerp(1.6, 0.25, tense); hemi.intensity = lerp(0.8, 0.15, tense);
+    spots.forEach((s, i) => { s.intensity = 40 * prog(t, TL.s4Text - 0.4, TL.s4Text + 0.6); s.target.position.set(Math.sin(t * 2.2 + i * 2) * 4, 1, -6); });
+    const d = eInOut(prog(t, TL.sphere, TL.s4Text)), rush = eInCubic(tense);
+    const shake = 0.06 * tense * Math.sin(t * 60);
+    look(lerp(-2.5, 0, d), lerp(5.5, 3.6, d) + shake, lerp(14, 6.5, d) - rush * 8, 0, lerp(2.2, 3.4, d), -7, shake * 0.4);
+  } else if (t >= TL.reveal && t < TL.final) {   // 5. révélation
+    S5.visible = true; setBackground(0x101410);
+    const R = TL.reveal;
+    growEmblem(emblem, eOutExpo(prog(t, R + 0.05, R + 0.8)), eOutCubic(prog(t, R + 0.3, R + 1.0)),
+      [pop(t, R + 0.75), pop(t, R + 0.95), pop(t, R + 1.15)]);
+    emblem.g.position.set(0, 4.1, -0.5); emblem.g.rotation.set(0.5, Math.sin((t - R) * 0.5) * 0.35, 0);   // anneau incliné vers la caméra, comme sur le logo
+    ground.visible = false;
+    TITLE.visible = true; TITLE.position.set(0, 0, 0); TITLE.rotation.y = Math.sin((t - R) * 0.4) * 0.12;
+    TITLE_MATS.front.color.setHex(HEX.white); TITLE_MATS.side.color.setHex(HEX.green);
+    const slam = eOutExpo(prog(t, R, R + 0.5));
+    if (openMesh) { openMesh.position.set(0, 2.55, lerp(9, 0, slam)); daysMesh.position.set(0, 1.15, lerp(9, 0, eOutExpo(prog(t, R + 0.1, R + 0.6)))); }
+    rim.intensity = 2.2; key.intensity = 1.4; hemi.intensity = 0.4;
+    glowLight.position.set(0, 3, 3); glowLight.intensity = 4 + 20 * imp(t, R, 2);
+    const k = prog(t, R, TL.final), push = eInCubic(prog(t, TL.light, TL.final));
+    look(Math.sin(k * 1.2) * 1.4, 3.6, lerp(17.5, 16, k) - push * 10, 0, 3.4, 0);
+  } else if (t >= TL.final) {                    // 6. signature
+    S5.visible = true; setBackground(0xe8e9e5);
+    emblem.g.visible = false; TITLE.visible = true;
+    TITLE_MATS.front.color.setHex(HEX.green); TITLE_MATS.side.color.setHex(HEX.gray);
+    const pulse = imp(t, TL.openPulse, 3);
+    TITLE.rotation.y = Math.sin((t - TL.final) * 0.6) * 0.18; TITLE.scale.setScalar(0.72 * (1 + 0.05 * pulse));
+    if (openMesh) { openMesh.position.set(0, 1.25, 0); daysMesh.position.set(0, -0.15, 0); }
+    TITLE.position.set(0, lerp(-2.6, -0.6, eOutExpo(prog(t, TL.final, TL.final + 0.8))), 0);
+    key.intensity = 1.5; hemi.intensity = 0.9;
+    ground.visible = false;
+    look(0, 0.4, 13.5, 0, -2.6, 0);
+  }
+  if (S5.visible && t < TL.final) emblem.g.visible = true;
+  renderer.render(scene, camera);
+}
+
+// ------------------------------------------------------------------ calque 2D : textes, flashs, logo officiel
+const base = () => ctx.setTransform(S, 0, 0, S, 0, 0);
+function words(s, x, y, o = {}) {
+  const p = o.p ?? 1, outK = o.out ?? 0;
+  if (p <= 0 || outK >= 1) return 0;
+  ctx.save();
+  let size = o.size || 80;
+  const setFont = () => { ctx.font = `${o.weight || 900} ${size}px ${SANS}`; ctx.letterSpacing = (o.spacing ?? 0) + 'px'; };
+  setFont();
+  let full = ctx.measureText(s).width;
+  if (o.maxWidth && full > o.maxWidth) { size *= o.maxWidth / full; setFont(); full = ctx.measureText(s).width; }
+  const parts = s.split(' '), space = ctx.measureText(' ').width;
+  let cx = x - full / 2;
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillStyle = o.color || CSS.white;
+  if (o.shadow) { ctx.shadowColor = o.shadow; ctx.shadowBlur = 24 * S; }
+  parts.forEach((w, i) => {
+    const k = eOutCubic(clamp(p * (parts.length + 1) - i)), ko = eInCubic(clamp(outK * (parts.length + 1) - i));
+    ctx.globalAlpha = k * (1 - ko);
+    ctx.fillText(w, cx, y + (1 - k) * size * 0.5 - ko * size * 0.5);
+    cx += ctx.measureText(w).width + space;
+  });
+  ctx.restore();
+  return full;
+}
+function small(s, x, y, o = {}) {
+  ctx.save(); ctx.font = `${o.weight || 700} ${o.size || 28}px ${SANS}`; ctx.letterSpacing = (o.spacing ?? 8) + 'px';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = o.alpha ?? 1; ctx.fillStyle = o.color || CSS.ink;
+  ctx.fillText(s, x + (o.spacing ?? 8) / 2, y); const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+const STABS = [21.0, 21.5, 22.0, 22.25, 22.5, 22.625, 22.75, 22.875];
+const FLASHES = [[TL.circuits, 0.2, 6], [TL.montage[0], 0.6, 6], [TL.montage[1], 0.25, 8], [TL.montage[2], 0.25, 8], ...TL.words.map(w => [w, 0.35, 8]),
+  [TL.sphere, 0.45, 5], ...STABS.map(s => [s, 0.2, 10]), [TL.reveal, 1.0, 2.6], [TL.final, 0.8, 3]];
+const MONTAGE = ['PROGRAMMATION', 'INTELLIGENCE ARTIFICIELLE', 'JEUNESSE MALGACHE'];
+const WORDS = ['INNOVER', 'PARTAGER', 'INSPIRER'];
+
+function overlay(t) {
+  const o1 = prog(t, 4.5, 4.95);
+  words('QUELQUE CHOSE', CX, 1360, { size: 96, shadow: 'rgba(0,0,0,.7)', p: prog(t, TL.s1Text, TL.s1Text + 0.8), out: o1, maxWidth: 900 });
+  words('SE PRÉPARE…', CX, 1470, { size: 96, shadow: 'rgba(0,0,0,.7)', p: prog(t, TL.s1Text + 0.3, TL.s1Text + 1.1), out: o1, maxWidth: 900 });
+  if (t >= TL.circuits && t < TL.montage[0]) {
+    const o2 = prog(t, 9.6, 9.95);
+    words('LES IDÉES', CX, 1460, { size: 100, shadow: 'rgba(0,0,0,.7)', p: prog(t, TL.s2Text, TL.s2Text + 0.7), out: o2, maxWidth: 900 });
+    words('SE CONNECTENT.', CX, 1570, { size: 100, color: CSS.leaf, shadow: 'rgba(0,0,0,.7)', p: prog(t, TL.s2Text + 0.25, TL.s2Text + 1.0), out: o2, maxWidth: 900 });
+  }
+  if (t >= TL.montage[0] && t < TL.sphere) {
+    const m = TL.montage, w = TL.words;
+    if (t < w[0]) {
+      const i = m.findLastIndex(x => t >= x), b = m[i + 1] ?? w[0];
+      small(MONTAGE[i], CX, 1430, { size: 30, spacing: 10, color: CSS.green, alpha: prog(t, m[i], m[i] + 0.2) * (1 - prog(t, b - 0.1, b)) });
+    } else {
+      const i = w.findLastIndex(x => t >= x), b = w[i + 1] ?? TL.sphere;
+      words(WORDS[i], CX, 1440, { size: 150, color: CSS.green, p: prog(t, w[i], w[i] + 0.25), out: prog(t, b - 0.1, b), maxWidth: 900 });
+    }
+  }
+  if (t >= TL.s4Text && t < TL.silence) {
+    words('UNE NOUVELLE ÉDITION', CX, 1420, { size: 70, p: prog(t, TL.s4Text, TL.s4Text + 0.8), maxWidth: 900, shadow: 'rgba(0,0,0,.6)' });
+    words('APPROCHE.', CX, 1530, { size: 140, color: CSS.white, p: prog(t, TL.s4Text + 0.3, TL.s4Text + 0.9), maxWidth: 900, shadow: 'rgba(0,0,0,.6)' });
+  }
+  if (t >= TL.reveal && t < TL.final) {
+    const e = eOutCubic(prog(t, TL.editionIn, TL.editionIn + 0.8)), oo = prog(t, TL.light, TL.final);
+    const w = small('PROCHAINE ÉDITION', CX, 1500, { size: 46, weight: 800, spacing: lerp(30, 14, eOutExpo(e)), color: CSS.white, alpha: e * (1 - oo) });
+    ctx.save(); ctx.globalAlpha = e * (1 - oo); ctx.fillStyle = CSS.leaf;
+    ctx.fillRect(CX - w / 2 - 90, 1498, 60 * e, 4); ctx.fillRect(CX + w / 2 + 30, 1498, 60 * e, 4); ctx.restore();
+  }
+  if (t >= TL.final) {
+    const ja = eOutCubic(prog(t, TL.jadeIn, TL.jadeIn + 0.8));
+    if (ja > 0 && jade.complete && jade.naturalWidth) {   // logo officiel, sans retouche
+      const h = 330, w = h * jade.naturalWidth / jade.naturalHeight, s = lerp(0.9, 1, eOutBack(prog(t, TL.jadeIn, TL.jadeIn + 0.8))) * (1 + 0.03 * imp(t, TL.ongIn, 2.5));
+      ctx.save(); ctx.globalAlpha = ja; ctx.translate(CX, 930); ctx.scale(s, s); ctx.drawImage(jade, -w / 2, -h / 2, w, h); ctx.restore();
+    }
+    words('ONG JADE MADAGASCAR', CX, 1180, { size: 58, weight: 900, color: CSS.ink, p: prog(t, TL.ongIn, TL.ongIn + 0.6), maxWidth: 900 });
+    const ca = eOutBack(prog(t, TL.comingIn, TL.comingIn + 0.45));
+    if (ca > 0) {
+      ctx.save(); ctx.translate(CX, 1305); ctx.scale(ca, ca); ctx.fillStyle = CSS.green; ctx.beginPath(); ctx.roundRect(-235, -44, 470, 88, 44); ctx.fill(); ctx.restore();
+      small('COMING SOON', CX, 1306, { size: 34, weight: 800, spacing: 10, color: CSS.white, alpha: clamp(ca) });
+    }
+    const sa = eOutCubic(prog(t, TL.connectIn, TL.connectIn + 0.6));
+    if (sa > 0) {
+      const w = small('RESTEZ CONNECTÉS', CX + 20, 1420, { size: 44, weight: 800, spacing: 4, color: CSS.ink, alpha: sa });
+      const ph = ((t - TL.connectIn) * 1.1) % 1, dx = CX + 20 - w / 2 - 32;
+      ctx.save(); ctx.globalAlpha = sa; ctx.fillStyle = CSS.green; ctx.beginPath(); ctx.arc(dx, 1420, 10, 0, 7); ctx.fill();
+      ctx.strokeStyle = CSS.green; ctx.lineWidth = 3; ctx.globalAlpha = sa * (1 - ph); ctx.beginPath(); ctx.arc(dx, 1420, 10 + ph * 26, 0, 7); ctx.stroke(); ctx.restore();
+    }
+  }
+}
+
+function render(t) {
+  if (t >= TL.silence && t < TL.reveal) { base(); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); return; }   // silence brutal
+  update3D(t);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; ctx.filter = 'none'; ctx.globalCompositeOperation = 'source-over';
+  ctx.drawImage(glc, 0, 0, out.width, out.height);
+  base();
+  overlay(t);
+  const f = clamp(FLASHES.reduce((s, [c, g, d]) => s + g * imp(t, c, d), 0));
+  if (f > 0.004) { ctx.fillStyle = `rgba(255,255,255,${f})`; ctx.fillRect(0, 0, W, H); }
+  const v = ctx.createRadialGradient(CX, H / 2, 520, CX, H / 2, 1300);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.35)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  const fade = Math.max(1 - prog(t, 0, 0.5), eInOut(prog(t, TL.fadeOut, TL.duration)));
+  if (fade > 0) { ctx.fillStyle = `rgba(0,0,0,${fade})`; ctx.fillRect(0, 0, W, H); }
+}
+
+function setScale(s) {
+  S = s;
+  out.width = Math.round(W * s); out.height = Math.round(H * s);
+  renderer.setSize(out.width, out.height, false);
+}
+
+// ------------------------------------------------------------------ export image par image / lecteur interactif
+window.ready = Promise.all([document.fonts.load(`900 100px Inter`), document.fonts.load(`700 30px Inter`), jade.decode().catch(() => {}), fontPromise]);
+window.renderFrame = t => render(t);
+
+if (new URLSearchParams(location.search).has('render')) {
+  document.body.classList.add('render');
+  setScale(1);
+} else {
+  const audio = document.getElementById('audio'), btn = document.getElementById('play'), seek = document.getElementById('seek');
+  const timeEl = document.getElementById('time'), vol = document.getElementById('vol');
+  const fmt = s => `00:${String(Math.floor(s)).padStart(2, '0')}`;
+  const SCENES = [[0, 'La graine'], [TL.circuits, 'Les idées'], [TL.montage[0], 'Génération'], [TL.sphere, 'Conférence'], [TL.silence, 'Révélation'], [TL.final, 'Signature']];
+  const track = document.getElementById('track'), list = document.getElementById('lines');
+  let cur = 0, playing = false, clock0 = 0;
+  SCENES.forEach(([s, name], i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'scene'; b.textContent = `${i + 1} · ${name}`;
+    b.onclick = () => go(s + 0.01); track.appendChild(b);
+  });
+  TL.voice.forEach(([a, b, at, text]) => {
+    const li = document.createElement('li'); li.tabIndex = 0;
+    li.innerHTML = `<span class="ts">${at.toFixed(1)} s</span><span></span>`; li.lastChild.textContent = text;
+    li.onclick = () => go(at); li.onkeydown = e => { if (e.key === 'Enter') go(at); };
+    list.appendChild(li);
+  });
+  const fit = () => setScale(Math.min(0.75, (out.getBoundingClientRect().height || 900) * Math.min(2, devicePixelRatio || 1) / H));
+  fit(); addEventListener('resize', () => { fit(); draw(); });
+  const now = () => (playing ? (audio.readyState >= 2 && !audio.paused ? audio.currentTime : (performance.now() - clock0) / 1000) : cur);
+  function sync(t) {
+    seek.value = t; timeEl.textContent = `${fmt(t)} / 00:35`;
+    [...track.children].forEach((b, i) => b.classList.toggle('on', t >= SCENES[i][0] && t < (SCENES[i + 1]?.[0] ?? 99)));
+    [...list.children].forEach((li, i) => { const [a, b, at] = TL.voice[i]; li.classList.toggle('on', t >= at && t < at + (b - a)); });
+  }
+  function draw() { const t = Math.min(now(), TL.duration - 0.001); render(t); sync(t); }
+  function loop() {
+    if (!playing) return;
+    if (now() >= TL.duration) { pause(); cur = 0; draw(); return; }
+    draw(); requestAnimationFrame(loop);
+  }
+  function play() { playing = true; btn.textContent = '❚❚'; btn.setAttribute('aria-label', 'Pause'); audio.currentTime = cur; clock0 = performance.now() - cur * 1000; audio.play().catch(() => {}); requestAnimationFrame(loop); }
+  function pause() { cur = now(); playing = false; audio.pause(); btn.textContent = '▶'; btn.setAttribute('aria-label', 'Lecture'); }
+  function go(t) { const was = playing; if (was) pause(); cur = t; audio.currentTime = t; draw(); if (was) play(); }
+  btn.onclick = () => (playing ? pause() : play());
+  seek.oninput = () => go(Number(seek.value));
+  vol.oninput = () => { audio.volume = Number(vol.value); };
+  audio.volume = Number(vol.value);
+  window.ready.then(() => { cur = 33.6; draw(); });   // image d'accueil : l'écran final
+}
+</script>

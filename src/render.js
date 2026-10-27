@@ -19,7 +19,7 @@ const stills = opt('--stills', null);
 const PAGE = opt('--page', 'src/teaser.html');
 
 // Serveur statique local : en file://, le logo rendrait le canvas non exportable.
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png', '.m4a': 'audio/mp4', '.mp3': 'audio/mpeg', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.png': 'image/png', '.m4a': 'audio/mp4', '.mp3': 'audio/mpeg', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.json': 'application/json' };
 function serve() {
   const server = http.createServer((req, res) => {
     const file = path.join(ROOT, decodeURIComponent(new URL(req.url, 'http://x').pathname));
