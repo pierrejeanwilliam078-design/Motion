@@ -1,0 +1,590 @@
+<meta charset="utf-8">
+<title>Open Days Trailer Madagascar</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Version 6 « De la terre au futur » : plan-séquence illustré, de la nuit sur les baobabs à la ville connectée. */
+  @font-face { font-family: Poppins; font-weight: 500; src: url("media/fonts/poppins-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: Poppins; font-weight: 700; src: url("media/fonts/poppins-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: Poppins; font-weight: 800; src: url("media/fonts/poppins-latin-800-normal.woff2") format("woff2"); }
+  :root {
+    --bg: #07120b;          /* nuit sur les collines */
+    --panel: #0d1d12;
+    --line: #1f3326;
+    --fg: #eef0ec;
+    --muted: #9b9c97;       /* gris du logo */
+    --accent: #2fa455;      /* vert du logo, éclairci pour fond sombre */
+    --accent-deep: #116d30; /* vert du logo */
+    --font: Poppins, system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.55 var(--font); }
+  .wrap { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 420px); gap: 32px; justify-content: center; align-items: start;
+          padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .stage { display: grid; gap: 14px; justify-items: center; min-width: 0; }
+  canvas { display: block; height: min(78vh, 900px); aspect-ratio: 9 / 16; max-width: 100%; background: #000; border-radius: 4px; }
+  .controls { width: 100%; max-width: min(calc(min(78vh, 900px) * 9 / 16), 100%); display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+  button.play { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent-deep); color: #fff; font-size: 16px; cursor: pointer; }
+  button.play:focus-visible, input:focus-visible, .scene:focus-visible, .lines li:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .time { font: 500 13px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .vol { display: flex; gap: 8px; align-items: center; color: var(--muted); font: 700 11px var(--font); letter-spacing: .12em; }
+  .vol input { width: 90px; }
+  .side { display: grid; gap: 20px; min-width: 0; }
+  .eyebrow { font: 700 12px var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin: 0; }
+  h1 { font: 800 30px/1.15 var(--font); margin: 6px 0 8px; text-wrap: balance; }
+  .lede { color: var(--muted); margin: 0; }
+  .track { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .scene { border: 0; border-radius: 4px; background: var(--panel); color: var(--muted); padding: 9px 10px; text-align: left; cursor: pointer; font: 700 12px var(--font); min-width: 0; }
+  .scene.on { background: var(--accent-deep); color: #fff; }
+  .lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .lines li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; padding: 8px 10px; background: var(--panel); border-radius: 4px; border-left: 3px solid transparent; cursor: pointer; }
+  .lines li.on { border-left-color: var(--accent); color: #fff; }
+  .lines .ts { font: 500 12px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .note { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; }
+  body.render .wrap > :not(.stage), body.render .controls { display: none; }
+  body.render { overflow: hidden; }
+  @media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } canvas { height: auto; width: min(100%, 440px); } .controls { max-width: 440px; } }
+</style>
+
+<div class="wrap">
+  <div class="stage">
+    <canvas id="c" width="1080" height="1920" aria-label="Aperçu animé du trailer Open Days, version Madagascar"></canvas>
+    <div class="controls">
+      <button class="play" id="play" type="button" aria-label="Lecture">▶</button>
+      <input id="seek" type="range" min="0" max="35" step="0.01" value="0" aria-label="Position dans le trailer">
+      <span class="time" id="time">00:00 / 00:35</span>
+      <span></span>
+      <label class="vol" for="vol">VOLUME <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9"></label>
+      <span></span>
+    </div>
+  </div>
+  <aside class="side">
+    <div>
+      <p class="eyebrow">ONG JADE Madagascar · 9:16 · 35 s</p>
+      <h1>Open Days, de la terre au futur</h1>
+      <p class="lede">Un seul plan continu : la nuit sur les baobabs, le lever du soleil, les rizières où pousse une nouvelle génération, la ville connectée, puis la révélation. Nouvelle musique aux couleurs malgaches, même voix off.</p>
+    </div>
+    <div class="track" id="track" role="group" aria-label="Scènes"></div>
+    <ul class="lines" id="lines" aria-label="Voix off"></ul>
+    <p class="note">Le logo officiel OPEN DAYS n'a pas été fourni : le titre est composé en Poppins en attendant. Le logo JADE de l'écran final est le fichier officiel, sans retouche.</p>
+  </aside>
+</div>
+<audio id="audio" src="media/trailer-v6-audio.mp3" preload="auto"></audio>
+
+<script src="timeline-v6.js"></script>
+<script>
+const TL = window.TIMELINE;
+const W = TL.width, H = TL.height, CX = W / 2;
+const FONT = 'Poppins, system-ui, sans-serif';
+// Palette : uniquement les teintes du logo (vert, gris, blanc, noir) et leurs mélanges.
+const P = { ink: '#050906', deep: '#0a4520', green: '#116d30', leaf: '#2fa455', gray: '#9b9c97', light: '#d9dad6', mist: '#eef0ec', white: '#ffffff' };
+
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+let S = 1;
+function setScale(s) { S = s; cv.width = Math.round(W * s); cv.height = Math.round(H * s); }
+const base = () => ctx.setTransform(S, 0, 0, S, 0, 0);
+const jade = new Image(); jade.src = 'media/jade-logo.png';
+
+// ------------------------------------------------------------------ utilitaires
+function hash(n) {
+  n = (n | 0) ^ 0x9e3779b9; n = Math.imul(n ^ (n >>> 16), 0x85ebca6b); n = Math.imul(n ^ (n >>> 13), 0xc2b2ae35); n ^= n >>> 16;
+  return (n >>> 0) / 4294967296;
+}
+function rng(seed) { let i = 0; return () => hash(seed * 7919 + (i++) * 104729); }
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOutExpo = k => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
+const eOutCubic = k => 1 - Math.pow(1 - k, 3);
+const eInCubic = k => k * k * k;
+const eInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const eOutBack = k => (k <= 0 ? 0 : 1 + 2.7 * Math.pow(k - 1, 3) + 1.7 * Math.pow(k - 1, 2));
+const imp = (t, t0, d) => (t >= t0 ? Math.exp(-(t - t0) * d) : 0);
+const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+function mix(a, b, k) { const x = rgb(a), y = rgb(b); k = clamp(k); return `rgb(${x.map((v, i) => Math.round(v + (y[i] - v) * k)).join(',')})`; }
+const hex = s => s.startsWith('#') ? s : '#' + s.match(/\d+/g).map(v => (+v).toString(16).padStart(2, '0')).join('');
+
+// ------------------------------------------------------------------ état du jour (nuit -> aube -> jour -> crépuscule -> nuit -> aube)
+function phase(t) {
+  const dawn = eInOut(prog(t, TL.dawn, 9.6));
+  const day = eInOut(prog(t, 9.4, 12.0));
+  const dusk = eInOut(prog(t, TL.s4Text - 0.5, TL.silence - 0.3));
+  const night = t < TL.dawn ? 1 : t >= TL.reveal && t < TL.final ? 1 : t >= TL.final ? 0 : Math.max(1 - dawn, dusk);
+  const finalDawn = t >= TL.final ? eOutCubic(prog(t, TL.final, TL.final + 1.5)) : 0;
+  return { dawn, day, dusk, night, finalDawn, revealNight: t >= TL.reveal && t < TL.final };
+}
+function skyColors(ph) {
+  if (ph.revealNight) return ['#020604', '#06120a', '#0e2a18'];
+  if (ph.finalDawn > 0) return [mix('#c9d0ca', '#e9ece8', ph.finalDawn), mix('#e2e5e0', '#f4f5f2', ph.finalDawn), '#ffffff'];
+  const night = ['#020604', '#06120a', '#0d2416'], dawn = ['#0c2416', '#4a6a55', '#e8ece6'], day = ['#b9c4bb', '#d9dad6', '#f4f5f2'];
+  let c = night.map((n, i) => hex(mix(n, dawn[i], ph.dawn)));
+  c = c.map((n, i) => hex(mix(n, day[i], ph.day)));
+  return c.map((n, i) => hex(mix(n, night[i], ph.dusk)));
+}
+
+// ------------------------------------------------------------------ éléments dessinés
+const HILLS = [   // profil des collines : base sous l'horizon, amplitude, graine, profondeur (parallaxe)
+  { off: -30, amp: 55, seed: 1, depth: 0.15 },
+  { off: 40, amp: 85, seed: 2, depth: 0.35 },
+  { off: 230, amp: 130, seed: 3, depth: 0.65 },
+  { off: 520, amp: 70, seed: 4, depth: 1.0 },
+];
+function profile(layer, wx) {
+  const r = rng(layer.seed * 31);
+  let y = 0;
+  for (let k = 1; k <= 4; k++) y += Math.sin(wx * (0.0016 * k + r() * 0.002) + r() * 6) * layer.amp / k;
+  return y;
+}
+function hillPath(layer, horizon, camX) {
+  ctx.beginPath(); ctx.moveTo(-60, H + 60);
+  for (let sx = -60; sx <= W + 60; sx += 12) ctx.lineTo(sx, horizon + layer.off + profile(layer, sx + camX * layer.depth));
+  ctx.lineTo(W + 60, H + 60); ctx.closePath();
+}
+const groundY = (layer, horizon, camX, sx) => horizon + layer.off + profile(layer, sx + camX * layer.depth);
+
+// Baobab de Grandidier : tronc droit et renflé, couronne plate de branches courtes.
+function baobab(x, gy, h, w, color, sway = 0) {
+  ctx.save(); ctx.fillStyle = color; ctx.strokeStyle = color; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x - w / 2, gy + 4);
+  ctx.bezierCurveTo(x - w * 0.62, gy - h * 0.45, x - w * 0.4, gy - h * 0.82, x - w * 0.3, gy - h);
+  ctx.lineTo(x + w * 0.3, gy - h);
+  ctx.bezierCurveTo(x + w * 0.4, gy - h * 0.82, x + w * 0.62, gy - h * 0.45, x + w / 2, gy + 4);
+  ctx.closePath(); ctx.fill();
+  const top = gy - h;
+  [[-1, 0.5], [-0.55, 0.8], [-0.1, 0.95], [0.35, 0.85], [0.8, 0.55]].forEach(([a, l], i) => {
+    const ex = x + a * w * 1.05 + sway * l * 6, ey = top - l * h * 0.24;
+    ctx.lineWidth = w * 0.16; ctx.beginPath(); ctx.moveTo(x + a * w * 0.22, top + 4); ctx.quadraticCurveTo(x + a * w * 0.5, top - l * h * 0.08, ex, ey); ctx.stroke();
+    ctx.lineWidth = w * 0.07; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex + (i % 2 ? 1 : -1) * w * 0.25, ey - h * 0.05); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(ex, ey - h * 0.02, w * 0.32, h * 0.035, 0, 0, 7); ctx.fill();
+  });
+  ctx.restore();
+}
+function house(x, gy, s, wall, roof, lit) {
+  ctx.save();
+  ctx.fillStyle = wall; ctx.fillRect(x - 22 * s, gy - 34 * s, 44 * s, 34 * s);
+  ctx.fillStyle = roof; ctx.beginPath(); ctx.moveTo(x - 28 * s, gy - 32 * s); ctx.lineTo(x, gy - 58 * s); ctx.lineTo(x + 28 * s, gy - 32 * s); ctx.fill();
+  if (lit > 0) { ctx.fillStyle = `rgba(255,255,255,${0.9 * lit})`; ctx.fillRect(x - 12 * s, gy - 24 * s, 9 * s, 10 * s); ctx.fillRect(x + 4 * s, gy - 24 * s, 9 * s, 10 * s); }
+  ctx.restore();
+}
+function sprout(x, gy, s, g, color) {   // pousse à trois feuilles, comme sur le logo
+  if (g <= 0) return;
+  ctx.save(); ctx.translate(x, gy); ctx.scale(s, s);
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap = 'round'; ctx.lineWidth = 5;
+  const h = 110 * clamp(g * 1.4);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(10, -h * 0.5, 16, -h); ctx.stroke();
+  const leaf = (lx, ly, a, l, k) => {
+    if (k <= 0) return; ctx.save(); ctx.translate(lx, ly); ctx.rotate(a); ctx.scale(k, k);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(l * 0.45, -l * 0.38, l, 0); ctx.quadraticCurveTo(l * 0.55, l * 0.2, 0, 0); ctx.fill(); ctx.restore();
+  };
+  leaf(7, -h * 0.5, -2.3, 46, eOutBack(prog(g, 0.55, 0.85)));
+  leaf(16, -h, -1.1, 60, eOutBack(prog(g, 0.7, 1)));
+  leaf(12, -h * 0.75, -0.4, 46, eOutBack(prog(g, 0.62, 0.92)));
+  ctx.restore();
+}
+function walker(x, gy, s, ph, color, carry) {   // silhouette de jeune qui marche
+  ctx.save(); ctx.translate(x, gy); ctx.scale(s, s);
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap = 'round';
+  const sw = Math.sin(ph) * 0.45;
+  ctx.lineWidth = 7;
+  for (const k of [1, -1]) { ctx.beginPath(); ctx.moveTo(0, -34); ctx.lineTo(Math.sin(sw * k) * 22, -2); ctx.stroke(); }
+  ctx.lineWidth = 11; ctx.beginPath(); ctx.moveTo(0, -36); ctx.lineTo(1, -66); ctx.stroke();
+  ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(1, -62); ctx.lineTo(Math.sin(-sw) * 16 + 2, -40); ctx.stroke();
+  if (carry) { ctx.fillRect(6, -58, 18, 13); ctx.beginPath(); ctx.moveTo(1, -62); ctx.lineTo(10, -52); ctx.stroke(); }
+  else { ctx.beginPath(); ctx.moveTo(1, -62); ctx.lineTo(Math.sin(sw) * 16 + 2, -40); ctx.stroke(); }
+  ctx.beginPath(); ctx.arc(2, -76, 9, 0, 7); ctx.fill();
+  ctx.restore();
+}
+function glowDot(x, y, r, color, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(x - r, y - r, 2 * r, 2 * r); ctx.restore();
+}
+// Ellipse grise en croissant, motif du logo
+function swoosh(cx, cy, rx, ry, rot, thick, color, p = 1, a = 1) {
+  if (p <= 0) return;
+  const a0 = -1.35, a1 = 3.7, aEnd = a0 + (a1 - a0) * p, outer = [], inner = [], n = 120;
+  for (let i = 0; i <= n; i++) {
+    const an = a0 + (aEnd - a0) * i / n, th = thick * Math.pow(Math.sin(Math.PI * clamp((an - a0) / (a1 - a0))), 0.9);
+    for (const [arr, r] of [[outer, th / 2], [inner, -th / 2]]) {
+      const ex = (rx + r) * Math.cos(an), ey = (ry + r) * Math.sin(an);
+      arr.push([cx + ex * Math.cos(rot) - ey * Math.sin(rot), cy + ex * Math.sin(rot) + ey * Math.cos(rot)]);
+    }
+  }
+  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = color; ctx.beginPath();
+  outer.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  for (let i = inner.length - 1; i >= 0; i--) ctx.lineTo(...inner[i]);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+// ------------------------------------------------------------------ éléments placés dans le monde (coordonnées « monde » + parallaxe)
+const BAOBABS = [[-180, 300, 58], [120, 360, 66], [300, 260, 50], [560, 390, 70], [820, 300, 56], [1030, 350, 62], [1300, 280, 54], [1540, 330, 60]];
+const HOUSES = (() => { const r = rng(6), a = []; for (let i = 0; i < 16; i++) a.push([-200 + i * 120 + r() * 60, 0.7 + r() * 0.4, i % 3 === 0 ? 2 : 1]); return a; })();
+const SPROUTS = (() => { const r = rng(7), a = []; for (let i = 0; i < 9; i++) a.push([60 + i * 120 + r() * 50, 10.3 + i * 0.12, 0.7 + r() * 0.5]); return a; })();
+const WALKERS = [[-60, 1.05, 0], [-150, 0.95, 1], [-240, 1.1, 0], [-330, 0.9, 1], [-420, 1.0, 0], [-520, 0.95, 1]];
+const CITY = (() => { const r = rng(12), a = []; for (let i = 0; i < 26; i++) { const x = 200 + i * 52 + r() * 20; a.push([x, 90 + r() * 260 + (Math.abs(x - 860) < 260 ? 80 : 0), 40 + r() * 26, 16.0 + Math.abs(i - 13) * 0.08 + r() * 0.3]); } return a; })();
+const VENUE_X = 860;   // le lieu du rendez-vous, au centre de la ville
+const FIREFLIES = (() => { const r = rng(15), a = []; for (let i = 0; i < 46; i++) a.push({ gx: r() * W, sy: 380 + r() * 620, d: r(), c: i % 4 ? P.leaf : P.white }); return a; })();
+const STARS = (() => { const r = rng(19), a = []; for (let i = 0; i < 140; i++) a.push([r() * W, r() * 1150, 0.6 + r() * 1.8, r() * 6]); return a; })();
+const BURSTS = [[23.5, 540, 520], [24.4, 250, 420], [25.2, 820, 380], [26.0, 380, 300], [26.9, 760, 560], [27.7, 200, 640], [28.4, 880, 280]];
+
+function camX(t) { return lerp(0, 380, eInOut(prog(t, 0, 20.6))); }
+function horizonAt(t) { return lerp(1460, 1250, eInOut(prog(t, 2.5, 9))); }
+
+// ------------------------------------------------------------------ le paysage continu (0 -> 23 s)
+function landscape(t) {
+  const ph = phase(t), hz = horizonAt(t), cx = camX(t);
+  const [top, mid, bot] = skyColors(ph);
+  const sky = ctx.createLinearGradient(0, 0, 0, hz + 80);
+  sky.addColorStop(0, top); sky.addColorStop(0.6, mid); sky.addColorStop(1, bot);
+  ctx.fillStyle = sky; ctx.fillRect(-80, -80, W + 160, H + 160);
+
+  // étoiles
+  const starA = ph.night * (1 - ph.dawn * 0.0);
+  if (starA > 0.02) STARS.forEach(([x, y, s, p]) => { ctx.globalAlpha = starA * (0.4 + 0.6 * Math.abs(Math.sin(t * 1.3 + p))); ctx.fillStyle = P.white; ctx.fillRect(x, y * (hz / 1250), s, s); });
+  ctx.globalAlpha = 1;
+
+  // soleil
+  const sunY = lerp(hz + 120, 760, eOutCubic(prog(t, TL.dawn, 10.5))) - 160 * prog(t, 10.5, 16) + 500 * eInCubic(prog(t, TL.s4Text - 0.5, TL.silence));
+  const sunX = CX + 150 - cx * 0.05;
+  if (t >= TL.dawn - 0.5) {
+    glowDot(sunX, sunY, 520 + 260 * imp(t, TL.words[2], 1.2), 'rgba(255,255,255,.55)', 0.85);
+    glowDot(sunX, sunY, 260, 'rgba(47,164,85,.35)', 0.8);
+    ctx.fillStyle = P.white; ctx.beginPath(); ctx.arc(sunX, sunY, 92, 0, 7); ctx.fill();
+    if (t >= TL.words[2]) {   // INSPIRER : rayons
+      const k = eOutCubic(prog(t, TL.words[2], TL.words[2] + 0.8)) * (1 - prog(t, 15.8, 16.6));
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.translate(sunX, sunY); ctx.rotate(t * 0.15);
+      for (let i = 0; i < 16; i++) { ctx.rotate(Math.PI / 8); ctx.fillStyle = `rgba(255,255,255,${0.16 * k})`; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(1400, -40); ctx.lineTo(1400, 40); ctx.fill(); }
+      ctx.restore();
+    }
+  }
+  const lights = Math.max(ph.night * 0.6, ph.dusk);
+
+  // collines lointaines et ville
+  const tint = (n, dawnC, dayC) => hex(mix(hex(mix(hex(mix(n, dawnC, ph.dawn)), dayC, ph.day)), n, ph.dusk));
+  hillPath(HILLS[0], hz, cx); ctx.fillStyle = tint('#0a1a10', '#5f7a68', '#a9b8ad'); ctx.fill();
+  if (t >= TL.city - 0.1) {
+    CITY.forEach(([wx, h, w, t0]) => {
+      const x = wx - cx * 0.4, k = eOutBack(prog(t, t0, t0 + 0.7)), gy = hz + 60;
+      if (k <= 0) return;
+      ctx.fillStyle = tint('#0b1810', '#55705f', '#8f9d93');
+      ctx.fillRect(x - w / 2, gy - h * k, w, h * k);
+      if (lights > 0.05) for (let yy = gy - h * k + 14; yy < gy - 10; yy += 22) for (let xx = x - w / 2 + 8; xx < x + w / 2 - 8; xx += 14) {
+        if (hash((xx | 0) * 7 + (yy | 0)) < 0.55) { ctx.fillStyle = hash((xx | 0) + (yy | 0) * 3) < 0.3 ? `rgba(47,164,85,${lights})` : `rgba(255,255,255,${0.85 * lights})`; ctx.fillRect(xx, yy, 6, 9); }
+      }
+    });
+    venue(t, VENUE_X - cx * 0.4, hz + 60, lights, tint);
+  }
+  hillPath(HILLS[1], hz, cx); ctx.fillStyle = tint('#081610', '#3e5e48', '#6f8f78'); ctx.fill();
+  HOUSES.forEach(([wx, s, layer]) => {
+    if (layer !== 1) return;
+    const sx = wx - cx * HILLS[1].depth, gy = groundY(HILLS[1], hz, cx, sx);
+    house(sx, gy + 6, s * 0.8, tint('#0c1a12', '#7f8f84', P.light), tint('#06110a', '#2c4a36', P.green), lights);
+  });
+  BAOBABS.forEach(([wx, h, w], i) => {
+    const sx = wx - cx * HILLS[1].depth, gy = groundY(HILLS[1], hz, cx, sx);
+    baobab(sx, gy + 8, h, w, tint('#030805', '#1d3325', '#3b5a45'), Math.sin(t * 0.8 + i));
+  });
+
+  // lucioles-idées qui montent et se relient (scène 2)
+  if (t > TL.dawn && t < 11.5) ideas(t, hz);
+
+  // rizières en terrasses
+  hillPath(HILLS[2], hz, cx); ctx.fillStyle = tint('#061209', '#22543a', '#2f7a49'); ctx.fill();
+  const terr = prog(t, 8.8, 10.6);
+  if (terr > 0) {
+    ctx.save(); hillPath(HILLS[2], hz, cx); ctx.clip();
+    for (let k = 1; k < 14; k++) {
+      ctx.beginPath();
+      for (let sx = -60; sx <= W + 60; sx += 14) { const y = groundY(HILLS[2], hz, cx, sx) + k * 24 + Math.sin(sx * 0.01 + k) * 4; sx === -60 ? ctx.moveTo(sx, y) : ctx.lineTo(sx, y); }
+      ctx.strokeStyle = `rgba(217,218,214,${0.35 * terr})`; ctx.lineWidth = 3; ctx.stroke();
+    }
+    if (t >= TL.words[0]) {   // INNOVER : la lumière court le long des terrasses comme sur un circuit
+      const k = prog(t, TL.words[0], TL.words[0] + 1.2) * (1 - prog(t, 16, 17));
+      for (let r = 1; r < 14; r += 2) {
+        const head = ((t - TL.words[0]) * 520 + r * 140) % (W + 400) - 200;
+        for (let j = 0; j < 10; j++) {
+          const sx = head - j * 16, y = groundY(HILLS[2], hz, cx, sx) + r * 24 + Math.sin(sx * 0.01 + r) * 4;
+          glowDot(sx, y, 26 - j * 2, 'rgba(47,164,85,1)', k * (1 - j / 10));
+        }
+      }
+    }
+    ctx.restore();
+  }
+  SPROUTS.forEach(([wx, t0, s]) => {
+    const sx = wx - cx * HILLS[2].depth;
+    sprout(sx, groundY(HILLS[2], hz, cx, sx) + 22, s, prog(t, t0, t0 + 0.9) * (1 - prog(t, 16.5, 17.5)), tint(P.leaf, P.leaf, P.green));
+  });
+  if (t >= TL.words[1]) network(t, hz, cx);   // PARTAGER
+
+  // jeunes qui marchent vers l'horizon
+  if (t >= 10.4) WALKERS.forEach(([off, s, carry], i) => {
+    const wx = off + (t - 10.4) * 95, sx = wx - cx * HILLS[2].depth;
+    if (sx < -80 || sx > W + 80) return;
+    walker(sx, groundY(HILLS[2], hz, cx, sx) + 10, s * 1.25, (t - 10.4) * 7 + i, tint(P.ink, '#0a2214', P.deep), carry);
+  });
+
+  hillPath(HILLS[3], hz, cx); ctx.fillStyle = tint('#030805', '#0d2a17', P.deep); ctx.fill();
+  if (ph.day > 0.2 && ph.dusk < 0.8) {   // brume du matin
+    const m = ctx.createLinearGradient(0, hz - 60, 0, hz + 160); m.addColorStop(0, 'rgba(255,255,255,0)'); m.addColorStop(0.5, `rgba(244,245,242,${0.35 * ph.day * (1 - ph.dusk)})`); m.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = m; ctx.fillRect(0, hz - 60, W, 220);
+  }
+}
+function venue(t, x, gy, lights, tint) {
+  const k = eOutBack(prog(t, 17.0, 17.9));
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, gy); ctx.scale(k, k);
+  if (t > TL.s4Text - 0.6) {   // faisceaux de l'événement
+    const a = prog(t, TL.s4Text - 0.6, TL.s4Text + 0.4);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    [-1, -0.4, 0.4, 1].forEach((s, i) => {
+      ctx.save(); ctx.translate(s * 120, -150); ctx.rotate(Math.sin(t * 1.6 + i * 1.7) * 0.35 + s * 0.15);
+      const g = ctx.createLinearGradient(0, 0, 0, -1500); g.addColorStop(0, `rgba(${i % 2 ? '255,255,255' : '47,164,85'},${0.38 * a})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.lineTo(120, -1500); ctx.lineTo(-120, -1500); ctx.fill(); ctx.restore();
+    });
+    ctx.restore();
+  }
+  ctx.fillStyle = tint('#0e1d14', '#6b7d70', '#b9c0ba');
+  ctx.beginPath(); ctx.roundRect(-210, -120, 420, 120, 10); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0, -120, 170, 70, 0, Math.PI, 0); ctx.fill();
+  swoosh(0, -130, 230, 62, -0.08, 26, tint('#3a3b38', P.gray, P.gray), 1);   // l'anneau du logo coiffe le lieu
+  ctx.fillStyle = lights > 0.05 ? `rgba(47,164,85,${0.5 + 0.5 * lights})` : P.green;
+  for (let i = -4; i <= 4; i++) ctx.fillRect(i * 44 - 14, -80, 28, 60);
+  ctx.restore();
+}
+function ideas(t, hz) {
+  const k = prog(t, TL.dawn + 0.3, 7.4), fade = 1 - prog(t, 9.8, 11.5);
+  const pos = FIREFLIES.map((f, i) => {
+    const gy = hz + 60 + f.d * 120, q = eInOut(clamp(k * 1.3 - f.d * 0.3));
+    return [f.gx + Math.sin(t * 1.2 + i) * 14, lerp(gy, f.sy, q)];
+  });
+  const link = prog(t, 7.0, 8.4);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineWidth = 2;
+  pos.forEach((p, i) => pos.forEach((q, j) => {
+    if (j <= i || Math.hypot(p[0] - q[0], p[1] - q[1]) > 210) return;
+    const kk = clamp(link * 2 - ((i + j) % 9) / 9);
+    if (kk <= 0) return;
+    ctx.strokeStyle = `rgba(47,164,85,${0.55 * fade})`; ctx.beginPath(); ctx.moveTo(...p); ctx.lineTo(lerp(p[0], q[0], kk), lerp(p[1], q[1], kk)); ctx.stroke();
+  }));
+  ctx.restore();
+  pos.forEach((p, i) => glowDot(p[0], p[1], 34, FIREFLIES[i].c === P.white ? 'rgba(255,255,255,1)' : 'rgba(47,164,85,1)', fade * prog(t, TL.dawn + i * 0.03, TL.dawn + 0.5 + i * 0.03)));
+}
+function network(t, hz, cx) {
+  const k = prog(t, TL.words[1], TL.words[1] + 0.8) * (1 - prog(t, 16, 17));
+  if (k <= 0) return;
+  const pts = SPROUTS.map(([wx]) => { const sx = wx - cx * HILLS[2].depth; return [sx + 16, groundY(HILLS[2], hz, cx, sx) - 60]; });
+  ctx.save(); ctx.lineWidth = 3; ctx.lineCap = 'round';
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [a, b] = [pts[i], pts[i + 1]], mx = (a[0] + b[0]) / 2, my = Math.min(a[1], b[1]) - 120;
+    const kk = clamp(k * 2.2 - i * 0.15);
+    ctx.strokeStyle = `rgba(255,255,255,${0.8 * k})`; ctx.setLineDash([2, 12]);
+    ctx.beginPath(); ctx.moveTo(...a); ctx.quadraticCurveTo(mx, my, lerp(a[0], b[0], kk), lerp(a[1], b[1], kk)); ctx.stroke();
+    const u = ((t - TL.words[1]) * 0.9 + i * 0.2) % 1, px = (1 - u) ** 2 * a[0] + 2 * (1 - u) * u * mx + u * u * b[0], py = (1 - u) ** 2 * a[1] + 2 * (1 - u) * u * my + u * u * b[1];
+    glowDot(px, py, 24, 'rgba(47,164,85,1)', k);
+  }
+  ctx.restore();
+}
+
+// ------------------------------------------------------------------ révélation de nuit (23,5 -> 29 s)
+function revealScene(t) {
+  const R = TL.reveal, hz = 1350;
+  const sky = ctx.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#020604'); sky.addColorStop(0.65, '#07160d'); sky.addColorStop(1, '#123a22');
+  ctx.fillStyle = sky; ctx.fillRect(-80, -80, W + 160, H + 160);
+  STARS.forEach(([x, y, s, p]) => { ctx.globalAlpha = 0.4 + 0.6 * Math.abs(Math.sin(t * 1.3 + p)); ctx.fillStyle = P.white; ctx.fillRect(x, y, s, s); });
+  ctx.globalAlpha = 1;
+  BURSTS.forEach(([t0, x, y], b) => {   // feux d'artifice vert et blanc
+    const k = (t - t0) / 1.6;
+    if (k < 0 || k > 1) return;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 34; i++) {
+      const an = i / 34 * Math.PI * 2 + b, r = eOutCubic(k) * (150 + 40 * hash(i + b * 50)), fall = k * k * 90;
+      ctx.globalAlpha = (1 - k) * 0.9; ctx.fillStyle = i % 3 ? P.leaf : P.white;
+      ctx.beginPath(); ctx.arc(x + Math.cos(an) * r, y + Math.sin(an) * r + fall, 4, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  });
+  glowDot(CX, 900, 900, 'rgba(47,164,85,.5)', 0.6 + 0.4 * imp(t, R, 1.5));
+  // ville de nuit et collines
+  CITY.forEach(([wx, h, w], i) => {
+    const x = wx - 380 * 0.4 - 20;
+    ctx.fillStyle = '#0b1810'; ctx.fillRect(x - w / 2, hz - h, w, h);
+    for (let yy = hz - h + 14; yy < hz - 10; yy += 22) for (let xx = x - w / 2 + 8; xx < x + w / 2 - 8; xx += 14)
+      if (hash((xx | 0) * 7 + (yy | 0)) < 0.55) { ctx.fillStyle = hash((xx | 0) + (yy | 0) * 3) < 0.3 ? P.leaf : 'rgba(255,255,255,.85)'; ctx.fillRect(xx, yy, 6, 9); }
+  });
+  hillPath(HILLS[1], hz + 30, 380); ctx.fillStyle = '#06110a'; ctx.fill();
+  BAOBABS.forEach(([wx, h, w], i) => { const sx = wx - 380 * HILLS[1].depth; baobab(sx, groundY(HILLS[1], hz + 30, 380, sx) + 8, h * 0.9, w * 0.9, '#020503', Math.sin(t * 0.8 + i)); });
+  hillPath(HILLS[3], hz - 120, 380); ctx.fillStyle = '#020503'; ctx.fill();
+
+  // OPEN DAYS dans l'ellipse du logo
+  const k = eOutExpo(prog(t, R, R + 0.6)), z = lerp(1.15, 1, k) * lerp(1, 1.04, prog(t, R, TL.final));
+  ctx.save(); ctx.translate(CX, 840); ctx.scale(z, z); ctx.translate(-CX, -840);
+  swoosh(CX + 20, 900, 470, 150, -0.1, 46, P.gray, eOutCubic(prog(t, R + 0.15, R + 1.1)), 0.95);
+  sprout(CX - 400, 960, 1.9, prog(t, R + 0.4, R + 1.4), P.leaf);
+  title('OPEN', CX + 20, 740, { size: 230, p: prog(t, R, R + 0.45) });
+  title('DAYS', CX + 20, 960, { size: 230, p: prog(t, R + 0.1, R + 0.55) });
+  ctx.restore();
+  const e = eOutCubic(prog(t, TL.editionIn, TL.editionIn + 0.7));
+  title('PROCHAINE ÉDITION', CX, 1200, { size: 52, weight: 700, spacing: lerp(26, 12, e), p: e, color: P.white });
+}
+
+// ------------------------------------------------------------------ signature à l'aube (29 -> 35 s)
+function finalScene(t) {
+  const F = TL.final, hz = 1560, k = eOutCubic(prog(t, F, F + 1.5));
+  const sky = ctx.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, '#d3d8d3'); sky.addColorStop(0.7, '#eef0ec'); sky.addColorStop(1, '#ffffff');
+  ctx.fillStyle = sky; ctx.fillRect(-80, -80, W + 160, H + 160);
+  glowDot(CX + 260, hz - 80, 700, 'rgba(255,255,255,1)', 0.9);
+  glowDot(CX + 260, hz - 80, 300, 'rgba(47,164,85,.35)', 0.6);
+  const lift = lerp(160, 0, k);
+  hillPath(HILLS[0], hz - 40 + lift, 0); ctx.fillStyle = '#b5c3b9'; ctx.fill();
+  hillPath(HILLS[1], hz + lift, 0); ctx.fillStyle = '#6f8f78'; ctx.fill();
+  BAOBABS.forEach(([wx, h, w], i) => baobab(wx, groundY(HILLS[1], hz + lift, 0, wx) + 8, h * 0.6, w * 0.7, '#3b5a45', Math.sin(t * 0.8 + i)));
+  hillPath(HILLS[2], hz + 120 + lift, 0); ctx.fillStyle = P.green; ctx.fill();
+  hillPath(HILLS[3], hz + 300 + lift, 0); ctx.fillStyle = P.deep; ctx.fill();
+
+  const pulse = imp(t, TL.openPulse, 3);
+  ctx.save(); ctx.translate(CX, 300); ctx.scale(1 + 0.05 * pulse, 1 + 0.05 * pulse); ctx.translate(-CX, -300);
+  title('OPEN DAYS', CX, 300, { size: 136, color: P.green, p: prog(t, F + 0.1, F + 0.6) });
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha = prog(t, F + 0.3, F + 0.8); ctx.fillStyle = P.gray; ctx.fillRect(CX - 70, 395, 140, 5); ctx.restore();
+  const ja = eOutCubic(prog(t, TL.jadeIn, TL.jadeIn + 0.8));
+  if (ja > 0 && jade.complete && jade.naturalWidth) {   // logo officiel, sans retouche
+    const h = 360, w = h * jade.naturalWidth / jade.naturalHeight, s = lerp(0.9, 1, eOutBack(prog(t, TL.jadeIn, TL.jadeIn + 0.8))) * (1 + 0.03 * imp(t, TL.ongIn, 2.5));
+    ctx.save(); ctx.globalAlpha = ja; ctx.translate(CX, 690); ctx.scale(s, s); ctx.drawImage(jade, -w / 2, -h / 2, w, h); ctx.restore();
+  }
+  title('ONG JADE MADAGASCAR', CX, 960, { size: 58, weight: 800, color: P.ink, spacing: 2, p: prog(t, TL.ongIn, TL.ongIn + 0.6) });
+  const ca = eOutBack(prog(t, TL.comingIn, TL.comingIn + 0.45));
+  if (ca > 0) {
+    ctx.save(); ctx.translate(CX, 1085); ctx.scale(ca, ca); ctx.fillStyle = P.green; ctx.beginPath(); ctx.roundRect(-235, -44, 470, 88, 44); ctx.fill(); ctx.restore();
+    title('COMING SOON', CX, 1088, { size: 34, weight: 700, spacing: 10, color: P.white, p: clamp(ca) });
+  }
+  const sa = prog(t, TL.connectIn, TL.connectIn + 0.5);
+  if (sa > 0) {
+    const w = title('RESTEZ CONNECTÉS', CX + 20, 1195, { size: 44, weight: 700, spacing: 4, color: P.ink, p: sa });
+    const ph = ((t - TL.connectIn) * 1.1) % 1, dx = CX + 20 - w / 2 - 34;
+    ctx.save(); ctx.globalAlpha = sa; ctx.fillStyle = P.green; ctx.beginPath(); ctx.arc(dx, 1193, 10, 0, 7); ctx.fill();
+    ctx.strokeStyle = P.green; ctx.lineWidth = 3; ctx.globalAlpha = sa * (1 - ph); ctx.beginPath(); ctx.arc(dx, 1193, 10 + ph * 26, 0, 7); ctx.stroke(); ctx.restore();
+  }
+}
+
+// ------------------------------------------------------------------ texte
+function title(s, x, y, o = {}) {
+  const p = o.p ?? 1, out = o.out ?? 0;
+  if (p <= 0 || out >= 1) return 0;
+  ctx.save();
+  let size = o.size || 90;
+  const sp = (o.spacing ?? 2) + 10 * (1 - eOutCubic(p));
+  const setFont = () => { ctx.font = `${o.weight || 800} ${size}px ${FONT}`; ctx.letterSpacing = sp + 'px'; };
+  setFont();
+  let w = ctx.measureText(s).width;
+  if (w > (o.maxWidth || 920)) { size *= (o.maxWidth || 920) / w; setFont(); w = ctx.measureText(s).width; }
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.globalAlpha = eOutCubic(p) * (1 - out); ctx.fillStyle = o.color || P.white;
+  if (o.shadow) { ctx.shadowColor = o.shadow; ctx.shadowBlur = 30 * S; }
+  ctx.fillText(s, x + sp / 2, y + (1 - eOutCubic(p)) * 30 - out * 30);
+  ctx.restore();
+  return w;
+}
+const WORDS = ['INNOVER', 'PARTAGER', 'INSPIRER'];
+function captions(t) {
+  const dark = 'rgba(0,0,0,.55)';
+  const o1 = prog(t, 4.5, 4.95);
+  if (t < TL.dawn) {
+    title('QUELQUE CHOSE', CX, 640, { size: 92, p: prog(t, TL.s1Text, TL.s1Text + 0.8), out: o1, shadow: dark });
+    title('SE PRÉPARE…', CX, 750, { size: 92, color: P.leaf, p: prog(t, TL.s1Text + 0.3, TL.s1Text + 1.1), out: o1, shadow: dark });
+  } else if (t < TL.terraces) {
+    const o2 = prog(t, 9.55, 9.95);
+    title('LES IDÉES', CX, 300, { size: 96, p: prog(t, TL.s2Text, TL.s2Text + 0.7), out: o2, shadow: dark });
+    title('SE CONNECTENT.', CX, 410, { size: 96, color: P.white, p: prog(t, TL.s2Text + 0.25, TL.s2Text + 1.0), out: o2, shadow: dark });
+  } else if (t >= TL.words[0] && t < TL.city) {
+    const w = TL.words, i = w.findLastIndex(x => t >= x), b = w[i + 1] ?? TL.city;
+    title(WORDS[i], CX, 360, { size: 150, color: P.deep, p: prog(t, w[i], w[i] + 0.3), out: prog(t, b - 0.12, b) });
+  } else if (t >= TL.s4Text && t < TL.silence) {
+    title('UNE NOUVELLE ÉDITION', CX, 330, { size: 70, p: prog(t, TL.s4Text, TL.s4Text + 0.7), shadow: dark });
+    title('APPROCHE.', CX, 450, { size: 140, color: P.white, p: prog(t, TL.s4Text + 0.3, TL.s4Text + 0.9), shadow: dark });
+  }
+}
+
+// ------------------------------------------------------------------ assemblage
+const STABS = [21.0, 21.5, 22.0, 22.333, 22.5, 22.667, 22.833];
+const FLASHES = [[TL.terraces, 0.25, 5], ...TL.words.map(w => [w, 0.4, 7]), [TL.city, 0.2, 5], ...STABS.map(s => [s, 0.18, 10]), [TL.reveal, 1.0, 2.6], [TL.final, 1.0, 2.2]];
+const GRAIN = (() => { const c = document.createElement('canvas'); c.width = 270; c.height = 480; const g = c.getContext('2d'), d = g.createImageData(270, 480), r = rng(77);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c; })();
+
+function render(t) {
+  base();
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none'; ctx.shadowBlur = 0;
+  if (t >= TL.silence && t < TL.reveal) { ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); return; }   // silence brutal
+  if (t < TL.silence) {
+    const hz = horizonAt(t), z = (1 + 0.06 * prog(t, 0, 20.5)) * (1 + 0.32 * eInCubic(prog(t, TL.s4Text, TL.silence)));
+    const shake = 6 * prog(t, 21, TL.silence) * Math.sin(t * 83);
+    const fx = lerp(CX, VENUE_X - camX(t) * 0.4, eInOut(prog(t, TL.s4Text, TL.silence)));
+    ctx.save(); ctx.translate(fx, hz + shake); ctx.scale(z, z); ctx.translate(-fx, -hz);
+    landscape(t);
+    ctx.restore();
+    captions(t);
+  } else if (t < TL.final) revealScene(t);
+  else finalScene(t);
+  base();
+  const f = clamp(FLASHES.reduce((s, [c, g, d]) => s + g * imp(t, c, d), 0));
+  if (f > 0.004) { ctx.fillStyle = `rgba(255,255,255,${f})`; ctx.fillRect(0, 0, W, H); }
+  ctx.save(); ctx.globalAlpha = 0.045; ctx.globalCompositeOperation = 'overlay'; ctx.drawImage(GRAIN, 0, 0, W, H); ctx.restore();
+  const v = ctx.createRadialGradient(CX, H / 2, 520, CX, H / 2, 1300);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.35)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  const fade = Math.max(1 - prog(t, 0, 0.5), eInOut(prog(t, TL.fadeOut, TL.duration)));
+  if (fade > 0) { ctx.fillStyle = `rgba(0,0,0,${fade})`; ctx.fillRect(0, 0, W, H); }
+}
+
+// ------------------------------------------------------------------ export image par image / lecteur interactif
+window.ready = Promise.all([document.fonts.load(`800 100px Poppins`), document.fonts.load(`700 40px Poppins`), jade.decode().catch(() => {})]);
+window.renderFrame = t => render(t);
+
+if (new URLSearchParams(location.search).has('render')) {
+  document.body.classList.add('render');
+  setScale(1);
+} else {
+  const audio = document.getElementById('audio'), btn = document.getElementById('play'), seek = document.getElementById('seek');
+  const timeEl = document.getElementById('time'), vol = document.getElementById('vol');
+  const fmt = s => `00:${String(Math.floor(s)).padStart(2, '0')}`;
+  const SCENES = [[0, 'La nuit'], [TL.dawn, "L'aube"], [TL.terraces, 'Les rizières'], [TL.city, 'La ville'], [TL.silence, 'Révélation'], [TL.final, 'Signature']];
+  const track = document.getElementById('track'), list = document.getElementById('lines');
+  let cur = 0, playing = false, clock0 = 0;
+  SCENES.forEach(([s, name], i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'scene'; b.textContent = `${i + 1} · ${name}`;
+    b.onclick = () => go(s + 0.01); track.appendChild(b);
+  });
+  TL.voice.forEach(([a, b, at, text]) => {
+    const li = document.createElement('li'); li.tabIndex = 0;
+    li.innerHTML = `<span class="ts">${at.toFixed(1)} s</span><span></span>`; li.lastChild.textContent = text;
+    li.onclick = () => go(at); li.onkeydown = e => { if (e.key === 'Enter') go(at); };
+    list.appendChild(li);
+  });
+  const fit = () => setScale(Math.min(1, (cv.getBoundingClientRect().height || 900) * Math.min(2, devicePixelRatio || 1) / H));
+  fit(); addEventListener('resize', () => { fit(); draw(); });
+  const now = () => (playing ? (audio.readyState >= 2 && !audio.paused ? audio.currentTime : (performance.now() - clock0) / 1000) : cur);
+  function sync(t) {
+    seek.value = t; timeEl.textContent = `${fmt(t)} / 00:35`;
+    [...track.children].forEach((b, i) => b.classList.toggle('on', t >= SCENES[i][0] && t < (SCENES[i + 1]?.[0] ?? 99)));
+    [...list.children].forEach((li, i) => { const [a, b, at] = TL.voice[i]; li.classList.toggle('on', t >= at && t < at + (b - a)); });
+  }
+  function draw() { const t = Math.min(now(), TL.duration - 0.001); render(t); sync(t); }
+  function loop() {
+    if (!playing) return;
+    if (now() >= TL.duration) { pause(); cur = 0; draw(); return; }
+    draw(); requestAnimationFrame(loop);
+  }
+  function play() { playing = true; btn.textContent = '❚❚'; btn.setAttribute('aria-label', 'Pause'); audio.currentTime = cur; clock0 = performance.now() - cur * 1000; audio.play().catch(() => {}); requestAnimationFrame(loop); }
+  function pause() { cur = now(); playing = false; audio.pause(); btn.textContent = '▶'; btn.setAttribute('aria-label', 'Lecture'); }
+  function go(t) { const was = playing; if (was) pause(); cur = t; audio.currentTime = t; draw(); if (was) play(); }
+  btn.onclick = () => (playing ? pause() : play());
+  seek.oninput = () => go(Number(seek.value));
+  vol.oninput = () => { audio.volume = Number(vol.value); };
+  audio.volume = Number(vol.value);
+  window.ready.then(() => { cur = 12.4; draw(); });   // image d'accueil : les rizières au matin
+}
+</script>

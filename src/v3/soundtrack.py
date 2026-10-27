@@ -5,7 +5,6 @@ La voix (assets/voice/) est découpée phrase par phrase et posée aux instants 
 La musique s'abaisse automatiquement (ducking) pendant chaque phrase.
 """
 import os
-import subprocess
 import sys
 
 import numpy as np
@@ -22,85 +21,6 @@ VOICE_FILE = os.path.join(ROOT, "assets", "voice", "voix-off-elevenlabs-hugo.mp3
 
 music = np.zeros((N, 2))
 verb = np.zeros((N, 2))
-
-
-# ---------------------------------------------------------------- instruments d'orchestre hybride
-
-def strings(notes, dur, attack=1.2, release=1.0, bright=2600, voices=5):
-    """Section de cordes : dents de scie désaccordées, vibrato lent, filtre doux."""
-    t = t_axis(dur)
-    env = np.minimum(1, t / attack) * np.minimum(1, np.maximum(0, dur - t) / release)
-    out = np.zeros_like(t)
-    for n in notes:
-        for d in np.linspace(-0.007, 0.007, voices):
-            vib = 1 + 0.003 * np.sin(2 * np.pi * (5 + rng.random()) * t + rng.random() * 6)
-            ph = np.cumsum(midi(n) * (1 + d) * vib) / SR + rng.random()
-            out += 2 * (ph % 1.0) - 1
-    return lp(out / (voices * len(notes)), bright, 2) * env
-
-
-def staccato(note, dur=0.11, bright=3200):
-    t = t_axis(dur)
-    s = sum(saw(midi(note), dur, d) for d in (-0.005, 0.0, 0.005)) / 3
-    return lp(s, bright) * np.minimum(1, t / 0.006) * np.exp(-t * 18)
-
-
-def brass(notes, dur, swell=0.15, peak=2400, sustain=1300, drive=1.8):
-    """Cuivres : ouverture rapide du filtre puis maintien, légère saturation."""
-    t = np.linspace(0, 1, int(dur * SR))
-    sig = sum(saw(midi(n), dur, d) for n in notes for d in (-0.004, 0.004)) / (2 * len(notes))
-    tt = t * dur
-    cutoff = np.where(tt < swell, 200 + (peak - 200) * tt / swell, sustain + (peak - sustain) * np.exp(-(tt - swell) * 4))
-    env = np.minimum(1, tt / 0.03) * np.minimum(1, (dur - tt) / 0.4)
-    return np.tanh(sweep_filter(sig, cutoff, "low") * drive) * env
-
-
-def braam(dur=4.0, notes=(26, 38, 45, 50, 53)):
-    """Le « braam » de bande-annonce : grappe de cuivres graves, filtre qui s'ouvre puis se referme."""
-    t = t_axis(dur)
-    sig = sum(saw(midi(n), dur, d) for n in notes for d in (-0.006, 0.0, 0.006)) / (3 * len(notes))
-    cut = 150 + 2600 * np.exp(-((t - 0.25) ** 2) / 0.08) + 500 * np.exp(-t * 0.8)
-    env = np.minimum(1, t / 0.05) * np.exp(-t * 0.55)
-    return np.tanh(sweep_filter(sig, cut, "low") * 3.0) * env
-
-
-def taiko(dur=1.2, f0=95, f1=48, gain=1.0):
-    t = t_axis(dur)
-    f = f1 + (f0 - f1) * np.exp(-t * 18)
-    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 4.5)
-    skin = lp(noise(dur), 900) * np.exp(-t * 25) * 0.6
-    return np.tanh((body + skin) * 1.8) * gain
-
-
-def choir(notes, dur, attack=0.6, release=1.2):
-    """Chœur synthétique : dents de scie passées dans les formants d'un « ah »."""
-    t = t_axis(dur)
-    src = sum(saw(midi(n), dur, d) for n in notes for d in (-0.008, 0.0, 0.008)) / (3 * len(notes))
-    voice = bp(src, 600, 800) + 0.6 * bp(src, 1100, 1350) + 0.25 * bp(src, 2400, 2800)
-    env = np.minimum(1, t / attack) * np.minimum(1, np.maximum(0, dur - t) / release)
-    return voice * env * 2.2
-
-
-def bell(note, dur=3.0):
-    t = t_axis(dur)
-    f = midi(note)
-    parts = [(1, 1.0, 1.2), (2.76, 0.5, 2.0), (5.4, 0.25, 3.5), (8.93, 0.12, 5.0)]
-    return sum(a * np.sin(2 * np.pi * f * r * t) * np.exp(-t * d) for r, a, d in parts) * 0.5
-
-
-def sub_drop(dur=2.5, f0=90, f1=24):
-    t = t_axis(dur)
-    f = f1 + (f0 - f1) * np.exp(-t * 2.2)
-    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 0.9)
-
-
-def crash(dur=3.5):
-    t = t_axis(dur)
-    return bp(noise(dur), 3500, 11000) * np.exp(-t * 2.6) * 0.35
-
-
-def rev(sig):
-    return sig[::-1]
 
 
 def add(start, sig, gain=1.0, pan=0.0, wet=0.0):
@@ -243,33 +163,8 @@ add(TL["openPulse"], bell(89, 2.0), 0.12, wet=1.0)
 
 # ---------------------------------------------------------------- voix off et mixage
 
-def load_voice():
-    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", VOICE_FILE, "-f", "s16le", "-ac", "1", "-ar", str(SR), "-"],
-                         check=True, capture_output=True).stdout
-    return np.frombuffer(raw, "<i2").astype(np.float64) / 32768
-
-
-src = load_voice()
-voice = np.zeros(N)
-for a, b, at, _text in TL["voice"]:
-    seg = src[int(a * SR): int(b * SR)].copy()
-    f = int(0.012 * SR)
-    seg[:f] *= np.linspace(0, 1, f)
-    seg[-f:] *= np.linspace(1, 0, f)
-    i = int(at * SR)
-    voice[i: i + len(seg)] += seg[: N - i]
-voice = hp(voice, 70)
-voice *= 0.7 / np.max(np.abs(voice))
-
-# Ducking : enveloppe de la voix (attaque 40 ms, relâche 350 ms) -> musique abaissée d'environ 8 dB
-env = np.abs(voice)
-smooth = np.zeros(N)
-att, rel, acc = np.exp(-1 / (0.04 * SR)), np.exp(-1 / (0.35 * SR)), 0.0
-for k in range(0, N, 64):  # par blocs pour rester rapide
-    peak = env[k: k + 64].max()
-    acc = (att ** 64) * acc + (1 - att ** 64) * peak if peak > acc else (rel ** 64) * acc + (1 - rel ** 64) * peak
-    smooth[k: k + 64] = acc
-duck = 1 - 0.6 * np.clip(smooth / 0.25, 0, 1)
+voice = voice_track(VOICE_FILE, TL["voice"], N)
+duck = duck_envelope(voice)
 
 wet = fftconvolve(verb, reverb_ir(3.6, 1.5), axes=0)[:N]
 mus = hp(music + wet * 0.55, 25)

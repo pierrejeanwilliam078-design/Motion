@@ -8,10 +8,11 @@ Tout est généré par le code : animation (canvas HTML), bande-son (synthèse P
 | V1 « Signal » | [`dist/open-days-teaser.mp4`](dist/open-days-teaser.mp4) | Futuriste néon : noir, bleu électrique, violet, cyan ; glitch, warp, électro 120 BPM |
 | V2 « De la graine au réseau » | [`dist/open-days-teaser-v2.mp4`](dist/open-days-teaser-v2.mp4) | Palette du logo JADE : vert `#116D30`, gris `#9B9C97`, blanc, noir ; révélations par masque, plante-logo, trap organique 100 BPM |
 | V3 « Trailer » (9:16, voix off) | [`dist/open-days-trailer-9x16.mp4`](dist/open-days-trailer-9x16.mp4) | Bande-annonce de cinéma pour Reels/TikTok : voix off ElevenLabs, orchestre hybride synthétisé, palette JADE |
+| V6 « De la terre au futur » (9:16, voix off) | [`dist/open-days-trailer-9x16-v6.mp4`](dist/open-days-trailer-9x16-v6.mp4) | Inspiration Madagascar : plan-séquence illustré (baobabs, rizières, ville connectée) en vert et gris JADE, nouvelle musique (pincés façon valiha, 12/8 inspiré du salegy) |
 | V5 « Trailer 3D » (9:16, voix off) | [`dist/open-days-trailer-9x16-v5.mp4`](dist/open-days-trailer-9x16-v5.mp4) | Même son que la V3 ; illustration 3D (three.js) en vert et gris du logo, sans photo |
 | V4 « Trailer photos » (9:16, voix off) | [`dist/open-days-trailer-9x16-v4.mp4`](dist/open-days-trailer-9x16-v4.mp4) | Même son que la V3 ; cartons Cinzel sur noir, texture pellicule, bandes cinéma, deux photos réelles de JADE (une apparition chacune) |
 
-V1 et V2 sont en 1920×1080, V3, V4 et V5 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
+V1 et V2 sont en 1920×1080, V3 à V6 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
 
 ## V1 « Signal » — découpage
 
@@ -91,6 +92,27 @@ Même découpage, même voix off et même musique que la V3. L'image est une vra
 node src/render.js --page src/v3/trailer-v5.html --audio build/soundtrack-v3.wav --out dist/open-days-trailer-9x16-v5.mp4
 ```
 
+## V6 « De la terre au futur » — ce qui change
+
+Un seul plan continu en couches de parallaxe, uniquement en teintes du logo (vert, gris, blanc, noir) :
+
+| Temps | Image | Texte | Musique |
+|---|---|---|---|
+| 0 – 5 s | Nuit étoilée, silhouettes de baobabs sur les collines | QUELQUE CHOSE SE PRÉPARE… | Grillons, battement grave, notes de valiha isolées |
+| 5 – 10 s | Le soleil se lève, des lucioles montent de la terre et se relient | LES IDÉES SE CONNECTENT. | Arpège de valiha qui monte avec le soleil, cordes |
+| 10 – 16 s | Rizières en terrasses, pousses du logo, jeunes qui marchent ; lumière qui court sur les terrasses, réseau entre les pousses, rayons du soleil | INNOVER · PARTAGER · INSPIRER | Groove 12/8 (tambours à main, hochet, guitare grattée) |
+| 16 – 23 s | La ville se lève derrière les collines, le lieu du rendez-vous coiffé de l'anneau du logo, crépuscule et faisceaux | UNE NOUVELLE ÉDITION APPROCHE. | Montée, cordes et tambours qui accélèrent |
+| 23 – 29 s | Noir et silence 0,5 s, puis nuit de fête : feux d'artifice, OPEN DAYS dans l'ellipse du logo | OPEN DAYS · PROCHAINE ÉDITION | Impact, chœur, refrain de valiha en sol majeur |
+| 29 – 35 s | Aube claire sur les baobabs, logo JADE officiel | OPEN DAYS · ONG JADE MADAGASCAR · COMING SOON · RESTEZ CONNECTÉS | Accord final, arpège-signature |
+
+```bash
+python3 src/v3/soundtrack_v6.py build/soundtrack-v6.wav
+ffmpeg -i build/soundtrack-v6.wav -c:a libmp3lame -b:a 192k src/v3/media/trailer-v6-audio.mp3
+node src/render.js --page src/v3/trailer-v6.html --audio build/soundtrack-v6.wav --out dist/open-days-trailer-9x16-v6.mp4
+```
+
+Police Poppins (licence OFL) dans `src/v3/media/fonts/`. Les instruments d'orchestre, la pose de la voix et le ducking sont partagés dans `src/synth.py`.
+
 ## Fichiers
 
 - `src/timeline.js`, `src/v2/timeline.js` — instants clés partagés par l'image et le son (modifier ici pour décaler un impact).
@@ -127,4 +149,4 @@ ffmpeg -i build/soundtrack-v3.wav -c:a libmp3lame -b:a 192k src/v3/media/trailer
 node src/render.js --stills 3.6,12.4,31.5            # -> build/still-*.jpg
 ```
 
-Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2), `http://localhost:8000/src/v3/trailer.html` (V3), `http://localhost:8000/src/v3/trailer-v4.html` (V4) ou `http://localhost:8000/src/v3/trailer-v5.html` (V5).
+Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2), `http://localhost:8000/src/v3/trailer.html` (V3), `http://localhost:8000/src/v3/trailer-v4.html` (V4) `http://localhost:8000/src/v3/trailer-v5.html` (V5) ou `http://localhost:8000/src/v3/trailer-v6.html` (V6).
