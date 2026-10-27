@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Days Teaser V2</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; }
+  body { display: grid; place-items: center; overflow: hidden; }
+  canvas { width: min(100vw, calc(100vh * 16 / 9)); height: auto; display: block; }
+  #play { position: fixed; inset: auto 0 24px 0; margin: auto; width: max-content; padding: 12px 28px;
+          border: 0; background: #116d30; color: #fff; font: 700 16px Inter, sans-serif;
+          letter-spacing: .15em; cursor: pointer; border-radius: 999px; }
+  body.render #play { display: none; }
+</style>
+<script src="timeline.js"></script>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<button id="play" type="button">▶ LIRE LE TEASER</button>
+<audio id="audio" src="../../dist/soundtrack-v2.m4a" preload="auto"></audio>
+<script>
+// Version 2 « De la graine au réseau » : palette du logo JADE (vert, gris, blanc, noir).
+const TL = window.TIMELINE;
+const W = 1920, H = 1080, CX = W / 2, CY = H / 2;
+const C = {
+  green: '#116d30', greenDeep: '#0a4520', leaf: '#2fa455',   // vert du logo, ombre et lumière
+  gray: '#9b9c97', grayLight: '#d9dad6', ink: '#0b0d0b',
+  paper: '#f4f5f1', white: '#ffffff', night: '#030604',
+};
+const DISPLAY = '"Inter Display", Inter, sans-serif';
+const MONO = '"JetBrains Mono", monospace';
+const BEAT = 60 / TL.bpm;
+
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const logo = new Image();
+logo.src = '../../assets/jade-logo-light.png';
+
+// ------------------------------------------------------------------ utilitaires
+function hash(n) {
+  n = (n | 0) ^ 0x9e3779b9;
+  n = Math.imul(n ^ (n >>> 16), 0x85ebca6b);
+  n = Math.imul(n ^ (n >>> 13), 0xc2b2ae35);
+  n ^= n >>> 16;
+  return (n >>> 0) / 4294967296;
+}
+function rng(seed) { let i = 0; return () => hash(seed * 7919 + (i++) * 104729); }
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOutExpo = k => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
+const eOutCubic = k => 1 - Math.pow(1 - k, 3);
+const eInCubic = k => k * k * k;
+const eInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const eOutBack = k => 1 + 2.4 * Math.pow(k - 1, 3) + 1.4 * Math.pow(k - 1, 2);
+const imp = (t, t0, d) => (t >= t0 ? Math.exp(-(t - t0) * d) : 0);
+
+// ------------------------------------------------------------------ typographie : révélation par masque
+function setFont(g, o) {
+  g.font = `${o.weight || 800} ${o.size}px ${o.family || DISPLAY}`;
+  g.letterSpacing = (o.spacing || 0) + 'px';
+}
+function textWidth(s, o) { ctx.save(); setFont(ctx, o); const w = ctx.measureText(s).width; ctx.restore(); return w; }
+function fit(s, o) {
+  const w = textWidth(s, o);
+  return o.maxWidth && w > o.maxWidth ? { ...o, size: o.size * o.maxWidth / w, spacing: (o.spacing || 0) * o.maxWidth / w } : o;
+}
+
+// Les lettres montent une à une derrière une ligne de coupe, puis ressortent par le haut.
+function rise(s, x, y, o, pin = 1, pout = 0) {
+  if (pin <= 0 || pout >= 1 || !s) return 0;
+  o = fit(s, { align: 'center', size: 80, ...o });
+  const w = textWidth(s, o);
+  const x0 = o.align === 'left' ? x : o.align === 'right' ? x - w : x - w / 2;
+  const st = o.stagger ?? 0.45, n = s.length, h = o.size;
+  ctx.save();
+  setFont(ctx, o);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.globalAlpha = o.alpha ?? 1;
+  ctx.beginPath(); ctx.rect(x0 - h, y - h * 0.8, w + 2 * h, h * 1.6); ctx.clip();
+  ctx.fillStyle = ctx.strokeStyle = o.color || C.white;
+  for (let i = 0; i < n; i++) {
+    if (s[i] === ' ') continue;
+    const d = st * (n > 1 ? i / (n - 1) : 0);
+    const ki = eOutCubic(clamp((pin - d) / (1 - st)));
+    const ko = eInCubic(clamp((pout - d) / (1 - st)));
+    const dy = (1 - ki) * h * 1.25 - ko * h * 1.25;
+    const xi = x0 + ctx.measureText(s.slice(0, i)).width;
+    if (o.stroke) { ctx.lineWidth = o.stroke; ctx.strokeText(s[i], xi, y + dy); } else ctx.fillText(s[i], xi, y + dy);
+  }
+  ctx.restore();
+  return w;
+}
+
+function label(s, x, y, o) {
+  if ((o.alpha ?? 1) <= 0) return 0;
+  ctx.save();
+  setFont(ctx, { family: MONO, weight: 600, size: 20, spacing: 6, ...o });
+  ctx.textAlign = o.align || 'center'; ctx.textBaseline = 'middle';
+  ctx.globalAlpha = o.alpha ?? 1; ctx.fillStyle = o.color || C.gray;
+  ctx.fillText(s, x, y);
+  const w = ctx.measureText(s).width;
+  ctx.restore();
+  return w;
+}
+
+// ------------------------------------------------------------------ motifs graphiques issus du logo
+// Ellipse en croissant, épaisse en bas à droite, comme l'anneau gris du logo.
+function swoosh(cx, cy, rx, ry, rot, thick, color, p = 1, alpha = 1, a0 = -1.35, a1 = 3.7) {
+  if (p <= 0 || alpha <= 0) return;
+  const steps = 140, aEnd = a0 + (a1 - a0) * p, outer = [], inner = [];
+  for (let i = 0; i <= steps; i++) {
+    const a = a0 + (aEnd - a0) * (i / steps);
+    const th = thick * Math.pow(Math.sin(Math.PI * clamp((a - a0) / (a1 - a0))), 0.9);
+    for (const [arr, r] of [[outer, th / 2], [inner, -th / 2]]) {
+      const ex = (rx + r) * Math.cos(a), ey = (ry + r) * Math.sin(a);
+      arr.push([cx + ex * Math.cos(rot) - ey * Math.sin(rot), cy + ex * Math.sin(rot) + ey * Math.cos(rot)]);
+    }
+  }
+  ctx.save();
+  ctx.globalAlpha = alpha; ctx.fillStyle = color;
+  ctx.beginPath();
+  outer.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  for (let i = inner.length - 1; i >= 0; i--) ctx.lineTo(...inner[i]);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function leaf(x, y, len, wid, ang, p, color = C.green, vein = 'rgba(255,255,255,.35)') {
+  if (p <= 0) return;
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(ang); ctx.scale(eOutBack(clamp(p)), eOutBack(clamp(p)));
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.moveTo(0, 0);
+  ctx.quadraticCurveTo(len * 0.45, -wid, len, 0);
+  ctx.quadraticCurveTo(len * 0.55, wid * 0.55, 0, 0);
+  ctx.fill();
+  ctx.strokeStyle = vein; ctx.lineWidth = Math.max(1.5, len / 90);
+  ctx.beginPath(); ctx.moveTo(len * 0.06, 0); ctx.quadraticCurveTo(len * 0.5, -wid * 0.18, len * 0.92, 0); ctx.stroke();
+  ctx.restore();
+}
+
+// Pousse à trois feuilles inspirée du logo. `g` = croissance de la tige, `lv` = ouverture des feuilles.
+function sprout(bx, by, scale, g, lv, sway = 0, color = C.green, stemColor = C.green) {
+  const pt = k => [bx + scale * (Math.sin(k * 1.4) * 40 + sway * k * k * 30), by - scale * 320 * k];
+  ctx.save();
+  ctx.strokeStyle = stemColor; ctx.lineCap = 'round';
+  const steps = 40;
+  for (let i = 0; i < steps * g; i++) {
+    const k0 = i / steps, k1 = Math.min(g, (i + 1) / steps);
+    ctx.lineWidth = scale * lerp(9, 3.5, k0);
+    ctx.beginPath(); ctx.moveTo(...pt(k0)); ctx.lineTo(...pt(k1)); ctx.stroke();
+  }
+  ctx.restore();
+  const L = [[0.5, 150, 58, -2.35], [0.98, 210, 70, -1.05], [0.72, 170, 56, -0.42]];
+  L.forEach(([k, len, wid, ang], i) => {
+    if (g < k) return;
+    const [x, y] = pt(k);
+    leaf(x, y, len * scale, wid * scale, ang + sway * 0.12 * (i + 1), lv[i] ?? 0, color);
+  });
+}
+
+// Racines en pistes de circuit imprimé
+const ROOTS = (() => {
+  const r = rng(21), segs = [];
+  function grow(x, y, ang, d, depth) {
+    const n = 2 + Math.floor(r() * 3);
+    for (let i = 0; i < n; i++) {
+      const len = 40 + r() * 60;
+      if (r() < 0.45) ang = Math.round((ang + (r() < 0.5 ? -1 : 1) * Math.PI / 4) / (Math.PI / 4)) * (Math.PI / 4);
+      ang = clamp(ang, 0.2, Math.PI - 0.2);
+      const x2 = x + Math.cos(ang) * len, y2 = y + Math.sin(ang) * len;
+      segs.push({ x1: x, y1: y, x2, y2, d0: d, len, end: false });
+      x = x2; y = y2; d += len;
+      if (depth < 4 && r() < 0.55) grow(x, y, ang + (r() < 0.5 ? -0.8 : 0.8), d, depth + 1);
+    }
+    segs[segs.length - 1].end = true;
+  }
+  for (const a of [0.55, 1.15, 1.57, 2.0, 2.6]) grow(0, 0, a, 0, 0);
+  return segs;
+})();
+function roots(ox, oy, L, alpha, t) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.lineCap = 'round';
+  for (const s of ROOTS) {
+    if (s.d0 >= L) continue;
+    const k = clamp((L - s.d0) / s.len);
+    ctx.strokeStyle = C.gray; ctx.globalAlpha = alpha * 0.8; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(ox + s.x1, oy + s.y1); ctx.lineTo(ox + lerp(s.x1, s.x2, k), oy + lerp(s.y1, s.y2, k)); ctx.stroke();
+    if (s.end && k >= 1) {
+      ctx.fillStyle = C.leaf; ctx.globalAlpha = alpha;
+      ctx.beginPath(); ctx.arc(ox + s.x2, oy + s.y2, 5, 0, 7); ctx.fill();
+    }
+    // Sève lumineuse qui remonte vers la graine
+    const ph = 1 - ((t * 0.9 + hash(s.d0 | 0) ) % 1);
+    if (k >= 1 && hash((s.d0 | 0) + 3) < 0.4) {
+      ctx.fillStyle = C.leaf; ctx.globalAlpha = alpha;
+      ctx.beginPath(); ctx.arc(ox + lerp(s.x1, s.x2, ph), oy + lerp(s.y1, s.y2, ph), 3, 0, 7); ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+const SPORES = (() => { const r = rng(5), a = []; for (let i = 0; i < 90; i++) a.push([r() * W, r() * H, 0.02 + r() * 0.05, 1 + r() * 3, r() * 6]); return a; })();
+function spores(t, alpha, color = C.leaf) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.fillStyle = color;
+  for (const [x, y, sp, s, ph] of SPORES) {
+    const yy = ((y - t * sp * H) % H + H) % H, xx = x + Math.sin(t * 0.8 + ph) * 20;
+    ctx.globalAlpha = alpha * (0.3 + 0.7 * Math.abs(Math.sin(t + ph)));
+    ctx.beginPath(); ctx.arc(xx, yy, s, 0, 7); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function dotGrid(color, alpha, step = 36, ox = 0) {
+  ctx.save(); ctx.fillStyle = color; ctx.globalAlpha = alpha;
+  for (let y = step / 2; y < H; y += step) for (let x = ((ox % step) + step) % step; x < W; x += step) ctx.fillRect(x - 1, y - 1, 2, 2);
+  ctx.restore();
+}
+
+function glow(x, y, r, color, a) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = g; ctx.fillRect(x - r, y - r, 2 * r, 2 * r); ctx.restore();
+}
+
+function fill(color, alpha = 1) { ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.fillRect(-40, -40, W + 80, H + 80); ctx.restore(); }
+
+// ------------------------------------------------------------------ séquence 1 : la graine (0 -> 9,6 s)
+const SEED = [CX, 650];
+function sceneSeed(t) {
+  fill(C.night);
+  dotGrid(C.gray, 0.08 * prog(t, 0.2, 1.5));
+  glow(SEED[0], SEED[1], 520, 'rgba(17,109,48,.55)', prog(t, 0.6, 4) * 0.9);
+  const pan = eInOut(prog(t, 6.9, 7.7)) * 380;
+  ctx.save(); ctx.translate(pan, 0);
+  const L = eOutCubic(prog(t, TL.rootsIn, TL.sproutIn + 0.6)) * 460;
+  roots(SEED[0], SEED[1], L, 1 - prog(t, 9.0, 9.6), t);
+  // graine : point qui pulse au rythme des gouttes d'eau
+  const drop = Math.max(...[0.6, 1.8, 3.0, 4.2].map(d => imp(t, d, 3)));
+  ctx.save(); ctx.fillStyle = C.leaf;
+  ctx.globalAlpha = prog(t, 0.5, 0.65);
+  ctx.beginPath(); ctx.arc(...SEED, 7 + 5 * drop, 0, 7); ctx.fill();
+  for (const d of [0.6, 1.8, 3.0, 4.2]) {
+    const k = prog(t, d, d + 1.1);
+    if (k > 0 && k < 1) {
+      ctx.strokeStyle = C.leaf; ctx.lineWidth = 2; ctx.globalAlpha = 1 - k;
+      ctx.beginPath(); ctx.ellipse(...SEED, 20 + k * 260, (20 + k * 260) * 0.32, 0, 0, 7); ctx.stroke();
+    }
+  }
+  ctx.restore();
+  const g = eOutCubic(prog(t, TL.sproutIn, TL.sproutIn + 1.6));
+  const lv = TL.leaves.map(l => prog(t, l, l + 0.7));
+  sprout(SEED[0], SEED[1], 0.95, g, lv, Math.sin(t * 1.3) * 0.4, C.green, C.leaf);
+  ctx.restore();
+
+  // Textes
+  const ideaOut = prog(t, 5.6, 6.0);
+  label('// 01', CX, 95, { alpha: prog(t, 2.2, 2.6) * (1 - ideaOut), color: C.leaf });
+  rise('Tout commence', CX, 165, { size: 74, weight: 300, color: C.white }, prog(t, TL.ideaIn, TL.ideaIn + 0.8), ideaOut);
+  rise('par une idée.', CX, 250, { size: 74, weight: 800, color: C.white }, prog(t, TL.ideaIn + 0.35, TL.ideaIn + 1.15), ideaOut);
+
+  const outAll = prog(t, 9.2, 9.6);
+  rise('Elle grandit.', 180, 440, { size: 110, weight: 300, align: 'left', color: C.white }, prog(t, TL.growIn, TL.growIn + 0.8), outAll);
+  rise('Elle se partage.', 180, 580, { size: 110, weight: 900, align: 'left', color: C.leaf }, prog(t, TL.shareIn, TL.shareIn + 0.8), outAll);
+  share(t, pan);
+}
+
+// L'idée se propage : de jeunes pousses apparaissent et se relient à la plante.
+const SHOOTS = [[250, 820], [520, 900], [800, 780], [1180, 960], [1700, 860], [1820, 300], [1560, 160], [420, 180], [80, 600]];
+function share(t, pan) {
+  const t0 = TL.shareIn;
+  if (t < t0) return;
+  const out = 1 - prog(t, 9.2, 9.6);
+  const hub = [SEED[0] + pan + 20, SEED[1] - 200];
+  SHOOTS.forEach(([x, y], i) => {
+    const k = prog(t, t0 + 0.1 + i * 0.09, t0 + 0.6 + i * 0.09);
+    if (k <= 0) return;
+    ctx.save(); ctx.globalAlpha = out * 0.6; ctx.strokeStyle = C.gray; ctx.lineWidth = 1.5; ctx.setLineDash([6, 8]);
+    ctx.beginPath(); ctx.moveTo(...hub); ctx.lineTo(lerp(hub[0], x, eOutCubic(k)), lerp(hub[1], y, eOutCubic(k))); ctx.stroke();
+    ctx.restore();
+    const ph = (t * 0.8 + i * 0.17) % 1;
+    ctx.save(); ctx.globalAlpha = out * k; ctx.fillStyle = C.leaf;
+    ctx.beginPath(); ctx.arc(lerp(hub[0], x, ph), lerp(hub[1], y, ph), 3.5, 0, 7); ctx.fill(); ctx.restore();
+    ctx.save(); ctx.globalAlpha = out;
+    sprout(x, y + 40, 0.22, prog(t, t0 + 0.5 + i * 0.09, t0 + 0.9 + i * 0.09), [1, 1, 1].map(() => prog(t, t0 + 0.7 + i * 0.09, t0 + 1.1 + i * 0.09)), Math.sin(t * 2 + i) * 0.3, C.leaf, C.leaf);
+    ctx.restore();
+  });
+}
+
+// ------------------------------------------------------------------ séquence 2 : mots en volets (9,6 -> 12 s)
+const WORDS = [
+  ['PARTAGER', C.green, C.white],
+  ['INNOVER', C.paper, C.green],
+  ['GRANDIR', C.ink, C.white],
+  ['ENSEMBLE', C.gray, C.ink],
+];
+function wordPanel(i, t) {
+  const [w, bg, fg] = WORDS[i], t0 = TL.wipeWords[i];
+  fill(bg);
+  if (i === 2) dotGrid(C.green, 0.5, 30);
+  swoosh(CX, CY + 20, 900, 300, -0.12, 70, fg, 1, 0.08);
+  const drift = (t - t0) * -60;
+  ctx.save(); ctx.translate(drift, 0);
+  rise(w, CX, CY, { size: 260, weight: 900, spacing: 6, color: fg, stagger: 0.3, maxWidth: 1700 }, prog(t, t0, t0 + 0.32));
+  ctx.restore();
+  label(`0${i + 1} / 04`, CX, CY + 200, { color: fg, alpha: 0.7 });
+}
+function wipeTo(t, t0, dur, drawOld, drawNew) {
+  const k = eInOut(prog(t, t0, t0 + dur));
+  if (k >= 1) { drawNew(); return; }
+  drawOld();
+  if (k <= 0) return;
+  ctx.save();
+  const x = lerp(W + 400, -400, k), sl = 300;  // bord diagonal du volet
+  ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(W + 500, 0); ctx.lineTo(W + 500, H); ctx.lineTo(x - sl, H); ctx.closePath();
+  ctx.clip(); drawNew();
+  ctx.restore();
+}
+function sceneWords(t) {
+  const ws = TL.wipeWords;
+  const i = ws.findLastIndex(w => t >= w);
+  wipeTo(t, ws[i], 0.2, () => (i === 0 ? sceneSeed(t) : wordPanel(i - 1, t)), () => wordPanel(i, t));
+}
+
+// ------------------------------------------------------------------ séquence 3 : panneaux clairs (12 -> 19,2 s)
+const PANELS = [
+  ['CONFÉRENCES', 'Écouter. Débattre. Apprendre.'],
+  ['TIC & IA', 'Le numérique au service de demain'],
+  ['CRÉATIVITÉ', 'Des idées qui prennent racine'],
+  ['MADAGASCAR', 'Une jeunesse qui avance'],
+];
+const IX = 1390, IY = 520;
+function icon(i, t, t0) {
+  const k = eOutBack(clamp(prog(t, t0 + 0.05, t0 + 0.6)));
+  ctx.save(); ctx.translate(IX, IY); ctx.scale(k, k); ctx.translate(-IX, -IY);
+  if (i === 0) {  // micro sur disque vert + ondes sonores
+    for (let r = 0; r < 3; r++) {
+      const ph = ((t - t0) * 0.9 + r / 3) % 1;
+      ctx.save(); ctx.strokeStyle = C.gray; ctx.lineWidth = 4; ctx.globalAlpha = 1 - ph;
+      ctx.beginPath(); ctx.arc(IX, IY, 240 + ph * 160, 0, 7); ctx.stroke(); ctx.restore();
+    }
+    ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(IX, IY, 230, 0, 7); ctx.fill();
+    ctx.fillStyle = C.white; ctx.strokeStyle = C.white; ctx.lineWidth = 16; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.roundRect(IX - 42, IY - 130, 84, 160, 42); ctx.fill();
+    ctx.beginPath(); ctx.arc(IX, IY - 10, 80, 0.15, Math.PI - 0.15); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(IX, IY + 70); ctx.lineTo(IX, IY + 120); ctx.moveTo(IX - 55, IY + 120); ctx.lineTo(IX + 55, IY + 120); ctx.stroke();
+  } else if (i === 1) {  // puce électronique reliée à des pistes
+    ctx.strokeStyle = C.gray; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    for (let s = 0; s < 4; s++) for (let p = 0; p < 5; p++) {
+      const off = -120 + p * 60, len = 130 + (hash(s * 5 + p) * 120 | 0);
+      const [ax, ay, dx, dy] = [[IX + off, IY - 170, 0, -1], [IX + 170, IY + off, 1, 0], [IX + off, IY + 170, 0, 1], [IX - 170, IY + off, -1, 0]][s];
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + dx * len, ay + dy * len); ctx.stroke();
+      ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(ax + dx * len, ay + dy * len, 8, 0, 7); ctx.fill();
+      const ph = ((t - t0) * 1.3 + hash(s * 7 + p)) % 1;
+      ctx.beginPath(); ctx.arc(ax + dx * len * ph, ay + dy * len * ph, 5, 0, 7); ctx.fill();
+    }
+    ctx.fillStyle = C.green; ctx.beginPath(); ctx.roundRect(IX - 170, IY - 170, 340, 340, 36); ctx.fill();
+    ctx.fillStyle = C.paper; ctx.beginPath(); ctx.roundRect(IX - 110, IY - 110, 220, 220, 18); ctx.fill();
+    ctx.fillStyle = C.green; ctx.font = `900 120px ${DISPLAY}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.letterSpacing = '0px';
+    ctx.fillText('IA', IX, IY + 6);
+  } else if (i === 2) {  // ampoule dans laquelle pousse une plante
+    ctx.save(); ctx.translate(IX, IY - 40); ctx.rotate((t - t0) * 0.4);
+    ctx.strokeStyle = C.gray; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    for (let r = 0; r < 12; r++) { const a = r / 12 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 225, Math.sin(a) * 225); ctx.lineTo(Math.cos(a) * 265, Math.sin(a) * 265); ctx.stroke(); }
+    ctx.restore();
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 12; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.arc(IX, IY - 40, 165, Math.PI * 0.78, Math.PI * 2.22); ctx.lineTo(IX + 70, IY + 170); ctx.lineTo(IX - 70, IY + 170); ctx.closePath(); ctx.stroke();
+    ctx.fillStyle = C.gray;
+    for (let b = 0; b < 3; b++) { ctx.beginPath(); ctx.roundRect(IX - 66 + b * 6, IY + 188 + b * 26, 132 - b * 12, 16, 8); ctx.fill(); }
+    sprout(IX - 10, IY + 140, 0.62, eOutCubic(prog(t, t0 + 0.2, t0 + 0.9)), [0, 1, 2].map(j => prog(t, t0 + 0.6 + j * 0.12, t0 + 1.0 + j * 0.12)), Math.sin(t * 2) * 0.3);
+  } else {  // Madagascar : silhouette verte percée d'une trame de points
+    madagascar(t, t0);
+  }
+  ctx.restore();
+}
+
+// Contour stylisé (longitude, latitude) et villes réelles reliées à Antananarivo.
+const MDG = [[49.26, -11.95], [49.95, -13.0], [50.17, -14.27], [50.28, -14.9], [50.48, -15.27], [50.2, -15.8], [49.75, -15.45],
+  [49.8, -16.2], [49.58, -16.92], [49.4, -17.38], [49.41, -18.15], [48.98, -19.33], [48.8, -19.9], [48.35, -21.23],
+  [48.02, -22.15], [47.83, -22.82], [47.6, -23.35], [46.98, -25.03], [46.3, -25.18], [45.15, -25.6], [44.6, -25.3],
+  [43.95, -24.68], [43.67, -23.35], [43.37, -21.75], [44.28, -20.28], [44.03, -18.07], [44.4, -16.2], [45.3, -16.1],
+  [46.32, -15.72], [47.0, -15.3], [47.75, -14.63], [48.4, -13.7], [48.9, -13.0], [49.3, -12.3]];
+const CITIES = [[47.52, -18.91], [49.40, -18.15], [46.32, -15.72], [49.29, -12.28], [43.67, -23.35], [47.09, -21.45], [46.99, -25.03], [44.28, -20.28]];
+const proj = ([lon, lat]) => [IX + (lon - 46.9) * 52 * 0.946, IY + (-lat - 18.75) * 52];
+function madagascar(t, t0) {
+  const poly = MDG.map(proj);
+  ctx.save();
+  ctx.beginPath(); poly.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath();
+  ctx.fillStyle = C.green; ctx.fill();
+  ctx.clip();
+  ctx.fillStyle = C.paper; ctx.globalAlpha = 0.28;
+  for (let y = IY - 400; y < IY + 400; y += 14) for (let x = IX - 260; x < IX + 260; x += 14) ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+  ctx.restore();
+  const c = CITIES.map(proj);
+  ctx.save(); ctx.strokeStyle = C.white; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+  c.slice(1).forEach((p, i) => {
+    const k = eOutCubic(prog(t, t0 + 0.4 + i * 0.06, t0 + 0.8 + i * 0.06));
+    if (k <= 0) return;
+    ctx.beginPath(); ctx.moveTo(...c[0]); ctx.lineTo(lerp(c[0][0], p[0], k), lerp(c[0][1], p[1], k)); ctx.stroke();
+    ctx.fillStyle = C.white; ctx.beginPath(); ctx.arc(...p, 6 * k, 0, 7); ctx.fill();
+  });
+  const ph = ((t - t0) * 1.2) % 1;
+  ctx.fillStyle = C.white; ctx.beginPath(); ctx.arc(...c[0], 10, 0, 7); ctx.fill();
+  ctx.globalAlpha = 1 - ph; ctx.strokeStyle = C.ink; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(...c[0], 10 + ph * 50, 0, 7); ctx.stroke();
+  ctx.restore();
+}
+
+function marquee(t, y, text, alpha) {
+  ctx.save();
+  setFont(ctx, { size: 170, weight: 900, spacing: 8 });
+  ctx.textBaseline = 'middle'; ctx.lineWidth = 2; ctx.strokeStyle = C.gray; ctx.globalAlpha = alpha;
+  const w = ctx.measureText(text).width, x = -((t * 140) % w);
+  for (let k = 0; k < 3; k++) ctx.strokeText(text, x + k * w, y);
+  ctx.restore();
+}
+
+function panel(i, t) {
+  const t0 = TL.panels[i], t1 = TL.panels[i + 1] ?? TL.iris;
+  fill(C.paper);
+  dotGrid(C.gray, 0.35, 36, -(t - TL.drop) * 20);
+  marquee(t, 950, 'JEUNESSE · INNOVATION · TIC · CRÉATIVITÉ · ', 0.25);
+  swoosh(IX, IY + 30, 440, 220, -0.15 + (t - t0) * 0.05, 46, C.gray, eOutCubic(prog(t, t0, t0 + 0.9)), 0.55);
+  icon(i, t, t0);
+  const k = prog(t, t0 + 0.05, t0 + 0.6), out = prog(t, t1 - 0.3, t1);
+  label(`0${i + 1} — 04`, 160, 330, { align: 'left', alpha: prog(t, t0, t0 + 0.3), color: C.green });
+  rise(PANELS[i][0], 160, 460, { size: 140, weight: 900, spacing: 2, align: 'left', color: C.green, maxWidth: 760 }, k, out);
+  rise(PANELS[i][1], 160, 580, { size: 40, weight: 500, align: 'left', color: C.ink, stagger: 0.25, maxWidth: 760 }, prog(t, t0 + 0.3, t0 + 0.9), out);
+  ctx.save(); ctx.fillStyle = C.green;
+  ctx.fillRect(160, 650, 160 * eOutExpo(prog(t, t0 + 0.4, t0 + 1.0)), 6);
+  for (let s = 0; s < 4; s++) { ctx.globalAlpha = s <= i ? 1 : 0.25; ctx.fillRect(160 + s * 70, 760, 56, 6); }
+  ctx.restore();
+}
+
+function sceneLight(t) {
+  const ps = TL.panels;
+  const i = ps.findLastIndex(p => t >= p);
+  if (i === 0) {
+    // Entrée du clair : disque vert puis disque papier qui s'ouvrent depuis le centre
+    wordPanel(3, t);
+    const g = eOutExpo(prog(t, TL.drop, TL.drop + 0.45)) * 1250, p = eOutExpo(prog(t, TL.drop + 0.1, TL.drop + 0.6)) * 1250;
+    ctx.save(); ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(CX, CY, g, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(CX, CY, p, 0, 7); ctx.clip(); panel(0, t); ctx.restore();
+    return;
+  }
+  wipeTo(t, ps[i] - 0.1, 0.32, () => panel(i - 1, t), () => {
+    ctx.save(); fill(C.green);
+    const k = prog(t, ps[i] - 0.1, ps[i] + 0.3);
+    ctx.beginPath(); ctx.rect(lerp(W, -200, eInOut(clamp(k * 1.4 - 0.4))), 0, W + 400, H); ctx.clip();
+    panel(i, t); ctx.restore();
+  });
+}
+
+// ------------------------------------------------------------------ séquence 4 : iris, phrase, question (19,2 -> 24 s)
+function sceneStatement(t) {
+  fill(C.night);
+  dotGrid(C.gray, 0.07);
+  glow(1450, 620, 650, 'rgba(17,109,48,.6)', 0.8);
+  spores(t, 0.7);
+  const grow = eOutCubic(prog(t, TL.iris + 0.2, TL.iris + 1.4));
+  sprout(1450, 980, 2.2 * lerp(0.85, 1, grow), grow, [1, 1, 1].map((_, j) => prog(t, TL.iris + 0.6 + j * 0.15, TL.iris + 1.2 + j * 0.15)), Math.sin(t * 1.1) * 0.35, C.green, C.greenDeep);
+  swoosh(1450, 900, 480, 120, -0.1, 30, C.gray, eOutCubic(prog(t, TL.iris + 0.3, TL.iris + 1.5)), 0.5);
+
+  const [s1, s2, s3] = TL.statement, Q = TL.question;
+  const out = prog(t, Q - 0.4, Q);
+  rise('Votre talent', 170, 330, { size: 120, weight: 300, align: 'left', color: C.white }, prog(t, s1, s1 + 0.7), out);
+  rise('a sa place', 170, 470, { size: 120, weight: 300, align: 'left', color: C.gray }, prog(t, s2, s2 + 0.7), out);
+  const w = rise('ici.', 170, 660, { size: 240, weight: 900, align: 'left', color: C.leaf }, prog(t, s3, s3 + 0.6), out);
+  ctx.save(); ctx.fillStyle = C.leaf; ctx.globalAlpha = 1 - out;
+  ctx.fillRect(176, 790, (w || 0) * eOutExpo(prog(t, s3 + 0.35, s3 + 0.9)), 10); ctx.restore();
+
+  if (t >= Q) {
+    fill(C.night, eOutCubic(prog(t, Q - 0.1, Q + 0.2)) * 0.85);
+    const qo = prog(t, TL.loading - 0.2, TL.loading);
+    swoosh(CX, CY + 30, 620, 230, -0.12, 40, C.gray, eOutCubic(prog(t, Q, Q + 1.0)), 0.6);
+    rise('Êtes-vous', CX, 440, { size: 130, weight: 300, color: C.white }, prog(t, Q, Q + 0.6), qo);
+    rise('prêts ?', CX, 600, { size: 190, weight: 900, color: C.leaf }, prog(t, Q + 0.25, Q + 0.85), qo);
+  }
+}
+function sceneIris(t) {
+  const k = eInOut(prog(t, TL.iris - 0.15, TL.iris + 0.35));
+  if (k >= 1) { sceneStatement(t); return; }
+  panel(3, t);
+  ctx.save(); ctx.translate(CX, CY); ctx.rotate(-0.15);
+  ctx.beginPath(); ctx.ellipse(0, 0, k * 1500, k * 1000, 0, 0, 7); ctx.restore();
+  ctx.save(); ctx.clip(); sceneStatement(t); ctx.restore();
+  swoosh(CX, CY, k * 1500, k * 1000, -0.15, 60 * (1 - k) + 10, C.gray, 1, 0.8 * (1 - k), -3.2, 3.1);
+}
+
+// ------------------------------------------------------------------ séquence 5 : chargement bloqué à 99 % (24 -> 28,2 s)
+const HEARTS = (() => {  // mêmes instants que le battement de cœur de la bande-son
+  const a = []; let t0 = TL.loading;
+  while (t0 < TL.silence) { a.push(t0); t0 += Math.max(0.32, 1.2 - 0.85 * (t0 - TL.loading) / (TL.silence - TL.loading)); }
+  return a;
+})();
+function percentAt(t) {
+  const pts = [[TL.loading, 0], [25.2, 18], [26.4, 54], [27.1, 86], [TL.stuck, 99]];
+  for (let i = 1; i < pts.length; i++) if (t <= pts[i][0]) return Math.floor(lerp(pts[i - 1][1], pts[i][1], prog(t, pts[i - 1][0], pts[i][0])));
+  return 99;
+}
+function sceneLoading(t) {
+  fill(C.night);
+  dotGrid(C.gray, 0.08);
+  const beat = Math.max(...HEARTS.map(h => imp(t, h, 9)));
+  const stuck = t >= TL.stuck;
+  glow(CX, CY, 700, 'rgba(17,109,48,.7)', 0.5 + 0.5 * beat + (stuck ? 0.3 : 0));
+  for (const h of HEARTS) {  // ondes sur chaque battement
+    const k = prog(t, h, h + 1.0);
+    if (k > 0 && k < 1) swoosh(CX, CY + 20, 560 + k * 500, 210 + k * 190, -0.12, 14, C.leaf, 1, (1 - k) * 0.5, -3.2, 3.1);
+  }
+  const pct = percentAt(t);
+  const sc = 1 + 0.035 * beat;
+  ctx.save(); ctx.translate(CX, CY); ctx.scale(sc, sc); ctx.translate(-CX, -CY);
+  swoosh(CX, CY + 20, 560, 210, -0.12, 44, 'rgba(155,156,151,.25)', 1, 1);
+  swoosh(CX, CY + 20, 560, 210, -0.12, 44, C.green, Math.max(0.001, pct / 100), 1);
+  const flick = stuck ? (Math.floor(t * 14) % 2 ? C.leaf : C.white) : C.white;
+  ctx.save(); setFont(ctx, { family: MONO, weight: 800, size: 230, spacing: -6 });
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = flick;
+  ctx.fillText(`${String(pct).padStart(2, '0')}%`, CX + (stuck ? (hash(Math.floor(t * 30)) - 0.5) * 10 : 0), CY + 10);
+  ctx.restore();
+  ctx.restore();
+  label('LA PROCHAINE ÉDITION SE PRÉPARE', CX, 240, { size: 22, spacing: 10, color: C.gray, alpha: prog(t, TL.loading, TL.loading + 0.4) });
+  for (let s = 0; s < 40; s++) {
+    ctx.save(); ctx.fillStyle = s / 40 < pct / 100 ? C.leaf : 'rgba(155,156,151,.25)';
+    ctx.fillRect(CX - 400 + s * 20, 830, 14, 22); ctx.restore();
+  }
+  if (stuck) label('CHARGEMENT EN ATTENTE…', CX, 900, { size: 20, color: Math.floor(t * 7) % 2 ? C.leaf : C.gray });
+}
+
+function sceneSilence(t) {
+  fill(C.night);
+  const d = TL.silence + 0.3;
+  if (t < d) return;
+  const k = prog(t, d, d + 0.6);
+  ctx.save(); ctx.fillStyle = C.leaf;
+  ctx.beginPath(); ctx.arc(CX, CY, 6 + 3 * imp(t, d, 6), 0, 7); ctx.fill();
+  ctx.strokeStyle = C.leaf; ctx.lineWidth = 2; ctx.globalAlpha = 1 - k;
+  ctx.beginPath(); ctx.ellipse(CX, CY, 20 + k * 200, (20 + k * 200) * 0.32, 0, 0, 7); ctx.stroke();
+  ctx.restore();
+}
+
+// ------------------------------------------------------------------ séquence 6 : révélation et écran final
+function sceneFinal(t) {
+  const R = TL.reveal;
+  fill(C.paper);
+  dotGrid(C.gray, 0.3, 36);
+  spores(t, 0.35, C.green);
+
+  const titleY = 330;
+  swoosh(CX + 20, titleY + 20, 860, 205, -0.07, 54, C.gray, eOutCubic(prog(t, R + 0.15, R + 1.2)), 0.75);
+  const so = { size: 210, weight: 900, spacing: 4 }, sd = { size: 210, weight: 200, spacing: 4 };
+  const wo = textWidth('OPEN', so), wd = textWidth('DAYS', sd), gap = 50, x0 = CX - (wo + gap + wd) / 2;
+  const breathe = lerp(1, 1.02, prog(t, R + 1, 35));
+  ctx.save(); ctx.translate(CX, titleY); ctx.scale(breathe, breathe); ctx.translate(-CX, -titleY);
+  rise('OPEN', x0, titleY, { ...so, align: 'left', color: C.green, stagger: 0.35 }, prog(t, R + 0.2, R + 0.75));
+  rise('DAYS', x0 + wo + gap, titleY, { ...sd, align: 'left', color: C.ink, stagger: 0.35 }, prog(t, R + 0.35, R + 0.9));
+  ctx.restore();
+
+  const E = TL.editionIn;
+  const ew = rise('PROCHAINE ÉDITION', CX, 490, { size: 42, weight: 600, spacing: 16, color: C.ink, stagger: 0.5 }, prog(t, E, E + 0.7));
+  ctx.save(); ctx.fillStyle = C.green;
+  const ll = 120 * eOutExpo(prog(t, E + 0.3, E + 1.0));
+  ctx.fillRect(CX - ew / 2 - 36 - ll, 488, ll, 4); ctx.fillRect(CX + ew / 2 + 36, 488, ll, 4);
+  ctx.restore();
+
+  const J = TL.jadeIn, ja = prog(t, J, J + 0.4);
+  if (ja > 0) {
+    const lh = 150, lwid = lh * (logo.naturalWidth / logo.naturalHeight || 1.4);
+    const jo = { size: 52, weight: 800, spacing: 1 };
+    const tw = textWidth('ONG JADE Madagascar', jo), total = lwid + 50 + tw, lx = CX - total / 2, jy = 665;
+    const ks = eOutBack(clamp(prog(t, J, J + 0.5)));
+    ctx.save(); ctx.globalAlpha = ja; ctx.translate(lx + lwid / 2, jy); ctx.scale(ks, ks);
+    if (logo.complete && logo.naturalWidth) ctx.drawImage(logo, -lwid / 2, -lh / 2, lwid, lh);
+    ctx.restore();
+    ctx.save(); ctx.fillStyle = C.gray; ctx.fillRect(lx + lwid + 24, jy - 40, 3, 80 * eOutCubic(ja)); ctx.restore();
+    rise('ONG JADE Madagascar', lx + lwid + 50, jy, { ...jo, align: 'left', color: C.ink, stagger: 0.4 }, prog(t, J + 0.1, J + 0.7));
+  }
+
+  // Bandeau vert : appel à l'action
+  const B = TL.bandIn, by = lerp(H, 790, eOutExpo(prog(t, B, B + 0.6)));
+  if (by < H) {
+    ctx.save();
+    ctx.fillStyle = C.green; ctx.fillRect(0, by, W, H - by + 40);
+    ctx.beginPath(); ctx.rect(0, by, W, H - by); ctx.clip();
+    swoosh(CX, by + 160, 1100, 150, -0.05, 60, C.white, 1, 0.08);
+    dotGrid(C.white, 0.12, 36);
+    ctx.restore();
+    const oy = by - 790;
+    rise('Préparez-vous', CX, 868 + oy, { size: 76, weight: 900, spacing: 1, color: C.white }, prog(t, TL.prepIn, TL.prepIn + 0.6));
+    const co = { size: 40, weight: 500, spacing: 3 };
+    const cw = textWidth('Restez connectés', co);
+    rise('Restez connectés', CX + 20, 948 + oy, { ...co, color: C.white }, prog(t, TL.connectIn, TL.connectIn + 0.6));
+    const ca = prog(t, TL.connectIn, TL.connectIn + 0.3);
+    if (ca > 0) {
+      const ph = ((t - TL.connectIn) * 1.1) % 1, dx = CX + 20 - cw / 2 - 32;
+      ctx.save(); ctx.globalAlpha = ca; ctx.fillStyle = C.white;
+      ctx.beginPath(); ctx.arc(dx, 948 + oy, 9, 0, 7); ctx.fill();
+      ctx.strokeStyle = C.white; ctx.lineWidth = 2.5; ctx.globalAlpha = ca * (1 - ph);
+      ctx.beginPath(); ctx.arc(dx, 948 + oy, 9 + ph * 22, 0, 7); ctx.stroke(); ctx.restore();
+    }
+    const sa = eOutBack(clamp(prog(t, TL.soonIn, TL.soonIn + 0.45)));
+    if (sa > 0) {
+      const bo = { family: MONO, weight: 800, size: 22, spacing: 10 };
+      const bw = textWidth('COMING SOON', bo) + 100;
+      ctx.save(); ctx.translate(CX, 1022 + oy); ctx.scale(sa, sa);
+      ctx.fillStyle = C.white; ctx.beginPath(); ctx.roundRect(-bw / 2, -24, bw, 48, 24); ctx.fill();
+      ctx.restore();
+      label('COMING SOON', CX + 17, 1023 + oy, { ...bo, color: C.green, alpha: clamp(sa) });
+      const pulse = 0.5 + 0.5 * Math.sin((t - TL.soonIn) * 6);
+      ctx.save(); ctx.fillStyle = C.leaf; ctx.globalAlpha = clamp(sa) * (0.4 + 0.6 * pulse);
+      ctx.beginPath(); ctx.arc(CX - bw / 2 + 30, 1022 + oy, 6, 0, 7); ctx.fill(); ctx.restore();
+    }
+  }
+}
+function sceneReveal(t) {
+  const R = TL.reveal;
+  const g = eOutExpo(prog(t, R, R + 0.45)) * 1300, p = eOutExpo(prog(t, R + 0.12, R + 0.6)) * 1300;
+  if (p >= 1250) { sceneFinal(t); return; }
+  fill(C.night);
+  ctx.save(); ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(CX, CY, Math.max(8, g), 0, 7); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, p, 0, 7); ctx.clip(); sceneFinal(t); ctx.restore();
+}
+
+// ------------------------------------------------------------------ assemblage
+const GRAIN = Array.from({ length: 4 }, (_, n) => {
+  const c = document.createElement('canvas'); c.width = 480; c.height = 270;
+  const g = c.getContext('2d'), d = g.createImageData(480, 270), r = rng(100 + n);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  g.putImageData(d, 0, 0); return c;
+});
+const IMPACTS = [[TL.ideaIn, 0.12], [TL.growIn, 0.12], [TL.shareIn, 0.1], ...TL.wipeWords.map(w => [w, 0.18]), [TL.drop, 0.5],
+  [TL.iris, 0.35], [TL.question, 0.25], [TL.reveal, 0.8], [TL.jadeIn, 0.1], [TL.prepIn, 0.12]];
+
+function render(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
+  const punch = 1 + IMPACTS.reduce((s, [c, g]) => s + g * 0.04 * imp(t, c, 7), 0);
+  ctx.translate(CX, CY); ctx.scale(punch, punch); ctx.translate(-CX, -CY);
+  if (t < TL.wipeWords[0]) sceneSeed(t);
+  else if (t < TL.drop) sceneWords(t);
+  else if (t < TL.iris - 0.15) sceneLight(t);
+  else if (t < TL.loading) sceneIris(t);
+  else if (t < TL.silence) sceneLoading(t);
+  else if (t < TL.reveal) sceneSilence(t);
+  else sceneReveal(t);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const flash = IMPACTS.reduce((s, [c, g]) => s + g * imp(t, c, 6), 0);
+  if (flash > 0.004) { ctx.fillStyle = `rgba(255,255,255,${clamp(flash * 0.8)})`; ctx.fillRect(0, 0, W, H); }
+  const v = ctx.createRadialGradient(CX, CY, 500, CX, CY, 1200);
+  const light = (t >= TL.drop && t < TL.iris) || t >= TL.reveal + 0.3;  // fonds clairs : vignettage discret
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, `rgba(0,0,0,${light ? 0.1 : 0.35})`);
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.globalAlpha = 0.05; ctx.globalCompositeOperation = 'overlay';
+  ctx.drawImage(GRAIN[Math.floor(t * 30) % 4], 0, 0, W, H); ctx.restore();
+  const fade = Math.max(prog(t, TL.fadeOut, TL.duration), 1 - prog(t, 0, 0.4));
+  if (fade > 0) { ctx.fillStyle = `rgba(0,0,0,${fade})`; ctx.fillRect(0, 0, W, H); }
+}
+
+// ------------------------------------------------------------------ lecture / rendu
+window.ready = Promise.all([
+  document.fonts.load(`900 100px ${DISPLAY}`), document.fonts.load(`200 100px ${DISPLAY}`), document.fonts.load(`800 20px ${MONO}`),
+  logo.decode().catch(() => {}),
+]);
+window.renderFrame = t => { render(t); };
+
+if (new URLSearchParams(location.search).has('render')) {
+  document.body.classList.add('render');
+} else {
+  const audio = document.getElementById('audio');
+  const btn = document.getElementById('play');
+  let start = null;
+  const clock = () => (audio.readyState >= 2 && !audio.paused ? audio.currentTime : (performance.now() - start) / 1000);
+  const loop = () => {
+    const t = clock();
+    render(Math.min(t, TL.duration - 0.001));
+    if (t < TL.duration) requestAnimationFrame(loop); else btn.style.display = '';
+  };
+  window.ready.then(() => render(TL.duration - 2));
+  btn.onclick = () => {
+    btn.style.display = 'none';
+    start = performance.now();
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+    requestAnimationFrame(loop);
+  };
+}
+</script>
+</body>
+</html>

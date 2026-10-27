@@ -2,6 +2,7 @@
 //
 //   node src/render.js                          -> dist/open-days-teaser.mp4 (1920x1080, 30 i/s)
 //   node src/render.js --stills 3.4,12.2,31     -> build/still-XX.XX.jpg (contrôle visuel)
+//   node src/render.js --page src/v2/teaser.html --audio build/soundtrack-v2.wav --out dist/open-days-teaser-v2.mp4
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -15,6 +16,7 @@ const FPS = Number(opt('--fps', 30));
 const OUT = path.resolve(ROOT, opt('--out', 'dist/open-days-teaser.mp4'));
 const AUDIO = path.resolve(ROOT, opt('--audio', 'build/soundtrack.wav'));
 const stills = opt('--stills', null);
+const PAGE = opt('--page', 'src/teaser.html');
 
 // Serveur statique local : en file://, le logo rendrait le canvas non exportable.
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.png': 'image/png', '.m4a': 'audio/mp4' };
@@ -32,7 +34,7 @@ function serve() {
   const server = await serve();
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-  await page.goto(`http://127.0.0.1:${server.address().port}/src/teaser.html?render`);
+  await page.goto(`http://127.0.0.1:${server.address().port}/${PAGE}?render`);
   await page.evaluate(() => window.ready);
   const duration = await page.evaluate(() => window.TIMELINE.duration);
   const grab = t => page.evaluate(tt => { window.renderFrame(tt); return document.getElementById('c').toDataURL('image/jpeg', 0.96); }, t);
@@ -41,7 +43,7 @@ function serve() {
     fs.mkdirSync(path.join(ROOT, 'build'), { recursive: true });
     for (const s of stills.split(',').map(Number)) {
       const url = await grab(s);
-      const file = path.join(ROOT, 'build', `still-${s.toFixed(2)}.jpg`);
+      const file = path.join(ROOT, 'build', `${opt('--prefix', 'still')}-${s.toFixed(2)}.jpg`);
       fs.writeFileSync(file, Buffer.from(url.split(',')[1], 'base64'));
       console.log(file);
     }

@@ -1,0 +1,30 @@
+// Version 2 « De la graine au réseau » — découpage partagé par teaser.html et soundtrack.py.
+// Tempo : 100 BPM, soit un temps toutes les 0,6 s et une mesure toutes les 2,4 s. Valeurs en secondes.
+window.TIMELINE = {
+  "duration": 35.0,
+  "bpm": 100,
+  "seedIn": 0.6,
+  "rootsIn": 1.2,
+  "ideaIn": 2.4,
+  "sproutIn": 4.8,
+  "leaves": [5.4, 6.0, 6.6],
+  "growIn": 7.2,
+  "shareIn": 8.4,
+  "wipeWords": [9.6, 10.2, 10.8, 11.4],
+  "drop": 12.0,
+  "panels": [12.0, 13.8, 15.6, 17.4],
+  "iris": 19.2,
+  "statement": [19.8, 20.4, 21.0],
+  "question": 22.8,
+  "loading": 24.0,
+  "stuck": 27.6,
+  "silence": 28.2,
+  "reveal": 28.8,
+  "editionIn": 29.4,
+  "jadeIn": 30.6,
+  "bandIn": 31.5,
+  "prepIn": 31.8,
+  "connectIn": 32.4,
+  "soonIn": 33.0,
+  "fadeOut": 34.7
+};
