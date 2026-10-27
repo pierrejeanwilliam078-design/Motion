@@ -1,0 +1,37 @@
+// Version 7 « L'écran » (9:16, voix off) — découpage partagé par trailer-v7.html et soundtrack_v7.py.
+// Mêmes instants que la V3 (la musique de la V3 est reprise), plus les gestes de l'interface :
+// notifications, bulles de discussion, défilement du fil, touches sur les stories et sur les boutons.
+window.TIMELINE = {
+  "duration": 35.0,
+  "width": 1080,
+  "height": 1920,
+  "voice": [[0.0, 2.7, 1.0, "Et si le futur était plus proche qu'on ne l'imagine ?"], [3.33, 4.98, 6.0, "Là où les idées se rencontrent…"], [5.32, 7.73, 10.5, "Une nouvelle génération ose imaginer demain."], [8.02, 10.65, 17.5, "Le rendez-vous des passionnés de technologie revient."], [10.81, 13.21, 24.2, "OPEN DAYS… Une nouvelle édition arrive !"], [13.4, 14.21, 29.25, "Préparez-vous."], [14.41, 16.03, 30.2, "Le futur nous rassemble."], [16.24, 17.11, 31.85, "OPEN DAYS."], [17.26, 19.15, 32.7, "ONG JADE Madagascar."]],
+  "heartbeats": [0.5, 1.5, 2.5, 3.5, 4.5],
+  "s1Text": 2.4,
+  "circuits": 5.0,
+  "s2Text": 7.7,
+  "montage": [10.0, 11.2, 12.3],
+  "words": [13.0, 13.9, 14.8],
+  "sphere": 16.0,
+  "conference": 19.0,
+  "s4Text": 20.4,
+  "silence": 23.0,
+  "reveal": 23.5,
+  "editionIn": 25.2,
+  "light": 28.7,
+  "final": 29.0,
+  "jadeIn": 29.2,
+  "comingIn": 30.4,
+  "connectIn": 31.0,
+  "openPulse": 31.95,
+  "ongIn": 32.75,
+  "fadeOut": 34.3,
+  "notifs": [2.4, 3.6],
+  "unlock": 5.0,
+  "bubbles": [5.5, 6.2, 6.9, 8.2, 8.8, 9.3],
+  "feedSnaps": [11.2, 12.3],
+  "storyTaps": [13.9, 14.8],
+  "loading": 16.0,
+  "flood": 19.0,
+  "taps": [30.95, 31.85]
+};

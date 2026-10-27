@@ -1,0 +1,540 @@
+<meta charset="utf-8">
+<title>Open Days Trailer Écran</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;500;600;700;800;900&display=swap">
+<style>
+  /* Version 7 « L'écran » : tout le trailer se joue dans l'interface d'un téléphone, aux couleurs JADE. */
+  :root {
+    --bg: #0b0f0c;
+    --panel: #151b16;
+    --line: #26302a;
+    --fg: #eef0ec;
+    --muted: #9b9c97;       /* gris du logo */
+    --accent: #2fa455;      /* vert du logo éclairci pour fond sombre */
+    --accent-deep: #116d30; /* vert du logo */
+    --font: Inter, system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--font); }
+  .wrap { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 420px); gap: 32px; justify-content: center; align-items: start;
+          padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .stage { display: grid; gap: 14px; justify-items: center; min-width: 0; }
+  .phone { padding: 10px; border-radius: 44px; background: #1b211c; box-shadow: 0 0 0 2px #2c352e inset; max-width: 100%; }
+  canvas { display: block; height: min(74vh, 860px); aspect-ratio: 9 / 16; max-width: 100%; background: #000; border-radius: 34px; }
+  .controls { width: 100%; max-width: min(calc(min(74vh, 860px) * 9 / 16 + 20px), 100%); display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+  button.play { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent-deep); color: #fff; font-size: 16px; cursor: pointer; }
+  button.play:focus-visible, input:focus-visible, .scene:focus-visible, .lines li:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .time { font: 600 13px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .vol { display: flex; gap: 8px; align-items: center; color: var(--muted); font: 700 11px var(--font); letter-spacing: .12em; }
+  .vol input { width: 90px; }
+  .side { display: grid; gap: 20px; min-width: 0; }
+  .eyebrow { font: 700 12px var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin: 0; }
+  h1 { font: 800 30px/1.15 var(--font); margin: 6px 0 8px; text-wrap: balance; }
+  .lede { color: var(--muted); margin: 0; }
+  .track { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .scene { border: 0; border-radius: 8px; background: var(--panel); color: var(--muted); padding: 9px 10px; text-align: left; cursor: pointer; font: 700 12px var(--font); min-width: 0; }
+  .scene.on { background: var(--accent-deep); color: #fff; }
+  .lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .lines li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; padding: 8px 10px; background: var(--panel); border-radius: 8px; border-left: 3px solid transparent; cursor: pointer; }
+  .lines li.on { border-left-color: var(--accent); color: #fff; }
+  .lines .ts { font: 600 12px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .note { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; }
+  body.render .wrap > :not(.stage), body.render .controls { display: none; }
+  body.render .phone { padding: 0; background: none; box-shadow: none; }
+  body.render canvas { border-radius: 0; }
+  body.render { overflow: hidden; }
+  @media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } canvas { height: auto; width: min(100%, 420px); } .controls { max-width: 440px; } }
+</style>
+
+<div class="wrap">
+  <div class="stage">
+    <div class="phone"><canvas id="c" width="1080" height="1920" aria-label="Aperçu animé du trailer Open Days, version écran de téléphone"></canvas></div>
+    <div class="controls">
+      <button class="play" id="play" type="button" aria-label="Lecture">▶</button>
+      <input id="seek" type="range" min="0" max="35" step="0.01" value="0" aria-label="Position dans le trailer">
+      <span class="time" id="time">00:00 / 00:35</span>
+      <span></span>
+      <label class="vol" for="vol">VOLUME <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9"></label>
+      <span></span>
+    </div>
+  </div>
+  <aside class="side">
+    <div>
+      <p class="eyebrow">ONG JADE Madagascar · 9:16 · 35 s</p>
+      <h1>Open Days, l'écran qui s'allume</h1>
+      <p class="lede">Le trailer se joue dans un téléphone : écran verrouillé, notifications, discussion, fil et stories, avalanche de notifications, l'écran s'éteint… puis se rallume sur OPEN DAYS. Musique de trailer de la V3, voix off et sons d'interface.</p>
+    </div>
+    <div class="track" id="track" role="group" aria-label="Scènes"></div>
+    <ul class="lines" id="lines" aria-label="Voix off"></ul>
+    <p class="note">Interface générique aux couleurs JADE, sans la marque d'aucun réseau social. Les messages et prénoms de la discussion sont fictifs. Le logo officiel OPEN DAYS n'a pas été fourni : le titre est typographique en attendant.</p>
+  </aside>
+</div>
+<audio id="audio" src="media/trailer-v7-audio.mp3" preload="auto"></audio>
+
+<script src="timeline-v7.js"></script>
+<script>
+const TL = window.TIMELINE;
+const W = TL.width, H = TL.height, CX = W / 2;
+const FONT = 'Inter, system-ui, sans-serif';
+const C = { bg: '#0b0f0c', surf: '#151b16', surf2: '#1f2720', line: '#2a332c', text: '#eef0ec', muted: '#9b9c97',
+  green: '#116d30', deep: '#0a4520', leaf: '#2fa455', gray: '#9b9c97', paper: '#f4f5f2', white: '#ffffff', ink: '#111411' };
+
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+let S = 1;
+function setScale(s) { S = s; cv.width = Math.round(W * s); cv.height = Math.round(H * s); }
+const base = () => ctx.setTransform(S, 0, 0, S, 0, 0);
+const jade = new Image(); jade.src = 'media/jade-logo.png';
+
+// ------------------------------------------------------------------ utilitaires
+function hash(n) {
+  n = (n | 0) ^ 0x9e3779b9; n = Math.imul(n ^ (n >>> 16), 0x85ebca6b); n = Math.imul(n ^ (n >>> 13), 0xc2b2ae35); n ^= n >>> 16;
+  return (n >>> 0) / 4294967296;
+}
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOutExpo = k => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
+const eOutCubic = k => 1 - Math.pow(1 - k, 3);
+const eInCubic = k => k * k * k;
+const eInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const eOutBack = k => (k <= 0 ? 0 : 1 + 2.7 * Math.pow(k - 1, 3) + 1.7 * Math.pow(k - 1, 2));
+const imp = (t, t0, d) => (t >= t0 ? Math.exp(-(t - t0) * d) : 0);
+
+function rr(x, y, w, h, r, fill, stroke, lw = 2) {
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+}
+function text(s, x, y, o = {}) {
+  ctx.save();
+  ctx.font = `${o.weight || 600} ${o.size || 32}px ${FONT}`; ctx.letterSpacing = (o.spacing || 0) + 'px';
+  ctx.textAlign = o.align || 'left'; ctx.textBaseline = o.baseline || 'middle';
+  ctx.globalAlpha = o.alpha ?? 1; ctx.fillStyle = o.color || C.text;
+  if (o.maxWidth) { const w = ctx.measureText(s).width; if (w > o.maxWidth) { ctx.font = `${o.weight || 600} ${(o.size || 32) * o.maxWidth / w}px ${FONT}`; } }
+  ctx.fillText(s, x, y);
+  const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function fill(color) { ctx.fillStyle = color; ctx.fillRect(-60, -60, W + 120, H + 120); }
+// Ellipse grise en croissant du logo
+function swoosh(cx, cy, rx, ry, rot, thick, color, p = 1, a = 1) {
+  if (p <= 0) return;
+  const a0 = -1.35, a1 = 3.7, aEnd = a0 + (a1 - a0) * p, outer = [], inner = [], n = 100;
+  for (let i = 0; i <= n; i++) {
+    const an = a0 + (aEnd - a0) * i / n, th = thick * Math.pow(Math.sin(Math.PI * clamp((an - a0) / (a1 - a0))), 0.9);
+    for (const [arr, r] of [[outer, th / 2], [inner, -th / 2]]) {
+      const ex = (rx + r) * Math.cos(an), ey = (ry + r) * Math.sin(an);
+      arr.push([cx + ex * Math.cos(rot) - ey * Math.sin(rot), cy + ex * Math.sin(rot) + ey * Math.cos(rot)]);
+    }
+  }
+  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = color; ctx.beginPath();
+  outer.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  for (let i = inner.length - 1; i >= 0; i--) ctx.lineTo(...inner[i]);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function sprout(x, y, s, color, g = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineCap = 'round'; ctx.lineWidth = 6;
+  const h = 120 * clamp(g * 1.3);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(10, -h * 0.5, 18, -h); ctx.stroke();
+  const leaf = (lx, ly, a, l, k) => { if (k <= 0) return; ctx.save(); ctx.translate(lx, ly); ctx.rotate(a); ctx.scale(k, k); ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(l * 0.45, -l * 0.38, l, 0); ctx.quadraticCurveTo(l * 0.55, l * 0.2, 0, 0); ctx.fill(); ctx.restore(); };
+  leaf(8, -h * 0.5, -2.3, 50, eOutBack(prog(g, 0.5, 0.8))); leaf(18, -h, -1.1, 64, eOutBack(prog(g, 0.65, 1))); leaf(13, -h * 0.75, -0.4, 50, eOutBack(prog(g, 0.58, 0.9)));
+  ctx.restore();
+}
+function appIcon(x, y, s) {   // icône d'application : le logo JADE officiel sur fond blanc
+  rr(x - s / 2, y - s / 2, s, s, s * 0.24, C.white);
+  if (jade.complete && jade.naturalWidth) { const w = s * 0.86, h = w * jade.naturalHeight / jade.naturalWidth; ctx.drawImage(jade, x - w / 2, y - h / 2, w, h); }
+}
+function avatar(x, y, r, letter, color) {
+  ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  text(letter, x, y + 2, { size: r, weight: 800, align: 'center', color: C.white });
+}
+function ripple(x, y, t0, t) {   // le doigt touche l'écran
+  const k = prog(t, t0, t0 + 0.5);
+  if (k <= 0 || k >= 1) return;
+  ctx.save(); ctx.globalAlpha = 0.45 * (1 - k); ctx.fillStyle = C.white;
+  ctx.beginPath(); ctx.arc(x, y, 40 + 80 * eOutCubic(k), 0, 7); ctx.fill(); ctx.restore();
+}
+function statusBar(t, dark = true) {
+  const col = dark ? C.white : C.ink, clock = t >= TL.reveal ? '00:00' : '23:59';
+  text(clock, 70, 62, { size: 34, weight: 700, color: col });
+  ctx.fillStyle = col;
+  for (let i = 0; i < 4; i++) ctx.fillRect(W - 250 + i * 14, 72 - 8 - i * 6, 9, 8 + i * 6);
+  ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(W - 160, 76, 10 + i * 9, -2.4, -0.74); ctx.stroke(); }
+  rr(W - 125, 50, 60, 28, 7, null, col, 3); ctx.fillStyle = col; ctx.fillRect(W - 120, 55, 40, 18); ctx.fillRect(W - 63, 58, 5, 12);
+}
+
+// ------------------------------------------------------------------ 1. écran verrouillé (0 -> 5 s)
+function notifCard(y, app, title, body, a, icon = true, h = 220) {
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  rr(60, y, W - 120, h, 40, 'rgba(31,39,32,.92)');
+  if (icon) appIcon(140, y + 70, 76); else avatar(140, y + 70, 38, 'C', C.green);
+  text(app, 200, y + 52, { size: 28, weight: 700, color: C.muted, spacing: 1 });
+  text('maintenant', W - 100, y + 52, { size: 26, weight: 500, color: C.muted, align: 'right' });
+  text(title, 200, y + 98, { size: 34, weight: 700, color: C.text, maxWidth: W - 320 });
+  text(body, 100, y + 165, { size: 46, weight: 800, color: C.white, maxWidth: W - 200 });
+  ctx.restore();
+}
+function lockScreen(t) {
+  fill(C.bg);
+  const g = ctx.createRadialGradient(CX, 1250, 0, CX, 1250, 1100);
+  g.addColorStop(0, 'rgba(17,109,48,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  swoosh(CX, 1350, 520, 190, -0.12, 70, C.gray, 1, 0.12);
+  const hb = Math.max(0, ...TL.heartbeats.map(h => imp(t, h, 3)));
+  sprout(CX - 40, 1520, 2.2, `rgba(47,164,85,${0.25 + 0.35 * hb})`);
+  statusBar(t);
+  text('23:59', CX, 400, { size: 250, weight: 200, align: 'center', color: C.white, alpha: prog(t, 0.2, 0.9) });
+  text('ONG JADE Madagascar', CX, 560, { size: 34, weight: 500, align: 'center', color: C.muted, alpha: prog(t, 0.6, 1.2) });
+  const [n1, n2] = TL.notifs;
+  notifCard(lerp(560, 700, eOutBack(prog(t, n1, n1 + 0.45))), 'ONG JADE MADAGASCAR', 'Nouveau', 'Quelque chose se prépare…', prog(t, n1, n1 + 0.2));
+  notifCard(lerp(820, 950, eOutBack(prog(t, n2, n2 + 0.45))), 'COMMUNAUTÉ TECH', '3 nouveaux messages', 'Vous avez vu ?', prog(t, n2, n2 + 0.2), false);
+  const hint = prog(t, 3.9, 4.3);
+  text('Balayez vers le haut pour ouvrir', CX, 1760, { size: 30, weight: 500, align: 'center', color: C.muted, alpha: hint * (0.6 + 0.4 * Math.sin(t * 6)) });
+  rr(CX - 70, 1840, 140, 10, 5, `rgba(255,255,255,${0.7 * hint})`);
+}
+
+// ------------------------------------------------------------------ 2. discussion de groupe (5 -> 10 s)
+const CHAT = [
+  ['L', 'A', '#5d5e5a', 'Vous avez vu la notif ?'],
+  ['L', 'M', C.green, 'Quelque chose se prépare…'],
+  ['R', '', '', "J'ai une idée de projet"],
+  ['L', 'T', '#3d6b4c', "Je m'occupe du code"],
+  ['L', 'R', '#7a7b77', 'Moi du design'],
+  ['R', '', '', 'On se retrouve là-bas !'],
+];
+function chatScreen(t) {
+  fill(C.bg);
+  statusBar(t);
+  rr(0, 110, W, 140, 0, C.surf);
+  text('‹', 60, 180, { size: 70, weight: 400, color: C.leaf });
+  ctx.save(); ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(170, 180, 46, 0, 7); ctx.fill(); ctx.restore();
+  sprout(160, 210, 0.42, C.white);
+  text('Communauté tech', 240, 160, { size: 40, weight: 800 });
+  text('4 membres en ligne', 240, 205, { size: 28, weight: 500, color: C.leaf });
+  let y = 320;
+  CHAT.forEach(([side, letter, col, msg], i) => {
+    const t0 = TL.bubbles[i], typing = prog(t, t0 - 0.5, t0);
+    if (t < t0 - 0.5) return;
+    ctx.save(); ctx.font = `600 38px ${FONT}`; const mw = Math.min(ctx.measureText(msg).width, 720); ctx.restore();
+    const bw = mw + 64, bh = 104, left = side === 'L';
+    const x = left ? 160 : W - 60 - bw, k = eOutBack(prog(t, t0, t0 + 0.35));
+    if (t < t0) {   // « en train d'écrire »
+      if (left) avatar(100, y + bh / 2, 36, letter, col);
+      rr(x, y, 150, bh, 40, left ? C.surf2 : C.green);
+      for (let d = 0; d < 3; d++) { ctx.fillStyle = C.muted; ctx.beginPath(); ctx.arc(x + 45 + d * 30, y + bh / 2 + Math.sin(t * 12 - d) * 6, 9, 0, 7); ctx.fill(); }
+    } else {
+      ctx.save(); ctx.translate(left ? x : x + bw, y + bh); ctx.scale(k, k); ctx.translate(-(left ? x : x + bw), -(y + bh));
+      if (left) avatar(100, y + bh / 2, 36, letter, col);
+      rr(x, y, bw, bh, 40, left ? C.surf2 : C.green);
+      text(msg, x + 32, y + bh / 2 + 2, { size: 38, weight: 600, color: C.white, maxWidth: 720 });
+      ctx.restore();
+    }
+    y += bh + 26;
+  });
+  rr(40, 1730, W - 80, 110, 55, C.surf2);
+  text('Message…', 100, 1786, { size: 34, weight: 500, color: C.muted });
+  ctx.fillStyle = C.green; ctx.beginPath(); ctx.arc(W - 110, 1785, 42, 0, 7); ctx.fill();
+  text('➤', W - 110, 1788, { size: 36, weight: 700, align: 'center', color: C.white });
+  // le message système qui résume la scène
+  const k = eOutBack(prog(t, TL.s2Text, TL.s2Text + 0.5)), out = prog(t, 9.75, 10.0);
+  if (k > 0) {
+    ctx.save(); ctx.globalAlpha = 1 - out; ctx.translate(CX, 1470); ctx.scale(k, k);
+    ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 40 * S;
+    rr(-450, -150, 900, 300, 48, C.green); ctx.shadowBlur = 0;
+    text('LES IDÉES', 0, -55, { size: 96, weight: 900, align: 'center', color: C.white });
+    text('SE CONNECTENT.', 0, 60, { size: 88, weight: 900, align: 'center', color: C.white, maxWidth: 820 });
+    ctx.restore();
+  }
+}
+
+// ------------------------------------------------------------------ 3. fil (10 -> 13 s) et stories (13 -> 16 s)
+const POSTS = [['#Programmation', 'code'], ['#IntelligenceArtificielle', 'ia'], ['#JeunesseMalgache', 'mada']];
+const MDG = [[49.26, -11.95], [49.95, -13.0], [50.17, -14.27], [50.28, -14.9], [50.48, -15.27], [50.2, -15.8], [49.75, -15.45],
+  [49.8, -16.2], [49.58, -16.92], [49.4, -17.38], [49.41, -18.15], [48.98, -19.33], [48.8, -19.9], [48.35, -21.23],
+  [48.02, -22.15], [47.83, -22.82], [47.6, -23.35], [46.98, -25.03], [46.3, -25.18], [45.15, -25.6], [44.6, -25.3],
+  [43.95, -24.68], [43.67, -23.35], [43.37, -21.75], [44.28, -20.28], [44.03, -18.07], [44.4, -16.2], [45.3, -16.1],
+  [46.32, -15.72], [47.0, -15.3], [47.75, -14.63], [48.4, -13.7], [48.9, -13.0], [49.3, -12.3]];
+function postArt(kind, x, y, w, h, t) {
+  ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, w, h, 28); ctx.clip();
+  const g = ctx.createLinearGradient(x, y, x + w, y + h); g.addColorStop(0, C.deep); g.addColorStop(1, C.green);
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  if (kind === 'code') {
+    const L = [['#9b9c97', '// OPEN DAYS'], ['#ffffff', 'const jeunesse = new Communaute();'], ['#d9dad6', 'jeunesse.idees.forEach(i => {'], ['#ffffff', '  i.partager();'], ['#d9dad6', '});'], ['#ffffff', 'innover();']];
+    L.forEach(([c, s], i) => text(s, x + 50, y + 70 + i * 62, { size: 36, weight: 500, color: c, maxWidth: w - 100 }));
+  } else if (kind === 'ia') {
+    const layers = [3, 5, 5, 2];
+    const pts = layers.map((n, l) => Array.from({ length: n }, (_, i) => [x + 140 + l * (w - 280) / 3, y + h / 2 + (i - (n - 1) / 2) * 80]));
+    ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 2;
+    for (let l = 0; l < pts.length - 1; l++) for (const p of pts[l]) for (const q of pts[l + 1]) { ctx.beginPath(); ctx.moveTo(...p); ctx.lineTo(...q); ctx.stroke(); }
+    pts.flat().forEach((p, i) => { ctx.fillStyle = (i + Math.floor(t * 6)) % 4 === 0 ? C.white : C.leaf; ctx.beginPath(); ctx.arc(...p, 16, 0, 7); ctx.fill(); });
+  } else {
+    ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.beginPath();
+    MDG.forEach(([lo, la], i) => { const px = x + w / 2 + (lo - 46.9) * 32, py = y + h / 2 + (-la - 18.75) * 32; i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = C.leaf; ctx.beginPath(); ctx.arc(x + w / 2 + (47.52 - 46.9) * 32, y + h / 2 + (18.91 - 18.75) * 32, 12, 0, 7); ctx.fill();
+  }
+  ctx.restore();
+}
+function heart(x, y, s, filled) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.beginPath();
+  ctx.moveTo(0, 12); ctx.bezierCurveTo(-26, -6, -14, -26, 0, -12); ctx.bezierCurveTo(14, -26, 26, -6, 0, 12);
+  if (filled) { ctx.fillStyle = C.leaf; ctx.fill(); } else { ctx.strokeStyle = C.text; ctx.lineWidth = 3; ctx.stroke(); }
+  ctx.restore();
+}
+function feedScreen(t) {
+  fill(C.bg);
+  const m = TL.montage, snaps = [m[0], ...TL.feedSnaps];
+  let scroll = 0;
+  snaps.forEach((s, i) => { if (i) scroll += 760 * eInOut(prog(t, s - 0.3, s + 0.05)); });
+  POSTS.forEach(([tag, kind], i) => {
+    const y = 300 + i * 760 - scroll, t0 = snaps[i];
+    if (y > H || y < -760) return;
+    rr(40, y, W - 80, 700, 36, C.surf);
+    appIcon(110, y + 64, 64);
+    text('ONG JADE Madagascar', 160, y + 52, { size: 32, weight: 700 });
+    text('Open Days · bientôt', 160, y + 88, { size: 26, weight: 500, color: C.muted });
+    postArt(kind, 70, y + 130, W - 140, 440, t);
+    const liked = t > t0 + 0.6, pk = eOutBack(prog(t, t0 + 0.6, t0 + 0.9));
+    heart(110, y + 630, liked ? 1.6 * (pk || 1) : 1.6, liked);
+    text(tag, 170, y + 632, { size: 34, weight: 700, color: C.leaf });
+    if (liked && pk < 1) heart(CX, y + 350, 5 * pk, true);
+  });
+  rr(0, 0, W, 250, 0, 'rgba(11,15,12,.96)');
+  statusBar(t);
+  text('Fil', 70, 180, { size: 52, weight: 800 });
+  text('Pour vous', W - 70, 180, { size: 32, weight: 700, color: C.leaf, align: 'right' });
+}
+const STORIES = [['INNOVER', C.green, C.white], ['PARTAGER', C.paper, C.green], ['INSPIRER', '#050806', C.white]];
+function storyScreen(t) {
+  const w = TL.words, i = w.findLastIndex(x => t >= x), t0 = w[i], t1 = w[i + 1] ?? TL.loading;
+  const [word, bg, fg] = STORIES[i];
+  fill(bg);
+  if (i === 0) swoosh(CX, 1100, 560, 220, -0.12, 90, C.white, eOutCubic(prog(t, t0, t0 + 0.8)), 0.18);
+  if (i === 1) { for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI * 2 + t * 0.6; ctx.fillStyle = k ? C.gray : C.green; ctx.beginPath(); ctx.arc(CX + Math.cos(a) * 260, 1150 + Math.sin(a) * 260, 60, 0, 7); ctx.fill(); } }
+  if (i === 2) { const g = ctx.createRadialGradient(CX, 1150, 0, CX, 1150, 700); g.addColorStop(0, 'rgba(47,164,85,.6)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); sprout(CX - 20, 1350, 3.2, C.leaf, prog(t, t0, t0 + 0.8)); }
+  for (let k = 0; k < 3; k++) {   // barres de progression des stories
+    const p = k < i ? 1 : k > i ? 0 : prog(t, t0, t1);
+    rr(40 + k * 340, 120, 320, 10, 5, i === 1 ? 'rgba(17,20,17,.2)' : 'rgba(255,255,255,.3)');
+    rr(40 + k * 340, 120, 320 * p, 10, 5, fg);
+  }
+  appIcon(100, 200, 60);
+  text('ONG JADE Madagascar', 150, 200, { size: 30, weight: 700, color: fg });
+  const k = eOutBack(prog(t, t0, t0 + 0.35));
+  ctx.save(); ctx.translate(CX, 780); ctx.scale(k, k);
+  text(word, 0, 0, { size: 170, weight: 900, align: 'center', color: fg, maxWidth: 940 });
+  ctx.restore();
+  TL.storyTaps.forEach(s => ripple(900, 1000, s - 0.05, t));
+}
+
+// ------------------------------------------------------------------ 4. chargement et avalanche de notifications (16 -> 23 s)
+const FLOOD = (() => {   // mêmes instants que les « ping » de la bande-son
+  const a = []; let t0 = TL.flood, k = 0;
+  while (t0 < TL.silence - 0.05) { const p = (t0 - TL.flood) / (TL.silence - TL.flood); a.push(t0); t0 += Math.max(0.07, 0.5 * (1 - p) ** 1.5); k++; }
+  return a;
+})();
+const FLOOD_TXT = [['ONG JADE MADAGASCAR', 'Une nouvelle édition approche'], ['COMMUNAUTÉ TECH', 'Vous êtes prêts ?'], ['RAPPEL', 'Restez connectés'], ['ONG JADE MADAGASCAR', "C'est bientôt…"]];
+function loadingScreen(t) {
+  fill(C.bg);
+  statusBar(t);
+  text('‹  Événement', 60, 180, { size: 40, weight: 700 });
+  const sh = (t * 1.2) % 1;
+  const skel = (x, y, w, h, r = 16) => {
+    ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.clip();
+    ctx.fillStyle = C.surf2; ctx.fillRect(x, y, w, h);
+    const g = ctx.createLinearGradient(x + (sh - 0.3) * W * 1.6, 0, x + (sh - 0.3) * W * 1.6 + 300, 0);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.5, 'rgba(255,255,255,.08)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, h); ctx.restore();
+  };
+  skel(40, 260, W - 80, 560, 36); skel(40, 870, 640, 70); skel(40, 970, 460, 50); skel(40, 1060, W - 80, 40); skel(40, 1120, W - 160, 40); skel(40, 1180, 700, 40);
+  text('?', CX, 540, { size: 260, weight: 900, align: 'center', color: 'rgba(155,156,151,.25)' });
+  const p = eOutCubic(prog(t, TL.loading, TL.flood)) * 0.86 + 0.13 * prog(t, TL.flood, TL.silence);
+  rr(40, 1300, W - 80, 16, 8, C.surf2); rr(40, 1300, (W - 80) * p, 16, 8, C.leaf);
+  text(`Chargement… ${Math.floor(p * 100)} %`, 40, 1360, { size: 32, weight: 600, color: C.muted });
+  // notifications qui tombent de plus en plus vite
+  const shown = FLOOD.filter(f => t >= f);
+  shown.slice(-6).forEach((f, j, arr) => {
+    const idx = shown.length - arr.length + j, [app, msg] = FLOOD_TXT[idx % 4];
+    const slot = arr.length - 1 - j, y = lerp(-200, 120 + slot * 120, eOutCubic(prog(t, f, f + 0.18)));
+    ctx.save(); ctx.globalAlpha = 1 - slot * 0.12;
+    rr(60, y, W - 120, 104, 30, 'rgba(31,39,32,.96)');
+    appIcon(118, y + 52, 56); text(app, 170, y + 34, { size: 24, weight: 700, color: C.muted }); text(msg, 170, y + 72, { size: 32, weight: 700, color: C.white, maxWidth: W - 300 });
+    ctx.restore();
+  });
+  if (shown.length) {
+    const n = shown.length; ctx.fillStyle = C.leaf; ctx.beginPath(); ctx.arc(W - 90, 180, 34, 0, 7); ctx.fill();
+    text(n > 99 ? '99+' : String(n), W - 90, 182, { size: 28, weight: 800, align: 'center', color: C.white });
+  }
+  // la phrase de la scène
+  const k = eOutBack(prog(t, TL.s4Text, TL.s4Text + 0.5));
+  if (k > 0) {
+    ctx.save(); ctx.fillStyle = `rgba(0,0,0,${0.55 * clamp(k)})`; ctx.fillRect(0, 0, W, H); ctx.restore();
+    ctx.save(); ctx.translate(CX, 1500); ctx.scale(k, k);
+    text('UNE NOUVELLE ÉDITION', 0, -70, { size: 72, weight: 900, align: 'center', color: C.white, maxWidth: 940 });
+    text('APPROCHE.', 0, 50, { size: 150, weight: 900, align: 'center', color: C.leaf });
+    ctx.restore();
+  }
+}
+
+// ------------------------------------------------------------------ 5. l'écran se rallume sur OPEN DAYS (23,5 -> 29 s)
+const CONFETTI = Array.from({ length: 120 }, (_, i) => [hash(i * 3) * W, -hash(i * 5) * 900, 0.6 + hash(i * 7), hash(i * 11) * 6, [C.leaf, C.white, C.gray, C.green][i % 4]]);
+function splashScreen(t) {
+  const R = TL.reveal;
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, C.deep); g.addColorStop(1, C.green);
+  ctx.fillStyle = g; ctx.fillRect(-60, -60, W + 120, H + 120);
+  const k = eOutExpo(prog(t, R, R + 0.6));
+  swoosh(CX + 10, 880, 470, 160, -0.1, 50, C.gray, eOutCubic(prog(t, R + 0.1, R + 1.0)), 0.95);
+  sprout(CX - 380, 960, 1.9, C.leaf, prog(t, R + 0.3, R + 1.2));
+  ctx.save(); ctx.translate(CX, 850); ctx.scale(lerp(1.3, 1, k) * lerp(1, 1.04, prog(t, R, TL.final)), lerp(1.3, 1, k) * lerp(1, 1.04, prog(t, R, TL.final)));
+  ctx.globalAlpha = clamp(k * 1.5);
+  text('OPEN', 10, -105, { size: 220, weight: 900, align: 'center', color: C.white });
+  text('DAYS', 10, 105, { size: 220, weight: 900, align: 'center', color: C.white });
+  ctx.restore();
+  const e = eOutCubic(prog(t, TL.editionIn, TL.editionIn + 0.6));
+  text('PROCHAINE ÉDITION', CX + 8, 1180, { size: 50, weight: 800, align: 'center', color: C.white, spacing: 12, alpha: e });
+  CONFETTI.forEach(([x, y0, v, r, c], i) => {
+    const y = y0 + (t - R) * 520 * v; if (t < R || y > H) return;
+    ctx.save(); ctx.translate(x + Math.sin(t * 2 + r) * 30, y); ctx.rotate(t * 3 * v + r); ctx.fillStyle = c; ctx.fillRect(-9, -5, 18, 10); ctx.restore();
+  });
+  const b = TL.voice[4][2];   // bannière de notification au moment où la voix l'annonce
+  const by = lerp(-200, 120, eOutBack(prog(t, b, b + 0.4))) - 360 * eInCubic(prog(t, 27.2, 27.7));
+  if (t > b) notifCard(by, 'OPEN DAYS', 'ONG JADE Madagascar', 'Une nouvelle édition arrive !', 1);
+  statusBar(t);
+}
+function powerOff(t) {   // extinction façon vieil écran : l'image s'écrase en une ligne puis un point
+  const k = prog(t, TL.silence - 0.18, TL.silence);
+  fill('#000');
+  const h = lerp(H, 6, eInCubic(clamp(k * 1.6))), w = lerp(W, 8, eInCubic(clamp(k * 1.6 - 0.6)));
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(CX - w / 2, H / 2 - h / 2, w, h);
+}
+function powerOn(t) {
+  const k = eOutExpo(prog(t, TL.reveal, TL.reveal + 0.25));
+  splashScreen(t);
+  if (k < 1) { ctx.save(); ctx.globalCompositeOperation = 'destination-in'; ctx.fillStyle = '#000'; ctx.fillRect(CX - W * k / 2, H / 2 - H * Math.max(0.004, k) / 2, W * Math.max(0.01, k), H * Math.max(0.004, k)); ctx.restore(); }
+}
+
+// ------------------------------------------------------------------ 6. la page de JADE (29 -> 35 s)
+function profileScreen(t) {
+  const F = TL.final, [tap1, tap2] = TL.taps;
+  fill(C.paper);
+  const cover = ctx.createLinearGradient(0, 120, W, 520); cover.addColorStop(0, C.deep); cover.addColorStop(1, C.green);
+  ctx.fillStyle = cover; ctx.fillRect(0, 0, W, 470);
+  swoosh(CX + 120, 330, 520, 120, -0.1, 50, C.white, 1, 0.12);
+  statusBar(t, true);
+  text('‹  Profil', 60, 170, { size: 40, weight: 700, color: C.white });
+  // avatar avec le logo officiel
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 30 * S;
+  ctx.fillStyle = C.white; ctx.beginPath(); ctx.arc(CX, 480, 165, 0, 7); ctx.fill(); ctx.restore();
+  const ja = eOutBack(prog(t, TL.jadeIn, TL.jadeIn + 0.6));
+  if (jade.complete && jade.naturalWidth && ja > 0) { const w = 270 * ja, h = w * jade.naturalHeight / jade.naturalWidth; ctx.drawImage(jade, CX - w / 2, 480 - h / 2 + 6, w, h); }
+  const ong = 1 + 0.06 * imp(t, TL.ongIn, 3);
+  ctx.save(); ctx.translate(CX, 720); ctx.scale(ong, ong);
+  text('ONG JADE MADAGASCAR', 0, 0, { size: 58, weight: 900, align: 'center', color: t >= TL.ongIn ? C.green : C.ink, maxWidth: 960 });
+  ctx.restore();
+  text('Jeunes Actifs pour le Développement', CX, 785, { size: 32, weight: 500, align: 'center', color: '#5d5e5a' });
+  // bouton « Restez connectés »
+  const on = t >= tap1, bk = eOutBack(prog(t, tap1, tap1 + 0.3)), ca = prog(t, TL.connectIn - 0.3, TL.connectIn);
+  ctx.save(); ctx.globalAlpha = Math.max(ca, on ? 1 : 0); ctx.translate(CX, 900); ctx.scale(on ? lerp(0.92, 1, bk) : 1, on ? lerp(0.92, 1, bk) : 1);
+  rr(-300, -56, 600, 112, 56, on ? C.green : null, C.green, 4);
+  text(on ? '✓  RESTEZ CONNECTÉS' : 'RESTEZ CONNECTÉS', 0, 2, { size: 38, weight: 800, align: 'center', color: on ? C.white : C.green, spacing: 2 });
+  ctx.restore();
+  ripple(CX + 120, 900, tap1, t);
+  // carte de l'événement
+  const ck = eOutCubic(prog(t, F + 0.3, F + 0.9)), y0 = 1010 + 60 * (1 - ck);
+  ctx.save(); ctx.globalAlpha = ck;
+  const eg = ctx.createLinearGradient(0, y0, 0, y0 + 520); eg.addColorStop(0, C.green); eg.addColorStop(1, C.deep);
+  rr(50, y0, W - 100, 520, 44, eg);
+  swoosh(W - 260, y0 + 300, 260, 80, -0.1, 30, C.white, 1, 0.12);
+  text('ÉVÉNEMENT', 110, y0 + 70, { size: 28, weight: 800, color: '#bfe3c9', spacing: 6 });
+  const pulse = 1 + 0.05 * imp(t, TL.openPulse, 3);
+  ctx.save(); ctx.translate(110, y0 + 180); ctx.scale(pulse, pulse); text('OPEN DAYS', 0, 0, { size: 128, weight: 900, color: C.white }); ctx.restore();
+  text('PROCHAINE ÉDITION', 110, y0 + 280, { size: 40, weight: 700, color: 'rgba(255,255,255,.85)', spacing: 6 });
+  const sk = eOutBack(prog(t, TL.comingIn, TL.comingIn + 0.4));
+  if (sk > 0) { ctx.save(); ctx.translate(250, y0 + 380); ctx.scale(sk, sk); rr(-140, -36, 280, 72, 36, C.white); text('COMING SOON', 0, 2, { size: 28, weight: 800, align: 'center', color: C.green, spacing: 4 }); ctx.restore(); }
+  const rem = t >= tap2;
+  rr(W - 430, y0 + 344, 320, 72, 36, rem ? C.white : null, C.white, 3);
+  text(rem ? '✓ Rappel activé' : 'Me rappeler', W - 270, y0 + 382, { size: 30, weight: 700, align: 'center', color: rem ? C.green : C.white });
+  ctx.restore();
+  ripple(W - 270, y0 + 380, tap2, t);
+}
+
+// ------------------------------------------------------------------ assemblage
+function slideUp(t, a, b, from, to) {   // transition : l'écran du dessus glisse vers le haut
+  const k = eInOut(prog(t, a, b));
+  to(t);
+  if (k < 1) { ctx.save(); ctx.translate(0, -k * H); from(t); ctx.restore(); }
+}
+const FLASHES = [...TL.words.map(w => [w, 0.35, 8]), [TL.reveal, 0.9, 3], [TL.final, 0.4, 4]];
+function render(t) {
+  base();
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none'; ctx.shadowBlur = 0;
+  if (t >= TL.silence && t < TL.reveal) { fill('#000'); return; }   // écran éteint : silence
+  const buzz = Math.max(0, ...TL.notifs.map(n => imp(t, n, 9)), ...(t > TL.flood && t < TL.silence ? [0.25 + 0.75 * prog(t, TL.flood, TL.silence)] : [0]));
+  ctx.translate(Math.sin(t * 160) * 8 * buzz, 0);
+  if (t < TL.unlock + 0.2) slideUp(t, TL.unlock - 0.25, TL.unlock + 0.2, lockScreen, chatScreen);
+  else if (t < TL.montage[0]) chatScreen(t);
+  else if (t < TL.words[0]) feedScreen(t);
+  else if (t < TL.loading) storyScreen(t);
+  else if (t < TL.silence - 0.18) loadingScreen(t);
+  else if (t < TL.silence) powerOff(t);
+  else if (t < TL.light) powerOn(t);
+  else slideUp(t, TL.light, TL.final + 0.15, splashScreen, profileScreen);
+  base();
+  const f = clamp(FLASHES.reduce((s, [c, g, d]) => s + g * imp(t, c, d), 0));
+  if (f > 0.004) { ctx.fillStyle = `rgba(255,255,255,${f})`; ctx.fillRect(0, 0, W, H); }
+  const fade = Math.max(1 - prog(t, 0, 0.5), eInOut(prog(t, TL.fadeOut, TL.duration)));
+  if (fade > 0) { ctx.fillStyle = `rgba(0,0,0,${fade})`; ctx.fillRect(0, 0, W, H); }
+}
+
+// ------------------------------------------------------------------ export image par image / lecteur interactif
+window.ready = Promise.all([document.fonts.load(`900 100px Inter`), document.fonts.load(`200 100px Inter`), document.fonts.load(`600 30px Inter`), jade.decode().catch(() => {})]);
+window.renderFrame = t => render(t);
+
+if (new URLSearchParams(location.search).has('render')) {
+  document.body.classList.add('render');
+  setScale(1);
+} else {
+  const audio = document.getElementById('audio'), btn = document.getElementById('play'), seek = document.getElementById('seek');
+  const timeEl = document.getElementById('time'), vol = document.getElementById('vol');
+  const fmt = s => `00:${String(Math.floor(s)).padStart(2, '0')}`;
+  const SCENES = [[0, 'Verrouillé'], [TL.unlock, 'Discussion'], [TL.montage[0], 'Fil & stories'], [TL.loading, 'Chargement'], [TL.silence, 'Rallumage'], [TL.final, 'Profil JADE']];
+  const track = document.getElementById('track'), list = document.getElementById('lines');
+  let cur = 0, playing = false, clock0 = 0;
+  SCENES.forEach(([s, name], i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'scene'; b.textContent = `${i + 1} · ${name}`;
+    b.onclick = () => go(s + 0.01); track.appendChild(b);
+  });
+  TL.voice.forEach(([a, b, at, txt]) => {
+    const li = document.createElement('li'); li.tabIndex = 0;
+    li.innerHTML = `<span class="ts">${at.toFixed(1)} s</span><span></span>`; li.lastChild.textContent = txt;
+    li.onclick = () => go(at); li.onkeydown = e => { if (e.key === 'Enter') go(at); };
+    list.appendChild(li);
+  });
+  const fit = () => setScale(Math.min(1, (cv.getBoundingClientRect().height || 860) * Math.min(2, devicePixelRatio || 1) / H));
+  fit(); addEventListener('resize', () => { fit(); draw(); });
+  const now = () => (playing ? (audio.readyState >= 2 && !audio.paused ? audio.currentTime : (performance.now() - clock0) / 1000) : cur);
+  function sync(t) {
+    seek.value = t; timeEl.textContent = `${fmt(t)} / 00:35`;
+    [...track.children].forEach((b, i) => b.classList.toggle('on', t >= SCENES[i][0] && t < (SCENES[i + 1]?.[0] ?? 99)));
+    [...list.children].forEach((li, i) => { const [a, b, at] = TL.voice[i]; li.classList.toggle('on', t >= at && t < at + (b - a)); });
+  }
+  function draw() { const t = Math.min(now(), TL.duration - 0.001); render(t); sync(t); }
+  function loop() {
+    if (!playing) return;
+    if (now() >= TL.duration) { pause(); cur = 0; draw(); return; }
+    draw(); requestAnimationFrame(loop);
+  }
+  function play() { playing = true; btn.textContent = '❚❚'; btn.setAttribute('aria-label', 'Pause'); audio.currentTime = cur; clock0 = performance.now() - cur * 1000; audio.play().catch(() => {}); requestAnimationFrame(loop); }
+  function pause() { cur = now(); playing = false; audio.pause(); btn.textContent = '▶'; btn.setAttribute('aria-label', 'Lecture'); }
+  function go(t) { const was = playing; if (was) pause(); cur = t; audio.currentTime = t; draw(); if (was) play(); }
+  btn.onclick = () => (playing ? pause() : play());
+  seek.oninput = () => go(Number(seek.value));
+  vol.oninput = () => { audio.volume = Number(vol.value); };
+  audio.volume = Number(vol.value);
+  window.ready.then(() => { cur = 33.6; draw(); });   // image d'accueil : la page JADE
+}
+</script>

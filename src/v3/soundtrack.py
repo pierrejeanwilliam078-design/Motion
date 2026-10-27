@@ -179,7 +179,8 @@ mix[fo:] *= np.linspace(1, 0, N - fo)[:, None]
 mix[: int(0.02 * SR)] *= np.linspace(0, 1, int(0.02 * SR))[:, None]
 mix *= 0.93 / np.max(np.abs(mix))
 
-out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "build", "soundtrack-v3.wav")
-os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
-write_wav(out, mix)
-print("écrit", out, f"{DUR:.1f}s")
+if __name__ == "__main__":   # importée par d'autres versions (V7), la bande-son n'est pas écrite
+    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "build", "soundtrack-v3.wav")
+    os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+    write_wav(out, mix)
+    print("écrit", out, f"{DUR:.1f}s")

@@ -8,11 +8,12 @@ Tout est généré par le code : animation (canvas HTML), bande-son (synthèse P
 | V1 « Signal » | [`dist/open-days-teaser.mp4`](dist/open-days-teaser.mp4) | Futuriste néon : noir, bleu électrique, violet, cyan ; glitch, warp, électro 120 BPM |
 | V2 « De la graine au réseau » | [`dist/open-days-teaser-v2.mp4`](dist/open-days-teaser-v2.mp4) | Palette du logo JADE : vert `#116D30`, gris `#9B9C97`, blanc, noir ; révélations par masque, plante-logo, trap organique 100 BPM |
 | V3 « Trailer » (9:16, voix off) | [`dist/open-days-trailer-9x16.mp4`](dist/open-days-trailer-9x16.mp4) | Bande-annonce de cinéma pour Reels/TikTok : voix off ElevenLabs, orchestre hybride synthétisé, palette JADE |
+| V7 « L'écran » (9:16, voix off) | [`dist/open-days-trailer-9x16-v7.mp4`](dist/open-days-trailer-9x16-v7.mp4) | Tout se joue dans un téléphone : notifications, discussion, fil, stories, l'écran s'éteint puis se rallume sur OPEN DAYS ; musique de la V3 + sons d'interface |
 | V6 « De la terre au futur » (9:16, voix off) | [`dist/open-days-trailer-9x16-v6.mp4`](dist/open-days-trailer-9x16-v6.mp4) | Inspiration Madagascar : plan-séquence illustré (baobabs, rizières, ville connectée) en vert et gris JADE, nouvelle musique (pincés façon valiha, 12/8 inspiré du salegy) |
 | V5 « Trailer 3D » (9:16, voix off) | [`dist/open-days-trailer-9x16-v5.mp4`](dist/open-days-trailer-9x16-v5.mp4) | Même son que la V3 ; illustration 3D (three.js) en vert et gris du logo, sans photo |
 | V4 « Trailer photos » (9:16, voix off) | [`dist/open-days-trailer-9x16-v4.mp4`](dist/open-days-trailer-9x16-v4.mp4) | Même son que la V3 ; cartons Cinzel sur noir, texture pellicule, bandes cinéma, deux photos réelles de JADE (une apparition chacune) |
 
-V1 et V2 sont en 1920×1080, V3 à V6 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
+V1 et V2 sont en 1920×1080, V3 à V7 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
 
 ## V1 « Signal » — découpage
 
@@ -113,6 +114,28 @@ node src/render.js --page src/v3/trailer-v6.html --audio build/soundtrack-v6.wav
 
 Police Poppins (licence OFL) dans `src/v3/media/fonts/`. Les instruments d'orchestre, la pose de la voix et le ducking sont partagés dans `src/synth.py`.
 
+## V7 « L'écran » — ce qui change
+
+L'image entière est l'écran d'un téléphone (interface générique aux couleurs JADE, aucune marque de réseau social ; messages et prénoms fictifs) :
+
+| Temps | Écran | Texte |
+|---|---|---|
+| 0 – 5 s | Écran verrouillé à 23:59, deux notifications avec vibration, on balaie pour ouvrir | Quelque chose se prépare… |
+| 5 – 10 s | Discussion « Communauté tech » : on écrit, les bulles arrivent | LES IDÉES SE CONNECTENT. |
+| 10 – 13 s | Fil qui défile : publications Programmation, IA, Madagascar, cœurs qui s'allument | #Programmation · #IntelligenceArtificielle · #JeunesseMalgache |
+| 13 – 16 s | Stories plein écran, touchées une à une | INNOVER · PARTAGER · INSPIRER |
+| 16 – 23 s | Page d'événement qui charge, avalanche de notifications de plus en plus rapide, l'écran s'éteint (ligne puis noir) | UNE NOUVELLE ÉDITION APPROCHE. |
+| 23,5 – 29 s | L'écran se rallume à 00:00 sur OPEN DAYS, confettis, notification | OPEN DAYS · PROCHAINE ÉDITION |
+| 29 – 35 s | Page de JADE : logo officiel, bouton « Restez connectés » touché, carte de l'événement, « Me rappeler » touché | ONG JADE MADAGASCAR · COMING SOON · RESTEZ CONNECTÉS |
+
+Son : la bande-son de la V3 (importée telle quelle depuis `src/v3/soundtrack.py`) plus les sons d'interface synthétisés (notifications, vibrations, frappe, bulles, défilement, touches).
+
+```bash
+python3 src/v3/soundtrack_v7.py build/soundtrack-v7.wav
+ffmpeg -i build/soundtrack-v7.wav -c:a libmp3lame -b:a 192k src/v3/media/trailer-v7-audio.mp3
+node src/render.js --page src/v3/trailer-v7.html --audio build/soundtrack-v7.wav --out dist/open-days-trailer-9x16-v7.mp4
+```
+
 ## Fichiers
 
 - `src/timeline.js`, `src/v2/timeline.js` — instants clés partagés par l'image et le son (modifier ici pour décaler un impact).
@@ -149,4 +172,4 @@ ffmpeg -i build/soundtrack-v3.wav -c:a libmp3lame -b:a 192k src/v3/media/trailer
 node src/render.js --stills 3.6,12.4,31.5            # -> build/still-*.jpg
 ```
 
-Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2), `http://localhost:8000/src/v3/trailer.html` (V3), `http://localhost:8000/src/v3/trailer-v4.html` (V4) `http://localhost:8000/src/v3/trailer-v5.html` (V5) ou `http://localhost:8000/src/v3/trailer-v6.html` (V6).
+Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2), `http://localhost:8000/src/v3/trailer.html` (V3), `http://localhost:8000/src/v3/trailer-v4.html` (V4) `http://localhost:8000/src/v3/trailer-v5.html` (V5), `http://localhost:8000/src/v3/trailer-v6.html` (V6) ou `http://localhost:8000/src/v3/trailer-v7.html` (V7).
