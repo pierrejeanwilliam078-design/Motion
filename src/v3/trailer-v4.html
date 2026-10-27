@@ -1,0 +1,456 @@
+<meta charset="utf-8">
+<title>Open Days Trailer Photos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<style>
+  /* Version 4 : grammaire de bande-annonce documentaire. Cartons Cinzel sur noir, photos réelles, bandes cinéma. */
+  @font-face { font-family: Cinzel; font-weight: 400; src: url("media/fonts/cinzel-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: Cinzel; font-weight: 700; src: url("media/fonts/cinzel-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: Cinzel; font-weight: 900; src: url("media/fonts/cinzel-latin-900-normal.woff2") format("woff2"); }
+  :root {
+    --bg: #0a0a09;
+    --panel: #141412;
+    --line: #2a2a27;
+    --fg: #f2f2ee;
+    --muted: #9b9c97;       /* gris du logo */
+    --accent: #116d30;      /* vert du logo */
+    --accent-hi: #2fa455;
+    --title: Cinzel, Georgia, serif;
+    --font: Inter, system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--font); }
+  .wrap { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 420px); gap: 32px; justify-content: center; align-items: start;
+          padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .stage { display: grid; gap: 14px; justify-items: center; min-width: 0; }
+  canvas { display: block; height: min(78vh, 900px); aspect-ratio: 9 / 16; max-width: 100%; background: #000; }
+  .controls { width: 100%; max-width: min(calc(min(78vh, 900px) * 9 / 16), 100%); display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+  button.play { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--fg); background: transparent; color: var(--fg); font-size: 16px; cursor: pointer; }
+  button.play:hover { background: var(--accent); border-color: var(--accent); }
+  button.play:focus-visible, input:focus-visible, .scene:focus-visible, .lines li:focus-visible { outline: 2px solid var(--accent-hi); outline-offset: 2px; }
+  .time { font: 600 13px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: var(--accent-hi); }
+  .vol { display: flex; gap: 8px; align-items: center; color: var(--muted); font: 600 11px var(--font); letter-spacing: .12em; }
+  .vol input { width: 90px; }
+  .side { display: grid; gap: 20px; min-width: 0; }
+  .eyebrow { font: 600 12px var(--font); letter-spacing: .18em; text-transform: uppercase; color: var(--accent-hi); margin: 0; }
+  h1 { font: 700 30px/1.15 var(--title); letter-spacing: .04em; margin: 6px 0 8px; text-wrap: balance; }
+  .lede { color: var(--muted); margin: 0; }
+  .track { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; }
+  .scene { border: 0; background: var(--panel); color: var(--muted); padding: 9px 10px; text-align: left; cursor: pointer; font: 600 12px var(--font); border-top: 2px solid var(--line); min-width: 0; }
+  .scene.on { color: var(--fg); border-top-color: var(--accent-hi); }
+  .lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .lines li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; padding: 8px 10px; background: var(--panel); border-left: 2px solid transparent; cursor: pointer; }
+  .lines li.on { border-left-color: var(--accent-hi); color: #fff; }
+  .lines .ts { font: 600 12px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+  .note { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; margin: 0; }
+  body.render .wrap > :not(.stage), body.render .controls { display: none; }
+  body.render { overflow: hidden; }
+  @media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } canvas { height: auto; width: min(100%, 440px); } .controls { max-width: 440px; } }
+</style>
+
+<div class="wrap">
+  <div class="stage">
+    <canvas id="c" width="1080" height="1920" aria-label="Aperçu animé du trailer Open Days, version photos"></canvas>
+    <div class="controls">
+      <button class="play" id="play" type="button" aria-label="Lecture">▶</button>
+      <input id="seek" type="range" min="0" max="35" step="0.01" value="0" aria-label="Position dans le trailer">
+      <span class="time" id="time">00:00 / 00:35</span>
+      <span></span>
+      <label class="vol" for="vol">VOLUME <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9"></label>
+      <span></span>
+    </div>
+  </div>
+  <aside class="side">
+    <div>
+      <p class="eyebrow">ONG JADE Madagascar · 9:16 · 35 s</p>
+      <h1>Open Days — prochaine édition</h1>
+      <p class="lede">Version photos : cartons de cinéma sur noir, vos deux photos montrées une seule fois chacune, même voix off et même musique de trailer.</p>
+    </div>
+    <div class="track" id="track" role="group" aria-label="Scènes"></div>
+    <ul class="lines" id="lines" aria-label="Voix off"></ul>
+    <p class="note">Le logo officiel OPEN DAYS n'a pas été fourni : le titre est composé en Cinzel en attendant. Le logo s'affiche automatiquement s'il est ajouté dans <code>media/open-days-logo.png</code>.</p>
+  </aside>
+</div>
+<audio id="audio" src="media/trailer-audio.mp3" preload="auto"></audio>
+
+<script src="timeline.js"></script>
+<script>
+// Même découpage et même bande-son que la V3 (timeline.js) ; seuls l'image et l'animation changent.
+const TL = window.TIMELINE;
+const W = TL.width, H = TL.height, CX = W / 2, CY = 900;
+const C = { green: '#116d30', glow: '#2fa455', gray: '#9b9c97', white: '#ffffff', ink: '#0b0d0b' };
+const TITLE = 'Cinzel, Georgia, serif';
+const SANS = 'Inter, system-ui, sans-serif';
+const PHOTO_ATELIER = [TL.montage[0], TL.words[0]];        // une seule apparition chacune
+const PHOTO_FORMATION = [TL.sphere, TL.s4Text - 0.05];
+
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+let S = 1;
+function setScale(s) { S = s; cv.width = Math.round(W * s); cv.height = Math.round(H * s); }
+const base = () => ctx.setTransform(S, 0, 0, S, 0, 0);
+
+function img(src) { const i = new Image(); i.src = src; return i; }
+const jade = img('media/jade-logo.png');
+const atelier = img('media/photo-atelier.jpg');
+const formation = img('media/photo-formation.jpg');
+const odLogo = new Image(); let odReady = false;
+odLogo.onload = () => { odReady = true; }; odLogo.src = 'media/open-days-logo.png';   // facultatif
+
+// ------------------------------------------------------------------ utilitaires
+function hash(n) {
+  n = (n | 0) ^ 0x9e3779b9; n = Math.imul(n ^ (n >>> 16), 0x85ebca6b); n = Math.imul(n ^ (n >>> 13), 0xc2b2ae35); n ^= n >>> 16;
+  return (n >>> 0) / 4294967296;
+}
+function rng(seed) { let i = 0; return () => hash(seed * 7919 + (i++) * 104729); }
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eOutExpo = k => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k));
+const eOutCubic = k => 1 - Math.pow(1 - k, 3);
+const eInCubic = k => k * k * k;
+const eInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const imp = (t, t0, d) => (t >= t0 ? Math.exp(-(t - t0) * d) : 0);
+const ready = i => i.complete && i.naturalWidth > 0;
+
+function black(a = 1) { ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = '#000'; ctx.fillRect(-60, -60, W + 120, H + 120); ctx.restore(); }
+
+// Carton de cinéma : les lettres apparaissent une à une, l'interlettrage s'ouvre lentement.
+function card(s, x, y, o = {}) {
+  const p = o.p ?? 1, out = o.out ?? 0;
+  if (p <= 0 || out >= 1) return 0;
+  ctx.save();
+  let size = o.size || 90, sp = (o.spacing ?? 12) + (o.drift ?? 0);
+  const setFont = () => { ctx.font = `${o.weight || 700} ${size}px ${o.family || TITLE}`; ctx.letterSpacing = '0px'; };
+  setFont();
+  const widths = [...s].map(ch => ctx.measureText(ch).width);
+  let w = widths.reduce((a, b) => a + b, 0) + sp * (s.length - 1);
+  if (o.maxWidth && w > o.maxWidth) { const k = o.maxWidth / w; size *= k; sp *= k; setFont(); widths.forEach((_, i) => { widths[i] = ctx.measureText(s[i]).width; }); w = o.maxWidth; }
+  const sc = o.scale ?? 1;
+  ctx.translate(x, y); ctx.scale(sc, sc);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = o.color || C.white;
+  if (o.glow) { ctx.shadowColor = o.glowColor || 'rgba(255,255,255,.6)'; ctx.shadowBlur = o.glow * S; }
+  const n = s.length, soft = o.soft ?? 5;
+  const letters = () => {
+    let cx = -w / 2;
+    for (let i = 0; i < n; i++) {
+      const order = o.fromCenter ? Math.abs(i - (n - 1) / 2) * 2 : i;
+      const a = clamp((p * (n + soft) - order) / soft) * (1 - clamp((out * (n + soft) - order) / soft));
+      if (a > 0.002) { ctx.globalAlpha = a * (o.alpha ?? 1); ctx.fillText(s[i], cx, (1 - a) * (o.rise ?? 0)); }
+      cx += widths[i] + sp;
+    }
+  };
+  letters();
+  if (o.sweep > 0 && o.sweep < 1) {   // reflet vert qui balaie les lettres (second passage, lettres seules)
+    ctx.shadowBlur = 0;
+    const sx = lerp(-w / 2 - 200, w / 2 + 200, o.sweep), g = ctx.createLinearGradient(sx - 120, 0, sx + 120, 0);
+    g.addColorStop(0, 'rgba(47,164,85,0)'); g.addColorStop(0.5, 'rgba(47,164,85,.95)'); g.addColorStop(1, 'rgba(47,164,85,0)');
+    ctx.fillStyle = g; letters();
+  }
+  ctx.restore();
+  return w * sc;
+}
+function rule(y, w, a, color = C.glow, th = 3) {
+  if (a <= 0 || w <= 0) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = color; ctx.fillRect(CX - w / 2, y - th / 2, w, th); ctx.restore();
+}
+function label(s, x, y, o = {}) {
+  ctx.save();
+  ctx.font = `${o.weight || 600} ${o.size || 30}px ${SANS}`; ctx.letterSpacing = (o.spacing ?? 10) + 'px';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = o.alpha ?? 1; ctx.fillStyle = o.color || C.white;
+  ctx.fillText(s, x + (o.spacing ?? 10) / 2, y);
+  const w = ctx.measureText(s).width;
+  ctx.restore();
+  return w;
+}
+// Bandes cinéma : 0 = image pleine, 1 = fermé au noir
+function bars(k, mid = CY) {
+  if (k <= 0) return;
+  ctx.save(); ctx.fillStyle = '#000';
+  const top = lerp(0, mid, k), bot = lerp(H, mid, k);
+  ctx.fillRect(-60, -60, W + 120, top + 60); ctx.fillRect(-60, bot, W + 120, H - bot + 60);
+  ctx.restore();
+}
+function lightLeak(x, y, r, a) {
+  if (a <= 0.005) return;
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(255,255,255,${0.55 * a})`); g.addColorStop(0.4, `rgba(47,164,85,${0.25 * a})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(x - r, y - r, 2 * r, 2 * r); ctx.restore();
+}
+
+// Photo en plein cadre flouté + photo nette posée par-dessus : l'image basse définition reste propre en 9:16.
+function photoBackdrop(im, a, t) {
+  if (!ready(im) || a <= 0) return;
+  const sc = Math.max(W / im.naturalWidth, H / im.naturalHeight) * 1.15;
+  ctx.save(); ctx.globalAlpha = a; ctx.filter = `blur(${38 * S}px) brightness(.45) saturate(.8)`;
+  ctx.drawImage(im, CX - im.naturalWidth * sc / 2, H / 2 - im.naturalHeight * sc / 2 + Math.sin(t * 0.3) * 20, im.naturalWidth * sc, im.naturalHeight * sc);
+  ctx.restore();
+}
+
+// ------------------------------------------------------------------ scène 1 : carton d'ouverture
+function scene1(t) {
+  black();
+  const hb = Math.max(0, ...TL.heartbeats.map(h => imp(t, h, 3)));
+  lightLeak(CX, CY, 900, 0.18 * hb * prog(t, 0.3, 1.2));
+  const p = prog(t, TL.s1Text, TL.s1Text + 1.3), out = prog(t, 4.45, 4.95), z = lerp(1, 1.05, prog(t, TL.s1Text, 5));
+  card('QUELQUE CHOSE', CX, 860, { size: 92, spacing: 10, drift: 8 * prog(t, 2.4, 5), p, out, scale: z, maxWidth: 900 });
+  card('SE PRÉPARE…', CX, 975, { size: 92, spacing: 10, drift: 8 * prog(t, 2.4, 5), p: prog(t, TL.s1Text + 0.35, TL.s1Text + 1.6), out, scale: z, maxWidth: 900 });
+  rule(1070, 300 * eOutExpo(prog(t, 3.4, 4.3)), 1 - out);
+}
+
+// ------------------------------------------------------------------ scène 2 : deux lignes de lumière se rencontrent
+const IDEAS = ['CODE', 'DESIGN', 'ROBOTIQUE', 'IA', 'PROJETS', 'NUMÉRIQUE', 'CRÉATIVITÉ', 'PARTAGE', 'TALENTS', 'ÉLECTRONIQUE'];
+const IDEA_POS = (() => { const r = rng(12); return IDEAS.map((w, i) => { const an = i / IDEAS.length * Math.PI * 2 + r() * 0.4; return [Math.cos(an) * (300 + r() * 60), Math.sin(an) * (700 + r() * 160), 0.3 + r() * 0.5]; }); })();
+function scene2(t) {
+  black();
+  const meet = TL.s2Text - 0.1, k = prog(t, TL.circuits, meet), out = prog(t, 9.6, 10.0);
+  // Les mots-idées convergent vers le centre et s'y éteignent
+  IDEAS.forEach((wd, i) => {
+    const [dx, dy, d] = IDEA_POS[i], q = eInCubic(clamp(k * (0.8 + d * 0.3)));
+    const a = prog(k, 0.05 + d * 0.2, 0.3 + d * 0.2) * (1 - prog(k, 0.75, 0.98)) * 0.85;
+    label(wd, CX + dx * (1 - q), CY + dy * (1 - q), { size: 34, spacing: 8, color: i % 3 ? C.gray : C.glow, alpha: a });
+  });
+  const e = eInCubic(k);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (const [y0, y1] of [[-20, CY - 6], [H + 20, CY + 6]]) {
+    const y = lerp(y0, y1, e), g = ctx.createLinearGradient(0, y0, 0, y);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(1, `rgba(255,255,255,${0.9 * (1 - prog(t, meet, meet + 0.4))})`);
+    ctx.fillStyle = g; ctx.fillRect(CX - 1.5, Math.min(y0, y), 3, Math.abs(y - y0));
+  }
+  ctx.restore();
+  lightLeak(CX, CY, 700, imp(t, meet, 2.5));
+  const hw = eOutExpo(prog(t, meet, meet + 0.8));
+  rule(CY, 960 * hw, (1 - out) * (1 - 0.7 * prog(t, meet + 0.6, meet + 1.5)), C.white, 2);
+  const p = prog(t, TL.s2Text, TL.s2Text + 1.1);
+  card('LES IDÉES', CX, CY - 80, { size: 96, spacing: 10, drift: 6 * prog(t, TL.s2Text, 10), p, out, fromCenter: true, maxWidth: 900 });
+  card('SE CONNECTENT', CX, CY + 80, { size: 96, spacing: 10, drift: 6 * prog(t, TL.s2Text, 10), p: prog(t, TL.s2Text + 0.3, TL.s2Text + 1.4), out, fromCenter: true, maxWidth: 900 });
+}
+
+// ------------------------------------------------------------------ scène 3 : la photo de l'atelier, puis les trois mots
+function photoAtelier(t) {
+  const [a0, a1] = PHOTO_ATELIER;
+  const show = 1 - prog(t, a1 - 0.15, a1);
+  photoBackdrop(atelier, show, t);
+  if (!ready(atelier)) return;
+  const cw = 960, ch = cw * atelier.naturalHeight / atelier.naturalWidth, open = eOutExpo(prog(t, a0, a0 + 0.55));
+  ctx.save();
+  ctx.beginPath(); ctx.rect(CX - cw / 2, CY - ch / 2 * open, cw, ch * open); ctx.clip();
+  const z = lerp(1.0, 1.12, prog(t, a0, a1)), px = lerp(0, -60, eInOut(prog(t, a0, a1)));   // poussée lente vers le jeune homme
+  ctx.globalAlpha = show; ctx.filter = 'contrast(1.06) saturate(1.05)';
+  ctx.drawImage(atelier, CX - cw * z / 2 + px, CY - ch * z / 2, cw * z, ch * z);
+  ctx.restore();
+  rule(CY + ch / 2 + 26, 140 * open, show);
+}
+const WORDS = ['INNOVER', 'PARTAGER', 'INSPIRER'];
+function scene3(t) {
+  black();
+  if (t < TL.words[0]) { photoAtelier(t); return; }
+  const w = TL.words, i = w.findLastIndex(x => t >= x), t0 = w[i], t1 = w[i + 1] ?? TL.sphere;
+  const p = prog(t, t0, t0 + 0.35), out = i === 2 ? prog(t, 15.55, 16.0) : prog(t, t1 - 0.08, t1);
+  lightLeak(i % 2 ? 160 : 920, i === 1 ? 1500 : 400, 900, 0.5 * imp(t, t0, 2));
+  card(WORDS[i], CX, CY, { size: 150, weight: 900, spacing: lerp(4, 22, prog(t, t0, t1)), p, out, soft: 3, glow: 26, scale: lerp(1.15, 1, eOutExpo(prog(t, t0, t0 + 0.4))), maxWidth: 980 });
+  rule(CY + 120, 220 * eOutExpo(prog(t, t0 + 0.1, t0 + 0.5)), 1 - out);
+}
+
+// ------------------------------------------------------------------ scène 4 : la photo de la promotion, puis la tension
+function photoFormation(t) {
+  const [a0, a1] = PHOTO_FORMATION;
+  const show = prog(t, a0, a0 + 0.45) * (1 - prog(t, a1 - 0.35, a1));
+  photoBackdrop(formation, show, t);
+  if (!ready(formation)) return;
+  const bh = 1000, bw = bh * formation.naturalWidth / formation.naturalHeight;   // bandeau panoramique
+  const x = lerp(0, W - bw, eInOut(prog(t, a0, a1)));                           // travelling sur tout le groupe
+  ctx.save(); ctx.globalAlpha = show; ctx.filter = 'contrast(1.05)';
+  ctx.beginPath(); ctx.rect(0, CY - bh / 2, W, bh); ctx.clip();
+  ctx.drawImage(formation, x, CY - bh / 2, bw, bh);
+  ctx.restore();
+  rule(CY - bh / 2 - 1, W, show * 0.9, C.green, 6);
+  rule(CY + bh / 2 + 1, W, show * 0.9, C.green, 6);
+  lightLeak(lerp(-100, W + 100, prog(t, a0, a0 + 1.6)), CY - 300, 700, 0.6 * (1 - prog(t, a0 + 1.2, a0 + 1.6)));
+}
+const STABS = [21.0, 21.5, 22.0, 22.25, 22.5, 22.625, 22.75, 22.875];
+function scene4(t) {
+  black();
+  if (t < PHOTO_FORMATION[1]) { photoFormation(t); return; }
+  const T0 = TL.s4Text, close = eInCubic(prog(t, 21.2, TL.silence));
+  const strobe = Math.max(0, ...STABS.map(s => imp(t, s, 9)));
+  lightLeak(CX, CY, 1000, 0.35 * strobe);
+  const p = prog(t, T0, T0 + 1.0), z = lerp(1, 1.05, prog(t, T0, TL.silence));
+  card('UNE NOUVELLE ÉDITION', CX, CY - 70, { size: 66, spacing: 8, p, scale: z, maxWidth: 900 });
+  card('APPROCHE', CX, CY + 60, { size: 150, weight: 900, spacing: 14, p: prog(t, T0 + 0.35, T0 + 1.1), scale: z, glow: 30 * strobe, maxWidth: 900 });
+  bars(close * 0.999);   // les bandes noires se referment jusqu'au silence
+}
+
+// ------------------------------------------------------------------ scène 5 : révélation OPEN DAYS
+function scene5(t) {
+  black();
+  const R = TL.reveal;
+  if (t < R) return;   // silence brutal : noir absolu
+  const open = eOutExpo(prog(t, R, R + 0.7));
+  lightLeak(CX, CY, 1100, 0.45 + 0.6 * imp(t, R, 1.5));
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';   // trait anamorphique
+  const fl = ctx.createLinearGradient(0, 0, W, 0);
+  fl.addColorStop(0, 'rgba(47,164,85,0)'); fl.addColorStop(0.5, `rgba(255,255,255,${0.25 + 0.6 * imp(t, R, 1.2)})`); fl.addColorStop(1, 'rgba(47,164,85,0)');
+  ctx.fillStyle = fl; ctx.fillRect(0, CY - 2, W, 4); ctx.restore();
+  const p = prog(t, R, R + 0.55), z = lerp(1.12, 1, eOutExpo(prog(t, R, R + 0.9))) * lerp(1, 1.04, prog(t, R, TL.final));
+  const sweep = t < 25.5 ? prog(t, 24.1, 25.0) : prog(t, 26.9, 27.7);
+  const out = prog(t, TL.light, TL.final);
+  if (odReady) {
+    const h = 520, w = h * odLogo.naturalWidth / odLogo.naturalHeight;
+    ctx.save(); ctx.globalAlpha = p * (1 - out); ctx.translate(CX, CY); ctx.scale(z, z); ctx.drawImage(odLogo, -w / 2, -h / 2, w, h); ctx.restore();
+  } else {
+    card('OPEN', CX, CY - 125, { size: 250, weight: 900, spacing: 18, p, out, soft: 2, scale: z, glow: 30, sweep, fromCenter: true, maxWidth: 980 });
+    card('DAYS', CX, CY + 125, { size: 250, weight: 900, spacing: 18, p: prog(t, R + 0.12, R + 0.7), out, soft: 2, scale: z, glow: 30, sweep, fromCenter: true, maxWidth: 980 });
+  }
+  const e = prog(t, TL.editionIn, TL.editionIn + 0.9);
+  const ew = label('PROCHAINE ÉDITION', CX, 1330, { size: 44, weight: 600, spacing: lerp(30, 14, eOutExpo(e)), alpha: eOutCubic(e) * (1 - out) });
+  ctx.save(); ctx.globalAlpha = eOutCubic(e) * (1 - out); ctx.fillStyle = C.glow;
+  const ll = 60 * eOutExpo(e); ctx.fillRect(CX - ew / 2 - 30 - ll, 1328, ll, 3); ctx.fillRect(CX + ew / 2 + 30, 1328, ll, 3); ctx.restore();
+  bars(1 - open);   // les bandes s'ouvrent sur le titre
+}
+
+// ------------------------------------------------------------------ scène 6 : signature JADE, puis fermeture au noir
+function scene6(t) {
+  black();
+  const F = TL.final;
+  lightLeak(CX, 300, 1000, 0.22);
+  const pulse = imp(t, TL.openPulse, 3);
+  if (odReady) {
+    const h = 220, w = h * odLogo.naturalWidth / odLogo.naturalHeight;
+    ctx.save(); ctx.globalAlpha = prog(t, F, F + 0.6); ctx.drawImage(odLogo, CX - w / 2, 400 - h / 2, w, h); ctx.restore();
+  } else {
+    card('OPEN DAYS', CX, 400, { size: 112, weight: 900, spacing: 12, p: prog(t, F, F + 0.6), soft: 3, scale: 1 + 0.04 * pulse, glow: 10 + 30 * pulse, glowColor: 'rgba(47,164,85,.8)', sweep: prog(t, TL.openPulse, TL.openPulse + 0.9), maxWidth: 900 });
+  }
+  rule(490, 180 * eOutExpo(prog(t, F + 0.3, F + 1.0)), 1);
+  // Logo JADE intact sur une plaque blanche
+  const ja = eOutCubic(prog(t, TL.jadeIn, TL.jadeIn + 0.8));
+  if (ja > 0 && ready(jade)) {
+    const lh = 360, lw = lh * jade.naturalWidth / jade.naturalHeight, pw = lw + 110, ph = lh + 90;
+    const s = lerp(0.94, 1, ja) * (1 + 0.025 * imp(t, TL.ongIn, 2.5));
+    ctx.save(); ctx.globalAlpha = ja; ctx.translate(CX, 820); ctx.scale(s, s);
+    ctx.shadowColor = 'rgba(47,164,85,.45)'; ctx.shadowBlur = 60 * S;
+    ctx.fillStyle = C.white; ctx.beginPath(); ctx.roundRect(-pw / 2, -ph / 2, pw, ph, 26); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.drawImage(jade, -lw / 2, -lh / 2, lw, lh);
+    ctx.restore();
+  }
+  card('ONG JADE MADAGASCAR', CX, 1160, { family: SANS, weight: 800, size: 54, spacing: 6, p: prog(t, TL.ongIn, TL.ongIn + 0.7), soft: 4, maxWidth: 900 });
+  const ca = eOutExpo(prog(t, TL.comingIn, TL.comingIn + 0.5));
+  if (ca > 0) {
+    ctx.save(); ctx.globalAlpha = ca; ctx.fillStyle = C.green; ctx.beginPath(); ctx.roundRect(CX - 230, 1290 - 42, 460, 84, 42); ctx.fill(); ctx.restore();
+    label('COMING SOON', CX, 1291, { size: 32, weight: 700, spacing: 12, alpha: ca });
+  }
+  const sa = eOutCubic(prog(t, TL.connectIn, TL.connectIn + 0.6));
+  if (sa > 0) {
+    const w = label('RESTEZ CONNECTÉS', CX + 20, 1410, { size: 42, weight: 700, spacing: 6, alpha: sa });
+    const ph = ((t - TL.connectIn) * 1.1) % 1, dx = CX + 20 - w / 2 - 32;
+    ctx.save(); ctx.globalAlpha = sa; ctx.fillStyle = C.glow; ctx.beginPath(); ctx.arc(dx, 1410, 10, 0, 7); ctx.fill();
+    ctx.strokeStyle = C.glow; ctx.lineWidth = 3; ctx.globalAlpha = sa * (1 - ph); ctx.beginPath(); ctx.arc(dx, 1410, 10 + ph * 26, 0, 7); ctx.stroke(); ctx.restore();
+  }
+  bars(eInOut(prog(t, TL.fadeOut, TL.duration)) * 0.999, 860);   // fermeture finale au noir
+}
+
+// ------------------------------------------------------------------ texture pellicule et assemblage
+const GRAIN = Array.from({ length: 4 }, (_, n) => {
+  const c = document.createElement('canvas'); c.width = 270; c.height = 480;
+  const g = c.getContext('2d'), d = g.createImageData(270, 480), r = rng(90 + n);
+  for (let i = 0; i < d.data.length; i += 4) { const v = r() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; }
+  g.putImageData(d, 0, 0); return c;
+});
+const FLASHES = [...TL.montage.slice(0, 1).map(m => [m, 0.5, 6]), ...TL.words.map(w => [w, 0.65, 7]), [TL.sphere, 0.35, 4],
+  ...STABS.map(s => [s, 0.18, 10]), [TL.reveal, 1.0, 3.0], [TL.ongIn, 0.1, 5]];
+
+function filmTexture(t) {
+  const f = Math.floor(t * 30);
+  ctx.save(); ctx.globalAlpha = 0.09; ctx.globalCompositeOperation = 'overlay';
+  ctx.drawImage(GRAIN[f % 4], 0, 0, W, H); ctx.restore();
+  ctx.save();   // poussières et rayures de pellicule
+  for (let k = 0; k < 5; k++) {
+    if (hash(f * 13 + k) > 0.55) continue;
+    ctx.globalAlpha = 0.35; ctx.fillStyle = k % 2 ? '#fff' : '#000';
+    const x = hash(f * 7 + k) * W, y = hash(f * 11 + k) * H, s = 2 + hash(f + k) * 5;
+    ctx.beginPath(); ctx.arc(x, y, s, 0, 7); ctx.fill();
+  }
+  if (hash(f * 3) < 0.12) { ctx.globalAlpha = 0.18; ctx.fillStyle = '#fff'; ctx.fillRect(hash(f * 5) * W, 0, 1.5, H); }
+  ctx.restore();
+  const v = ctx.createRadialGradient(CX, H / 2, 420, CX, H / 2, 1250);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.6)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+}
+
+function render(t) {
+  base();
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none'; ctx.shadowBlur = 0;
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  const weave = Math.sin(t * 23) * 1.2;   // léger flottement de projecteur
+  const shake = (t > 21 && t < TL.silence ? 7 * prog(t, 21, TL.silence) : 0) + 16 * imp(t, TL.reveal, 6);
+  ctx.translate(shake * Math.sin(t * 91) * Math.sin(t * 37), weave + shake * Math.sin(t * 77 + 1) * Math.sin(t * 29));
+  if (t < TL.circuits) scene1(t);
+  else if (t < TL.montage[0]) scene2(t);
+  else if (t < TL.sphere) scene3(t);
+  else if (t < TL.silence) scene4(t);
+  else if (t < TL.final) scene5(t);
+  else scene6(t);
+  base();
+  if (!(t >= TL.silence && t < TL.reveal)) {
+    const f = clamp(FLASHES.reduce((s, [c, g, d]) => s + g * imp(t, c, d), 0));
+    if (f > 0.004) { ctx.fillStyle = `rgba(255,255,255,${f})`; ctx.fillRect(0, 0, W, H); }
+    filmTexture(t);
+  }
+  if (t < 0.4) { ctx.fillStyle = `rgba(0,0,0,${1 - t / 0.4})`; ctx.fillRect(0, 0, W, H); }
+}
+
+// ------------------------------------------------------------------ export image par image / lecteur interactif
+window.ready = Promise.all([
+  document.fonts.load(`900 100px Cinzel`), document.fonts.load(`700 100px Cinzel`), document.fonts.load(`800 40px Inter`),
+  ...[jade, atelier, formation].map(i => i.decode().catch(() => {})), odLogo.decode().then(() => { odReady = true; }).catch(() => {}),
+]);
+window.renderFrame = t => render(t);
+
+if (new URLSearchParams(location.search).has('render')) {
+  document.body.classList.add('render');
+  setScale(1);
+} else {
+  const audio = document.getElementById('audio'), btn = document.getElementById('play'), seek = document.getElementById('seek');
+  const timeEl = document.getElementById('time'), vol = document.getElementById('vol');
+  const fmt = s => `00:${String(Math.floor(s)).padStart(2, '0')}`;
+  const SCENES = [[0, 'Ouverture'], [TL.circuits, 'Rencontre'], [TL.montage[0], 'Atelier'], [TL.sphere, 'Promotion'], [TL.silence, 'Révélation'], [TL.final, 'Signature']];
+  const track = document.getElementById('track'), list = document.getElementById('lines');
+  let cur = 0, playing = false, clock0 = 0;
+  SCENES.forEach(([s, name], i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'scene'; b.textContent = `${i + 1} · ${name}`;
+    b.onclick = () => go(s + 0.01); track.appendChild(b);
+  });
+  TL.voice.forEach(([a, b, at, text]) => {
+    const li = document.createElement('li'); li.tabIndex = 0;
+    li.innerHTML = `<span class="ts">${at.toFixed(1)} s</span><span></span>`; li.lastChild.textContent = text;
+    li.onclick = () => go(at); li.onkeydown = e => { if (e.key === 'Enter') go(at); };
+    list.appendChild(li);
+  });
+  const fit = () => setScale(Math.min(1, (cv.getBoundingClientRect().height || 900) * Math.min(2, devicePixelRatio || 1) / H));
+  fit(); addEventListener('resize', () => { fit(); draw(); });
+  const now = () => (playing ? (audio.readyState >= 2 && !audio.paused ? audio.currentTime : (performance.now() - clock0) / 1000) : cur);
+  function sync(t) {
+    seek.value = t; timeEl.textContent = `${fmt(t)} / 00:35`;
+    [...track.children].forEach((b, i) => b.classList.toggle('on', t >= SCENES[i][0] && t < (SCENES[i + 1]?.[0] ?? 99)));
+    [...list.children].forEach((li, i) => { const [a, b, at] = TL.voice[i]; li.classList.toggle('on', t >= at && t < at + (b - a)); });
+  }
+  function draw() { const t = Math.min(now(), TL.duration - 0.001); render(t); sync(t); }
+  function loop() {
+    if (!playing) return;
+    if (now() >= TL.duration) { pause(); cur = 0; draw(); return; }
+    draw(); requestAnimationFrame(loop);
+  }
+  function play() { playing = true; btn.textContent = '❚❚'; btn.setAttribute('aria-label', 'Pause'); audio.currentTime = cur; clock0 = performance.now() - cur * 1000; audio.play().catch(() => {}); requestAnimationFrame(loop); }
+  function pause() { cur = now(); playing = false; audio.pause(); btn.textContent = '▶'; btn.setAttribute('aria-label', 'Lecture'); }
+  function go(t) { const was = playing; if (was) pause(); cur = t; audio.currentTime = t; draw(); if (was) play(); }
+  btn.onclick = () => (playing ? pause() : play());
+  seek.oninput = () => go(Number(seek.value));
+  vol.oninput = () => { audio.volume = Number(vol.value); };
+  audio.volume = Number(vol.value);
+  window.ready.then(() => { cur = 33.6; draw(); });   // image d'accueil : l'écran final
+}
+</script>

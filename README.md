@@ -8,8 +8,9 @@ Tout est généré par le code : animation (canvas HTML), bande-son (synthèse P
 | V1 « Signal » | [`dist/open-days-teaser.mp4`](dist/open-days-teaser.mp4) | Futuriste néon : noir, bleu électrique, violet, cyan ; glitch, warp, électro 120 BPM |
 | V2 « De la graine au réseau » | [`dist/open-days-teaser-v2.mp4`](dist/open-days-teaser-v2.mp4) | Palette du logo JADE : vert `#116D30`, gris `#9B9C97`, blanc, noir ; révélations par masque, plante-logo, trap organique 100 BPM |
 | V3 « Trailer » (9:16, voix off) | [`dist/open-days-trailer-9x16.mp4`](dist/open-days-trailer-9x16.mp4) | Bande-annonce de cinéma pour Reels/TikTok : voix off ElevenLabs, orchestre hybride synthétisé, palette JADE |
+| V4 « Trailer photos » (9:16, voix off) | [`dist/open-days-trailer-9x16-v4.mp4`](dist/open-days-trailer-9x16-v4.mp4) | Même son que la V3 ; cartons Cinzel sur noir, texture pellicule, bandes cinéma, deux photos réelles de JADE (une apparition chacune) |
 
-V1 et V2 sont en 1920×1080, la V3 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
+V1 et V2 sont en 1920×1080, V3 et V4 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
 
 ## V1 « Signal » — découpage
 
@@ -57,6 +58,23 @@ Typographies : Inter Display (titres) et JetBrains Mono (éléments d'interface)
 - Le logo officiel OPEN DAYS n'a pas été fourni : le titre est typographique. Déposer le logo dans `src/v3/media/open-days-logo.png` suffit pour qu'il remplace le titre (aperçu et rendu).
 - Aperçu interactif (lecture/pause, volume, scènes et répliques cliquables) : `src/v3/trailer.html`.
 
+## V4 « Trailer photos » — ce qui change
+
+Même découpage, même voix off et même musique que la V3 (`src/v3/timeline.js`, `src/v3/media/trailer-audio.mp3`). L'image change entièrement :
+
+- cartons de bande-annonce en Cinzel (police libre OFL, `src/v3/media/fonts/`), lettres qui apparaissent une à une ;
+- texture pellicule : grain, poussières, rayures, léger flottement de projecteur ;
+- 10 – 13 s : photo de l'atelier électronique, en carte nette sur fond flou de la même photo, avec poussée lente ;
+- 16 – 20,3 s : photo de la promotion, en bandeau panoramique avec un travelling sur tout le groupe ;
+- 21 – 23 s : les bandes noires se referment jusqu'au silence, puis s'ouvrent sur OPEN DAYS ;
+- écran final sur noir, logo JADE intact sur une plaque blanche, fermeture finale en bandes.
+
+Chaque photo n'apparaît qu'une seule fois. Originaux dans `assets/photos/`, versions préparées dans `src/v3/media/`.
+
+```bash
+node src/render.js --page src/v3/trailer-v4.html --audio build/soundtrack-v3.wav --out dist/open-days-trailer-9x16-v4.mp4
+```
+
 ## Fichiers
 
 - `src/timeline.js`, `src/v2/timeline.js` — instants clés partagés par l'image et le son (modifier ici pour décaler un impact).
@@ -93,4 +111,4 @@ ffmpeg -i build/soundtrack-v3.wav -c:a libmp3lame -b:a 192k src/v3/media/trailer
 node src/render.js --stills 3.6,12.4,31.5            # -> build/still-*.jpg
 ```
 
-Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2) ou `http://localhost:8000/src/v3/trailer.html` (V3).
+Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2), `http://localhost:8000/src/v3/trailer.html` (V3) ou `http://localhost:8000/src/v3/trailer-v4.html` (V4).
