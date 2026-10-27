@@ -7,8 +7,9 @@ Tout est généré par le code : animation (canvas HTML), bande-son (synthèse P
 |---|---|---|
 | V1 « Signal » | [`dist/open-days-teaser.mp4`](dist/open-days-teaser.mp4) | Futuriste néon : noir, bleu électrique, violet, cyan ; glitch, warp, électro 120 BPM |
 | V2 « De la graine au réseau » | [`dist/open-days-teaser-v2.mp4`](dist/open-days-teaser-v2.mp4) | Palette du logo JADE : vert `#116D30`, gris `#9B9C97`, blanc, noir ; révélations par masque, plante-logo, trap organique 100 BPM |
+| V3 « Trailer » (9:16, voix off) | [`dist/open-days-trailer-9x16.mp4`](dist/open-days-trailer-9x16.mp4) | Bande-annonce de cinéma pour Reels/TikTok : voix off ElevenLabs, orchestre hybride synthétisé, palette JADE |
 
-Les deux vidéos sont en 1920×1080, 30 i/s, H.264 + AAC stéréo.
+V1 et V2 sont en 1920×1080, la V3 en 1080×1920 ; toutes à 30 i/s, H.264 + AAC stéréo, 35 s.
 
 ## V1 « Signal » — découpage
 
@@ -41,6 +42,21 @@ Typographies : Inter Display (titres) et JetBrains Mono (éléments d'interface)
 | 28,2 – 28,8 s | Noir, retour de la graine | — | Silence, goutte d'eau |
 | 28,8 – 35 s | Disques vert puis blanc, écran final clair avec bandeau vert | OPEN DAYS · PROCHAINE ÉDITION · logo + ONG JADE Madagascar · Préparez-vous · Restez connectés · COMING SOON | Impact, résolution en fa majeur, envolée de kalimba |
 
+## V3 « Trailer » — découpage
+
+| Temps | Image | Texte à l'écran | Voix off (posée à) |
+|---|---|---|---|
+| 0 – 5 s | Noir, pulsation verte, poussière lumineuse | QUELQUE CHOSE SE PRÉPARE… | « Et si le futur était plus proche qu'on ne l'imagine ? » (1,0 s) |
+| 5 – 10 s | Pistes de circuit qui convergent, caméra qui tourne et avance | LES IDÉES SE CONNECTENT. | « Là où les idées se rencontrent… » (6,0 s) |
+| 10 – 16 s | Montage : code, réseau de neurones, Madagascar ; mots-chocs | INNOVER · PARTAGER · INSPIRER | « Une nouvelle génération ose imaginer demain. » (10,5 s) |
+| 16 – 23 s | Particules qui forment une sphère 3D, salle de conférence, tension | UNE NOUVELLE ÉDITION APPROCHE. | « Le rendez-vous des passionnés de technologie revient. » (17,5 s) |
+| 23 – 29 s | 0,5 s de noir et de silence, flash, révélation | OPEN DAYS · PROCHAINE ÉDITION | « OPEN DAYS… Une nouvelle édition arrive ! » (24,2 s) |
+| 29 – 35 s | Logo JADE dans la lumière, puis fondu au noir | OPEN DAYS · ONG JADE MADAGASCAR · COMING SOON · RESTEZ CONNECTÉS | « Préparez-vous. Le futur nous rassemble. OPEN DAYS. ONG JADE Madagascar. » (29,25 s →) |
+
+- La voix (`assets/voice/voix-off-elevenlabs-hugo.mp3`) est découpée phrase par phrase ; les bornes et les instants de pose sont dans `src/v3/timeline.js`. La musique baisse d'environ 8 dB pendant chaque phrase.
+- Le logo officiel OPEN DAYS n'a pas été fourni : le titre est typographique. Déposer le logo dans `src/v3/media/open-days-logo.png` suffit pour qu'il remplace le titre (aperçu et rendu).
+- Aperçu interactif (lecture/pause, volume, scènes et répliques cliquables) : `src/v3/trailer.html`.
+
 ## Fichiers
 
 - `src/timeline.js`, `src/v2/timeline.js` — instants clés partagés par l'image et le son (modifier ici pour décaler un impact).
@@ -68,8 +84,13 @@ python3 src/v2/soundtrack.py build/soundtrack-v2.wav
 node src/render.js --page src/v2/teaser.html --audio build/soundtrack-v2.wav --out dist/open-days-teaser-v2.mp4
 ffmpeg -i dist/open-days-teaser-v2.mp4 -vn -c:a copy dist/soundtrack-v2.m4a
 
+# Version 3 (9:16, voix off) :
+python3 src/v3/soundtrack.py build/soundtrack-v3.wav
+node src/render.js --page src/v3/trailer.html --audio build/soundtrack-v3.wav --out dist/open-days-trailer-9x16.mp4
+ffmpeg -i build/soundtrack-v3.wav -c:a libmp3lame -b:a 192k src/v3/media/trailer-audio.mp3
+
 # Images de contrôle à des instants précis :
 node src/render.js --stills 3.6,12.4,31.5            # -> build/still-*.jpg
 ```
 
-Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) ou `http://localhost:8000/src/v2/teaser.html` (V2).
+Aperçu interactif : `python3 -m http.server` à la racine, puis ouvrir `http://localhost:8000/src/teaser.html` (V1) `http://localhost:8000/src/v2/teaser.html` (V2) ou `http://localhost:8000/src/v3/trailer.html` (V3).
