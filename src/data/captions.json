@@ -1,0 +1,756 @@
+{
+ "_doc": "Sous-titres synchronisés sur public/audio/voix-off.mp3. Temps en secondes, relatifs au DÉBUT DU FICHIER de voix off (le décalage voiceover.offsetSeconds de timeline.json est ajouté automatiquement). onScreen=true : la phrase est déjà affichée en grand à l'écran, la barre de sous-titres la masque dans la vidéo (elle reste dans le fichier SRT). Mots horodatés par transcription automatique (Whisper small) puis corrigés à la main.",
+ "lines": [
+  {
+   "text": "Une vidéo à garder ?",
+   "start": 0.0,
+   "end": 1.27,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "Une",
+     "s": 0.0,
+     "e": 0.2
+    },
+    {
+     "w": "vidéo",
+     "s": 0.2,
+     "e": 0.58
+    },
+    {
+     "w": "à",
+     "s": 0.58,
+     "e": 0.74
+    },
+    {
+     "w": "garder ?",
+     "s": 0.74,
+     "e": 1.15
+    }
+   ]
+  },
+  {
+   "text": "Un son à écouter partout ?",
+   "start": 1.54,
+   "end": 3.13,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "Un",
+     "s": 1.54,
+     "e": 1.74
+    },
+    {
+     "w": "son",
+     "s": 1.74,
+     "e": 2.02
+    },
+    {
+     "w": "à",
+     "s": 2.02,
+     "e": 2.18
+    },
+    {
+     "w": "écouter",
+     "s": 2.18,
+     "e": 2.44
+    },
+    {
+     "w": "partout ?",
+     "s": 2.44,
+     "e": 3.01
+    }
+   ]
+  },
+  {
+   "text": "Découvrez Miarina Media.",
+   "start": 3.38,
+   "end": 5.0,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "Découvrez",
+     "s": 3.38,
+     "e": 4.0
+    },
+    {
+     "w": "Miarina",
+     "s": 4.0,
+     "e": 4.42
+    },
+    {
+     "w": "Media.",
+     "s": 4.42,
+     "e": 4.88
+    }
+   ]
+  },
+  {
+   "text": "Simple, pratique et gratuit.",
+   "start": 5.18,
+   "end": 7.0,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "Simple,",
+     "s": 5.18,
+     "e": 5.58
+    },
+    {
+     "w": "pratique",
+     "s": 5.9,
+     "e": 6.16
+    },
+    {
+     "w": "et",
+     "s": 6.16,
+     "e": 6.56
+    },
+    {
+     "w": "gratuit.",
+     "s": 6.56,
+     "e": 6.88
+    }
+   ]
+  },
+  {
+   "text": "Explorez YouTube, Facebook et d'autres plateformes compatibles",
+   "start": 7.38,
+   "end": 10.78,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Explorez",
+     "s": 7.38,
+     "e": 7.94
+    },
+    {
+     "w": "YouTube,",
+     "s": 7.94,
+     "e": 8.24
+    },
+    {
+     "w": "Facebook",
+     "s": 8.72,
+     "e": 9.02
+    },
+    {
+     "w": "et",
+     "s": 9.02,
+     "e": 9.38
+    },
+    {
+     "w": "d'autres",
+     "s": 9.38,
+     "e": 9.66
+    },
+    {
+     "w": "plateformes",
+     "s": 9.66,
+     "e": 10.22
+    },
+    {
+     "w": "compatibles",
+     "s": 10.22,
+     "e": 10.8
+    }
+   ]
+  },
+  {
+   "text": "directement depuis son navigateur intégré.",
+   "start": 10.8,
+   "end": 13.12,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "directement",
+     "s": 10.8,
+     "e": 11.48
+    },
+    {
+     "w": "depuis",
+     "s": 11.48,
+     "e": 11.78
+    },
+    {
+     "w": "son",
+     "s": 11.78,
+     "e": 12.0
+    },
+    {
+     "w": "navigateur",
+     "s": 12.0,
+     "e": 12.58
+    },
+    {
+     "w": "intégré.",
+     "s": 12.58,
+     "e": 13.0
+    }
+   ]
+  },
+  {
+   "text": "Ou tout simplement, copiez un lien,",
+   "start": 13.46,
+   "end": 15.32,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Ou",
+     "s": 13.46,
+     "e": 13.52
+    },
+    {
+     "w": "tout",
+     "s": 13.52,
+     "e": 13.7
+    },
+    {
+     "w": "simplement,",
+     "s": 13.7,
+     "e": 14.12
+    },
+    {
+     "w": "copiez",
+     "s": 14.58,
+     "e": 14.82
+    },
+    {
+     "w": "un",
+     "s": 14.82,
+     "e": 14.96
+    },
+    {
+     "w": "lien,",
+     "s": 14.96,
+     "e": 15.2
+    }
+   ]
+  },
+  {
+   "text": "collez-le dans Miarina Media et lancez l'analyse.",
+   "start": 15.5,
+   "end": 18.26,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "collez-le",
+     "s": 15.5,
+     "e": 15.86
+    },
+    {
+     "w": "dans",
+     "s": 15.86,
+     "e": 16.02
+    },
+    {
+     "w": "Miarina",
+     "s": 16.02,
+     "e": 16.38
+    },
+    {
+     "w": "Media",
+     "s": 16.38,
+     "e": 16.74
+    },
+    {
+     "w": "et",
+     "s": 16.74,
+     "e": 17.12
+    },
+    {
+     "w": "lancez",
+     "s": 17.12,
+     "e": 17.58
+    },
+    {
+     "w": "l'analyse.",
+     "s": 17.58,
+     "e": 18.14
+    }
+   ]
+  },
+  {
+   "text": "Choisissez votre format.",
+   "start": 18.5,
+   "end": 19.76,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Choisissez",
+     "s": 18.5,
+     "e": 18.96
+    },
+    {
+     "w": "votre",
+     "s": 18.96,
+     "e": 19.16
+    },
+    {
+     "w": "format.",
+     "s": 19.16,
+     "e": 19.64
+    }
+   ]
+  },
+  {
+   "text": "Vidéo haute qualité ou audio MP3, selon vos envies.",
+   "start": 20.06,
+   "end": 23.5,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Vidéo",
+     "s": 20.06,
+     "e": 20.38
+    },
+    {
+     "w": "haute",
+     "s": 20.38,
+     "e": 20.64
+    },
+    {
+     "w": "qualité",
+     "s": 20.64,
+     "e": 21.08
+    },
+    {
+     "w": "ou",
+     "s": 21.08,
+     "e": 21.44
+    },
+    {
+     "w": "audio",
+     "s": 21.44,
+     "e": 21.82
+    },
+    {
+     "w": "MP3,",
+     "s": 21.82,
+     "e": 22.46
+    },
+    {
+     "w": "selon",
+     "s": 22.6,
+     "e": 22.84
+    },
+    {
+     "w": "vos",
+     "s": 22.84,
+     "e": 23.04
+    },
+    {
+     "w": "envies.",
+     "s": 23.04,
+     "e": 23.38
+    }
+   ]
+  },
+  {
+   "text": "Suivez vos téléchargements en temps réel,",
+   "start": 23.72,
+   "end": 26.0,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Suivez",
+     "s": 23.72,
+     "e": 24.18
+    },
+    {
+     "w": "vos",
+     "s": 24.18,
+     "e": 24.3
+    },
+    {
+     "w": "téléchargements",
+     "s": 24.3,
+     "e": 25.02
+    },
+    {
+     "w": "en",
+     "s": 25.02,
+     "e": 25.22
+    },
+    {
+     "w": "temps",
+     "s": 25.22,
+     "e": 25.42
+    },
+    {
+     "w": "réel,",
+     "s": 25.42,
+     "e": 25.88
+    }
+   ]
+  },
+  {
+   "text": "mettez-les en pause et reprenez-les en un seul clic.",
+   "start": 26.16,
+   "end": 28.88,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "mettez-les",
+     "s": 26.16,
+     "e": 26.5
+    },
+    {
+     "w": "en",
+     "s": 26.5,
+     "e": 26.68
+    },
+    {
+     "w": "pause",
+     "s": 26.68,
+     "e": 26.94
+    },
+    {
+     "w": "et",
+     "s": 26.94,
+     "e": 27.2
+    },
+    {
+     "w": "reprenez-les",
+     "s": 27.2,
+     "e": 27.82
+    },
+    {
+     "w": "en",
+     "s": 27.82,
+     "e": 28.06
+    },
+    {
+     "w": "un",
+     "s": 28.06,
+     "e": 28.32
+    },
+    {
+     "w": "seul",
+     "s": 28.32,
+     "e": 28.46
+    },
+    {
+     "w": "clic.",
+     "s": 28.46,
+     "e": 28.76
+    }
+   ]
+  },
+  {
+   "text": "Retrouvez tous vos fichiers dans votre bibliothèque",
+   "start": 29.22,
+   "end": 31.62,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Retrouvez",
+     "s": 29.22,
+     "e": 29.72
+    },
+    {
+     "w": "tous",
+     "s": 29.72,
+     "e": 29.96
+    },
+    {
+     "w": "vos",
+     "s": 29.96,
+     "e": 30.14
+    },
+    {
+     "w": "fichiers",
+     "s": 30.14,
+     "e": 30.5
+    },
+    {
+     "w": "dans",
+     "s": 30.5,
+     "e": 30.62
+    },
+    {
+     "w": "votre",
+     "s": 30.62,
+     "e": 30.84
+    },
+    {
+     "w": "bibliothèque",
+     "s": 30.84,
+     "e": 31.64
+    }
+   ]
+  },
+  {
+   "text": "et profitez-en même sans connexion internet.",
+   "start": 31.64,
+   "end": 34.04,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "et",
+     "s": 31.64,
+     "e": 31.8
+    },
+    {
+     "w": "profitez-en",
+     "s": 31.8,
+     "e": 32.48
+    },
+    {
+     "w": "même",
+     "s": 32.48,
+     "e": 32.74
+    },
+    {
+     "w": "sans",
+     "s": 32.74,
+     "e": 33.02
+    },
+    {
+     "w": "connexion",
+     "s": 33.02,
+     "e": 33.5
+    },
+    {
+     "w": "internet.",
+     "s": 33.5,
+     "e": 33.92
+    }
+   ]
+  },
+  {
+   "text": "Disponible sur Windows et Android.",
+   "start": 34.3,
+   "end": 36.42,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "Disponible",
+     "s": 34.3,
+     "e": 34.9
+    },
+    {
+     "w": "sur",
+     "s": 34.9,
+     "e": 35.14
+    },
+    {
+     "w": "Windows",
+     "s": 35.14,
+     "e": 35.42
+    },
+    {
+     "w": "et",
+     "s": 35.42,
+     "e": 35.86
+    },
+    {
+     "w": "Android.",
+     "s": 35.86,
+     "e": 36.3
+    }
+   ]
+  },
+  {
+   "text": "Sans compte, sans publicité et sans abonnement.",
+   "start": 36.68,
+   "end": 39.64,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "Sans",
+     "s": 36.68,
+     "e": 36.92
+    },
+    {
+     "w": "compte,",
+     "s": 36.92,
+     "e": 37.36
+    },
+    {
+     "w": "sans",
+     "s": 37.56,
+     "e": 37.7
+    },
+    {
+     "w": "publicité",
+     "s": 37.7,
+     "e": 38.36
+    },
+    {
+     "w": "et",
+     "s": 38.36,
+     "e": 38.64
+    },
+    {
+     "w": "sans",
+     "s": 38.64,
+     "e": 38.92
+    },
+    {
+     "w": "abonnement.",
+     "s": 38.92,
+     "e": 39.52
+    }
+   ]
+  },
+  {
+   "text": "Et le meilleur dans tout ça ?",
+   "start": 39.84,
+   "end": 41.13,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Et",
+     "s": 39.84,
+     "e": 39.94
+    },
+    {
+     "w": "le",
+     "s": 39.94,
+     "e": 40.12
+    },
+    {
+     "w": "meilleur",
+     "s": 40.12,
+     "e": 40.32
+    },
+    {
+     "w": "dans",
+     "s": 40.32,
+     "e": 40.52
+    },
+    {
+     "w": "tout",
+     "s": 40.52,
+     "e": 40.66
+    },
+    {
+     "w": "ça ?",
+     "s": 40.66,
+     "e": 41.01
+    }
+   ]
+  },
+  {
+   "text": "C'est totalement gratuit !",
+   "start": 41.18,
+   "end": 42.73,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "C'est",
+     "s": 41.18,
+     "e": 41.44
+    },
+    {
+     "w": "totalement",
+     "s": 41.44,
+     "e": 41.94
+    },
+    {
+     "w": "gratuit !",
+     "s": 41.94,
+     "e": 42.61
+    }
+   ]
+  },
+  {
+   "text": "Alors, qu'attendez-vous ?",
+   "start": 43.14,
+   "end": 44.49,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Alors,",
+     "s": 43.14,
+     "e": 43.36
+    },
+    {
+     "w": "qu'attendez-vous ?",
+     "s": 43.62,
+     "e": 44.37
+    }
+   ]
+  },
+  {
+   "text": "Rendez-vous dès maintenant sur media.miarina.org",
+   "start": 44.54,
+   "end": 47.76,
+   "onScreen": false,
+   "words": [
+    {
+     "w": "Rendez-vous",
+     "s": 44.54,
+     "e": 44.98
+    },
+    {
+     "w": "dès",
+     "s": 44.98,
+     "e": 45.2
+    },
+    {
+     "w": "maintenant",
+     "s": 45.2,
+     "e": 45.54
+    },
+    {
+     "w": "sur",
+     "s": 45.54,
+     "e": 45.84
+    },
+    {
+     "w": "media.miarina.org",
+     "s": 45.84,
+     "e": 47.78
+    }
+   ]
+  },
+  {
+   "text": "Miarina Media.",
+   "start": 48.17,
+   "end": 49.1,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "Miarina",
+     "s": 48.17,
+     "e": 48.62
+    },
+    {
+     "w": "Media.",
+     "s": 48.62,
+     "e": 48.98
+    }
+   ]
+  },
+  {
+   "text": "Your media. Your freedom.",
+   "start": 49.38,
+   "end": 51.14,
+   "onScreen": true,
+   "words": [
+    {
+     "w": "Your",
+     "s": 49.38,
+     "e": 49.64
+    },
+    {
+     "w": "media.",
+     "s": 49.64,
+     "e": 50.0
+    },
+    {
+     "w": "Your",
+     "s": 50.54,
+     "e": 50.66
+    },
+    {
+     "w": "freedom.",
+     "s": 50.66,
+     "e": 51.02
+    }
+   ]
+  }
+ ]
+}
