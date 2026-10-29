@@ -1,8 +1,8 @@
 import { Config } from "@remotion/cli/config";
 
 // Rendu MP4 H.264, 30 fps, qualité élevée.
-Config.setVideoImageFormat("jpeg");
-Config.setJpegQuality(92);
+// Images intermédiaires en PNG : sortie en yuv420p standard (le JPEG produit du yuvj420p).
+Config.setVideoImageFormat("png");
 Config.setCodec("h264");
 Config.setCrf(18);
 Config.setPixelFormat("yuv420p");
